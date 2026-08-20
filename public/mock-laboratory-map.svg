@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 900 520" role="img" aria-labelledby="title desc">
+  <title id="title">实验室总览地图</title>
+  <desc id="desc">包含智能仓储区、主通道、实验机台区、充电区与安全出口的实验室平面示意图</desc>
+  <defs>
+    <pattern id="grid" width="22" height="22" patternUnits="userSpaceOnUse">
+      <path d="M 22 0 L 0 0 0 22" fill="none" stroke="#dce5ec" stroke-width="0.8"/>
+    </pattern>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fafb"/>
+      <stop offset="1" stop-color="#e9eff4"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#15314b" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <rect width="900" height="520" fill="#d9e1e7"/>
+  <rect x="22" y="22" width="856" height="476" rx="14" fill="url(#paper)" filter="url(#shadow)"/>
+  <rect x="38" y="38" width="824" height="444" rx="8" fill="url(#grid)"/>
+
+  <path d="M58 58H842V462H58Z" fill="none" stroke="#718291" stroke-width="9" stroke-linejoin="round"/>
+  <path d="M298 58V205H502V58M298 205V462M502 205V462M58 340H298M502 340H842" fill="none" stroke="#8a99a6" stroke-width="7"/>
+  <path d="M288 252h20M492 282h20M492 132h20M728 330v20" fill="none" stroke="#f8fafb" stroke-width="13"/>
+
+  <g fill="#dbe9f4" stroke="#8395a5" stroke-width="2">
+    <rect x="82" y="82" width="166" height="110" rx="6"/>
+    <rect x="82" y="220" width="166" height="86" rx="6"/>
+  </g>
+  <g fill="#eff3f6" stroke="#8a99a6" stroke-width="2">
+    <rect x="328" y="86" width="142" height="86" rx="6"/>
+    <rect x="328" y="368" width="142" height="66" rx="6"/>
+  </g>
+  <g fill="#f7ead7" stroke="#a78e6b" stroke-width="2">
+    <rect x="546" y="82" width="124" height="96" rx="6"/>
+    <rect x="696" y="82" width="120" height="96" rx="6"/>
+    <rect x="546" y="220" width="270" height="76" rx="6"/>
+  </g>
+  <g fill="#dcefe7" stroke="#789889" stroke-width="2">
+    <rect x="548" y="370" width="138" height="66" rx="6"/>
+    <rect x="720" y="370" width="96" height="66" rx="6"/>
+  </g>
+
+  <g font-family="Microsoft YaHei, sans-serif" text-anchor="middle" fill="#30475b">
+    <text x="165" y="130" font-size="17" font-weight="700">智能仓储区</text>
+    <text x="165" y="155" font-size="12">立库 A · 24 个库位</text>
+    <text x="165" y="264" font-size="16" font-weight="700">手套箱工作区</text>
+    <text x="399" y="123" font-size="16" font-weight="700">缓冲间</text>
+    <text x="399" y="406" font-size="16" font-weight="700">物料暂存区</text>
+    <text x="608" y="124" font-size="16" font-weight="700">贴标机台</text>
+    <text x="756" y="124" font-size="16" font-weight="700">后处理机台</text>
+    <text x="681" y="264" font-size="16" font-weight="700">实验机台区</text>
+    <text x="617" y="410" font-size="16" font-weight="700">电梯连接区</text>
+    <text x="768" y="410" font-size="16" font-weight="700">充电区</text>
+  </g>
+
+  <path d="M132 282H360V284H512V142H700V238H646V388H770V406" fill="none" stroke="#25a7a1" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="10 9" opacity="0.86"/>
+  <g fill="#fff" stroke="#1469b8" stroke-width="4">
+    <circle cx="132" cy="282" r="8"/><circle cx="360" cy="284" r="8"/><circle cx="520" cy="142" r="8"/><circle cx="700" cy="238" r="8"/><circle cx="646" cy="388" r="8"/><circle cx="770" cy="406" r="8"/>
+  </g>
+  <g font-family="Bahnschrift, sans-serif" font-size="10" fill="#36536a">
+    <text x="112" y="304">N-A01</text><text x="338" y="306">W-A01</text><text x="530" y="132">DOOR-A-01</text><text x="676" y="218">DEVICE-B-DOCK</text><text x="620" y="410">E-B</text><text x="744" y="430">CHG-B-01</text>
+  </g>
+
+  <g transform="translate(345 267)">
+    <rect x="-16" y="-11" width="32" height="22" rx="6" fill="#1469b8" stroke="#fff" stroke-width="3"/>
+    <circle cx="-9" cy="12" r="4" fill="#0b2f5b"/><circle cx="9" cy="12" r="4" fill="#0b2f5b"/>
+    <path d="M-5 -2h10M0-7v10" stroke="#fff" stroke-width="2"/>
+  </g>
+  <text x="345" y="247" text-anchor="middle" font-family="Bahnschrift, sans-serif" font-size="11" font-weight="700" fill="#1469b8">AGV-01</text>
+
+  <g transform="translate(72 447)" font-family="Microsoft YaHei, sans-serif" font-size="11" fill="#51677a">
+    <circle cx="0" cy="0" r="5" fill="#1469b8"/><text x="12" y="4">导航点</text>
+    <path d="M82 0h28" stroke="#25a7a1" stroke-width="4" stroke-dasharray="7 5"/><text x="120" y="4">已发布路径</text>
+    <rect x="222" y="-7" width="14" height="14" rx="2" fill="#f7ead7" stroke="#a78e6b"/><text x="246" y="4">设备区域</text>
+  </g>
+  <text x="828" y="471" text-anchor="end" font-family="Bahnschrift, sans-serif" font-size="10" fill="#7b8c9b">LAB MAP · 2026-08-20</text>
+</svg>

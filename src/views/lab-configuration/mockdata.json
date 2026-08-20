@@ -1,0 +1,193 @@
+{
+  "spaces": [
+    {
+      "id": "SPACE-LAB-A",
+      "name": "实验室 A",
+      "mapName": "实验室总览地图",
+      "mapVersion": "V3.2",
+      "fileName": "laboratory-map-v3.2.png",
+      "scope": "立库 A、手套箱、贴标机台",
+      "status": "已发布",
+      "publishedAt": "2026-08-18 16:42",
+      "navPoints": [
+        {
+          "id": "N-A01",
+          "name": "立库 A 出口",
+          "type": "导航节点",
+          "x": 132,
+          "y": 282,
+          "yaw": "90.0",
+          "status": "有效"
+        },
+        {
+          "id": "W-A01",
+          "name": "主通道等待点",
+          "type": "等待点",
+          "x": 360,
+          "y": 284,
+          "yaw": "0.0",
+          "status": "有效"
+        },
+        {
+          "id": "DEVICE-B-DOCK",
+          "name": "贴标机台停靠点",
+          "type": "停靠点",
+          "x": 700,
+          "y": 238,
+          "yaw": "0.0",
+          "status": "有效"
+        },
+        {
+          "id": "DOOR-A-01",
+          "name": "自动门通行点",
+          "type": "门禁点",
+          "x": 520,
+          "y": 142,
+          "yaw": "90.0",
+          "status": "有效"
+        }
+      ]
+    },
+    {
+      "id": "SPACE-LAB-B",
+      "name": "实验室 B",
+      "mapName": "实验室总览地图",
+      "mapVersion": "V3.2",
+      "fileName": "laboratory-map-v3.2.png",
+      "scope": "后处理机台、充电区",
+      "status": "已发布",
+      "publishedAt": "2026-08-18 16:42",
+      "navPoints": [
+        {
+          "id": "N-B01",
+          "name": "实验室 B 主通道",
+          "type": "导航节点",
+          "x": 646,
+          "y": 388,
+          "yaw": "0.0",
+          "status": "有效"
+        },
+        {
+          "id": "CHG-B-01",
+          "name": "主充电桩停靠点",
+          "type": "充电点",
+          "x": 770,
+          "y": 406,
+          "yaw": "180.0",
+          "status": "有效"
+        },
+        {
+          "id": "E-B",
+          "name": "电梯 B 端连接点",
+          "type": "电梯点",
+          "x": 532,
+          "y": 376,
+          "yaw": "180.0",
+          "status": "有效"
+        }
+      ]
+    }
+  ],
+  "topology": [
+    {
+      "id": "N01",
+      "name": "立库 A 出口",
+      "type": "导航节点",
+      "spaceMap": "实验室 A / 实验室总览地图 V3.2",
+      "coordinate": "11.820 / 6.110 / 90.0°",
+      "rule": "双向通行",
+      "status": "有效"
+    },
+    {
+      "id": "N12",
+      "name": "主通道转角",
+      "type": "路径节点",
+      "spaceMap": "实验室 A / 实验室总览地图 V3.2",
+      "coordinate": "18.400 / 6.110 / 0.0°",
+      "rule": "限速 0.6 m/s",
+      "status": "有效"
+    },
+    {
+      "id": "W-B01",
+      "name": "贴标机台安全等待点",
+      "type": "等待资源",
+      "spaceMap": "实验室 A / 实验室总览地图 V3.2",
+      "coordinate": "24.600 / 6.720 / 0.0°",
+      "rule": "任务互斥预约",
+      "status": "有效"
+    }
+  ],
+  "machines": [
+    {
+      "id": "MACHINE-LABEL",
+      "name": "贴标机台",
+      "type": "检测机台",
+      "spaceMap": "实验室 A / 实验室总览地图 V3.2",
+      "owner": "—",
+      "coordinateSystem": "空间地图坐标系",
+      "coordinate": "X 28.600 / Y 6.800 / θ 180.0°",
+      "navPoint": "DEVICE-B-DOCK",
+      "status": "启用"
+    },
+    {
+      "id": "DEVICE-B-DOCK",
+      "name": "贴标机台停靠点",
+      "type": "导航停靠点",
+      "spaceMap": "实验室 A / 实验室总览地图 V3.2",
+      "owner": "贴标机台",
+      "coordinateSystem": "空间地图坐标系",
+      "coordinate": "X 26.850 / Y 6.720 / θ 0.0°",
+      "navPoint": "本点位",
+      "status": "已发布"
+    },
+    {
+      "id": "DEVICE-B-PLACE",
+      "name": "贴标机台放料点",
+      "type": "机械臂放料点",
+      "spaceMap": "实验室 A / 实验室总览地图 V3.2",
+      "owner": "贴标机台",
+      "coordinateSystem": "机台坐标系",
+      "coordinate": "X 0.420 / Y -0.135 / Z 0.880 / RZ 180.0°",
+      "navPoint": "DEVICE-B-DOCK",
+      "status": "已发布"
+    }
+  ],
+  "peripherals": [
+    {
+      "id": "D-01",
+      "name": "实验室 A 自动门",
+      "type": "自动门",
+      "spaceMap": "实验室 A / 实验室总览地图 V3.2",
+      "coordinate": "X 18.400 / Y 3.200 / θ 90.0°",
+      "navPoint": "DOOR-A-01",
+      "status": "在线"
+    },
+    {
+      "id": "E-01",
+      "name": "实验室连接电梯",
+      "type": "电梯",
+      "spaceMap": "实验室 A ↔ 实验室 B",
+      "coordinate": "A：32.100 / 8.200 / 0°；B：4.300 / 8.100 / 180°",
+      "navPoint": "E-A ↔ E-B",
+      "status": "在线"
+    },
+    {
+      "id": "CHG-01",
+      "name": "主充电桩",
+      "type": "充电桩",
+      "spaceMap": "实验室 B / 实验室总览地图 V3.2",
+      "coordinate": "X 7.600 / Y 2.400 / θ 180.0°",
+      "navPoint": "CHG-B-01",
+      "status": "可用"
+    },
+    {
+      "id": "CHG-02",
+      "name": "备用充电桩",
+      "type": "充电桩",
+      "spaceMap": "实验室 A / 实验室总览地图 V3.2",
+      "coordinate": "X 3.200 / Y 2.150 / θ 90.0°",
+      "navPoint": "CHG-A-02",
+      "status": "备用"
+    }
+  ]
+}

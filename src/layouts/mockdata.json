@@ -1,0 +1,91 @@
+{
+  "system": {
+    "name": "复合机器人调度系统",
+    "englishName": "Laboratory Robot Orchestration",
+    "health": "系统正常",
+    "healthTone": "success",
+    "updatedAt": "刚刚更新"
+  },
+  "user": {
+    "name": "陈工",
+    "role": "实施工程师"
+  },
+  "healthMetrics": [
+    { "label": "调度服务", "value": "正常", "description": "心跳延迟 18 ms", "tone": "success" },
+    {
+      "label": "机器人连接",
+      "value": "1 / 1 在线",
+      "description": "AGV-01 通信稳定",
+      "tone": "success"
+    },
+    {
+      "label": "外围设备",
+      "value": "4 / 4 在线",
+      "description": "门、梯、充电桩可用",
+      "tone": "success"
+    },
+    {
+      "label": "待处理异常",
+      "value": "2 条",
+      "description": "均已进入人工处理流程",
+      "tone": "warning"
+    }
+  ],
+  "alerts": [
+    {
+      "id": "ALM-20260820-0042",
+      "level": "严重",
+      "tone": "danger",
+      "time": "10:26:18",
+      "title": "贴标机台进样许可等待超时",
+      "source": "任务引擎",
+      "impact": "任务保持在安全等待点，后续同目标任务暂停派发。"
+    },
+    {
+      "id": "ALM-20260820-0041",
+      "level": "警告",
+      "tone": "warning",
+      "time": "10:19:07",
+      "title": "立库 A 第 4 层 07 位状态不一致",
+      "source": "库位服务",
+      "impact": "当前库位已锁定，不参与新任务分配。"
+    }
+  ],
+  "sidebarMenu": [
+    {
+      "id": "overview",
+      "label": "运行总览",
+      "icon": "LayoutDashboard",
+      "route": "/dashboard"
+    },
+    {
+      "id": "scheduling",
+      "label": "运行调度",
+      "icon": "Radar",
+      "children": [
+        { "label": "订单管理", "route": "/scheduling/orders" },
+        { "label": "库位与载具", "route": "/scheduling/locations" }
+      ]
+    },
+    {
+      "id": "configuration",
+      "label": "配置中心",
+      "icon": "SlidersHorizontal",
+      "children": [
+        { "label": "机器人与设备", "route": "/configuration/robots" },
+        { "label": "实验室配置", "route": "/configuration/labs" },
+        { "label": "流程与动作", "route": "/configuration/flows" }
+      ]
+    },
+    {
+      "id": "operations",
+      "label": "运维与数据",
+      "icon": "Activity",
+      "children": [
+        { "label": "异常与恢复", "route": "/operations/exceptions" },
+        { "label": "系统日志", "route": "/operations/logs" },
+        { "label": "实验室产能", "route": "/operations/capacity" }
+      ]
+    }
+  ]
+}
