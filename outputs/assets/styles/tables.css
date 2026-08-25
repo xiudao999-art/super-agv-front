@@ -1,8 +1,288 @@
-.table-wrap { border-radius: var(--agv-radius-control); }
-table { border-collapse: separate; border-spacing: 0; }
-th, td { line-height: 1.45; }
-th { font-weight: 700; }
+.table-wrap {
+    border-radius: var(--agv-radius-control);
+}
+
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th,
+td {
+    line-height: 1.45;
+}
+
+th {
+    font-weight: 700;
+}
+
+/* 公共表格只保留横向分隔，避免列线切碎信息密度。 */
+table th,
+table td {
+    border-inline-start: 0 !important;
+    border-inline-end: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+}
+
+table tbody td:last-child .row-actions,
+table tbody td:last-child [class*="action"] {
+    flex-wrap: nowrap;
+}
+
+.agv-action-source--collapsed {
+    display: none !important;
+}
+
+agv-action-menu {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+    vertical-align: middle;
+}
+
+.agv-action-menu__trigger {
+    display: inline-flex;
+    min-width: 0;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin: 0;
+    padding: 0 8px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--agv-primary, #1677ff);
+    font: inherit;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+.agv-action-menu__trigger:hover,
+.agv-action-menu__trigger[aria-expanded="true"] {
+    border-color: #bae0ff;
+    background: #e6f4ff;
+    color: #0958d9;
+}
+
+.agv-action-menu__trigger:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.18);
+}
+
+.agv-action-menu__chevron {
+    width: 6px;
+    height: 6px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: translateY(-1px) rotate(45deg);
+    transition: transform 160ms ease;
+}
+
+.agv-action-menu__trigger[aria-expanded="true"] .agv-action-menu__chevron {
+    transform: translateY(2px) rotate(225deg);
+}
+
+.agv-action-menu__panel {
+    position: fixed;
+    z-index: 1200;
+    display: grid;
+    min-width: 128px;
+    max-width: min(240px, calc(100vw - 16px));
+    padding: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(5, 5, 5, 0.08);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+}
+
+.agv-action-menu__panel[hidden] {
+    display: none !important;
+}
+
+.agv-action-menu__item {
+    display: flex;
+    width: 100%;
+    min-height: 32px;
+    align-items: center;
+    margin: 0;
+    padding: 5px 10px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--agv-ink, #1f1f1f);
+    font: inherit;
+    font-weight: 500;
+    line-height: 1.45;
+    text-align: left;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 140ms ease;
+}
+
+.agv-action-menu__item:hover,
+.agv-action-menu__item:focus-visible {
+    outline: 0;
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.agv-action-menu__item:disabled {
+    color: rgba(0, 0, 0, 0.25);
+    cursor: not-allowed;
+}
+
+.agv-action-menu__item:disabled:hover {
+    background: transparent;
+}
 
 @media (max-width: 760px) {
-  .table-wrap { -webkit-overflow-scrolling: touch; }
+    .table-wrap {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .agv-action-menu__trigger {
+        min-height: 32px;
+    }
+}
+
+/* 只有明确的操作列固定在右侧，其余业务列保持横向滚动。 */
+.agv-table--sticky-actions thead th:last-child,
+.agv-table--sticky-actions tbody td:last-child {
+    position: sticky;
+    right: 0;
+    white-space: nowrap;
+}
+
+.agv-table--sticky-actions thead th:last-child {
+    z-index: 5;
+    background: var(--agv-table-head-bg, #f7f9fc);
+}
+
+.agv-table--sticky-actions tbody td:last-child {
+    z-index: 3;
+    background: var(--agv-table-cell-bg, #fff);
+}
+
+.agv-table--sticky-actions tbody tr:hover td:last-child {
+    background: var(--agv-table-row-hover-bg, #f8fbff);
+}
+
+.agv-table--sticky-actions thead th:last-child::before,
+.agv-table--sticky-actions tbody td:last-child::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -12px;
+    width: 12px;
+    background: linear-gradient(90deg, transparent, rgba(15, 42, 68, 0.08));
+    pointer-events: none;
+    content: "";
+}
+
+.agv-table--sticky-actions tbody td:last-child > .row-actions,
+.agv-table--sticky-actions tbody td:last-child > [class*="action"] {
+    min-width: max-content !important;
+}
+
+/* 操作列按实际入口数量自适应，由公共增强脚本写入精确宽度。 */
+.agv-table--sticky-actions,
+.agv-table-wrap--sticky-actions {
+    --agv-action-column-width: 176px;
+}
+
+.agv-table--sticky-actions thead th:last-child,
+.agv-table--sticky-actions tbody td:last-child {
+    box-sizing: border-box;
+    width: var(--agv-action-column-width) !important;
+    min-width: var(--agv-action-column-width) !important;
+    max-width: var(--agv-action-column-width) !important;
+    padding-right: 13px;
+    padding-left: 13px;
+}
+
+.agv-table--sticky-actions tbody td:last-child > .row-actions,
+.agv-table--sticky-actions tbody td:last-child > [class*="action"] {
+    display: flex;
+    width: 100%;
+    min-width: 0 !important;
+    max-width: 100%;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px !important;
+    overflow: visible;
+}
+
+.agv-table--sticky-actions tbody td:last-child agv-action-menu {
+    margin-left: auto;
+}
+
+/* 自定义同步滚动条只覆盖业务列区域，固定操作列下方不再出现滑块。 */
+.agv-table-wrap--sticky-actions {
+    position: relative;
+    scrollbar-width: none;
+}
+
+.agv-table-wrap--sticky-actions::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.agv-table-scrollbar {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    z-index: 7;
+    box-sizing: border-box;
+    height: 12px;
+    padding: 3px 2px;
+    background: var(--agv-table-cell-bg, #fff);
+    touch-action: none;
+    user-select: none;
+}
+
+.agv-table-scrollbar[hidden] {
+    display: none !important;
+}
+
+.agv-table-scrollbar__track {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(15, 42, 68, 0.1);
+    cursor: pointer;
+}
+
+.agv-table-scrollbar__thumb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-width: 32px;
+    height: 6px;
+    border-radius: inherit;
+    background: rgba(15, 42, 68, 0.28);
+    cursor: grab;
+    transform: translateX(0);
+}
+
+.agv-table-scrollbar__thumb:hover {
+    background: rgba(15, 42, 68, 0.38);
+}
+
+.agv-table-scrollbar__thumb:active {
+    cursor: grabbing;
+}
+
+.agv-table-scrollbar:focus-visible {
+    outline: 0;
+}
+
+.agv-table-scrollbar:focus-visible .agv-table-scrollbar__track {
+    box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.14);
 }
