@@ -1,0 +1,5 @@
+input, select, textarea { color: var(--agv-ink); }
+input, select { min-height: var(--agv-control); }
+textarea { line-height: 1.55; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button:disabled { cursor: not-allowed; }

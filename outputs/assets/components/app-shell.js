@@ -1,0 +1,144 @@
+const navGroups = [
+  { items: [{ href: 'robot-dispatch-dashboard.html', label: '运行总览', icon: 'grid' }] },
+  { label: '运行调度', items: [
+    { href: 'order-management.html', label: '订单管理', icon: 'clipboard' },
+    { href: 'storage-and-carriers.html', label: '库位与载具', icon: 'sliders' }
+  ] },
+  { label: '配置中心', items: [
+    { href: 'robots-and-devices.html', label: '机器人与设备', icon: 'panel' },
+    { href: 'laboratory-configuration.html', label: '实验室配置', icon: 'map' },
+    { href: 'process-list.html', label: '流程与动作', icon: 'flow' }
+  ] },
+  { label: '运维与数据', items: [
+    { href: 'current-anomalies.html', label: '异常与恢复', icon: 'shield' },
+    { href: 'system-logs.html', label: '系统日志', icon: 'log' },
+    { href: 'lab-capacity.html', label: '实验室产能', icon: 'chart' }
+  ] }
+];
+
+const iconPaths = {
+  grid: '<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
+  clipboard: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M8 9h8M8 13h6"/>',
+  sliders: '<path d="M5 3v6M5 15v6M12 3v12M12 19v2M19 3v3M19 12v9M2 9h6M9 15h6M16 6h6"/><circle cx="5" cy="12" r="2"/><circle cx="12" cy="18" r="2"/><circle cx="19" cy="9" r="2"/>',
+  panel: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 3v18"/>',
+  map: '<path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2V5Z"/><path d="M9 3v16M15 5v16"/>',
+  flow: '<circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 6h7a4 4 0 0 1 0 8H9a4 4 0 1 0 0 8h8"/>',
+  shield: '<path d="M12 3 4 6v5c0 5 3.4 8.3 8 10 4.6-1.7 8-5 8-10V6l-8-3Z"/><path d="M12 8v4M12 16h.01"/>',
+  log: '<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V4Z"/><path d="M7 8h7M7 12h7M7 16h5"/>',
+  chart: '<path d="M4 20V10h5v10M9 20V4h6v16M15 20v-7h5v7M2 20h20"/>',
+  document: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+  alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/>',
+  menu: '<path d="M4 7h16M4 12h16M4 17h16"/>'
+};
+
+function icon(name, className = '') {
+  return `<svg class="icon ${className}" aria-hidden="true" viewBox="0 0 24 24">${iconPaths[name] || iconPaths.panel}</svg>`;
+}
+
+function activeHref(current, itemHref) {
+  if (current === itemHref) return true;
+  const groups = {
+    'storage-and-carriers.html': ['carrier-list.html', 'storage-type-list.html', 'carrier-type-list.html'],
+    'laboratory-configuration.html': ['passage-rules.html', 'stations-and-points.html', 'peripheral-resources.html'],
+    'process-list.html': ['process-templates.html', 'process-template-editor.html'],
+    'current-anomalies.html': ['alarm-records.html', 'task-recovery-status.html'],
+    'order-management.html': ['order-task-detail.html']
+  };
+  return groups[itemHref]?.includes(current) || false;
+}
+
+export class AgvAppShell extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+  }
+
+  connectedCallback() {
+    const current = this.getAttribute('active-route') || location.pathname.split('/').pop() || 'robot-dispatch-dashboard.html';
+    const title = this.getAttribute('section-title') || document.querySelector('.page-head h1, agv-page-header h1')?.textContent?.trim() || '运行总览';
+    const user = this.getAttribute('user-name') || '陈工';
+    const nav = navGroups.map(group => `
+      <div class="nav-group">
+        ${group.label ? `<p class="nav-label">${group.label}</p>` : ''}
+        ${group.items.map(item => `<a class="nav-item${activeHref(current, item.href) ? ' active' : ''}" href="${item.href}">${icon(item.icon)}<span>${item.label}</span></a>`).join('')}
+      </div>`).join('');
+
+    this.shadowRoot.innerHTML = `
+      <style>
+        :host { display:block; min-height:100dvh; color:var(--agv-ink,#122235); background:var(--agv-canvas,#f3f6f8); }
+        * { box-sizing:border-box; }
+        .icon { width:18px; height:18px; flex:0 0 auto; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+        .sidebar { position:fixed; inset:0 auto 0 0; z-index:30; width:var(--agv-sidebar-width,220px); padding:18px 10px 22px; overflow:auto; background:#fff; border-right:1px solid var(--agv-line-soft,#e9edf1); transition:transform .2s ease; }
+        .brand { height:38px; display:flex; align-items:center; gap:10px; padding:0 9px; margin-bottom:20px; color:var(--agv-blue,#1677c8); font-size:15px; font-weight:750; white-space:nowrap; }
+        .robot-logo { width:29px; height:29px; flex:0 0 auto; }
+        .nav-group { margin:12px 0 19px; }
+        .nav-group:first-child { margin-top:0; }
+        .nav-label { margin:0 10px 8px; color:var(--agv-text-muted,#768392); font-size:12px; line-height:24px; }
+        .nav-item { min-height:42px; display:flex; align-items:center; gap:10px; padding:0 11px; border-radius:8px; color:var(--agv-ink,#122235); font-size:14px; text-decoration:none; transition:background .15s ease,color .15s ease; }
+        .nav-item + .nav-item { margin-top:2px; }
+        .nav-item:hover { background:#f4f7f9; }
+        .nav-item.active { color:var(--agv-blue,#1677c8); background:var(--agv-blue-soft,#eaf4fd); font-weight:700; }
+        .shell { min-height:100dvh; margin-left:var(--agv-sidebar-width,220px); }
+        .topbar { position:sticky; top:0; z-index:20; height:var(--agv-topbar-height,56px); display:flex; align-items:center; justify-content:space-between; padding:0 20px; background:rgba(255,255,255,.96); border-bottom:1px solid var(--agv-line-soft,#e9edf1); backdrop-filter:blur(12px); }
+        .top-title,.top-actions,.top-action,.user-chip { display:flex; align-items:center; }
+        .top-title { gap:12px; font-size:14px; font-weight:600; }
+        .title-icon { width:26px; height:26px; display:grid; place-items:center; border-radius:7px; background:#f2f5f7; }
+        .title-icon .icon { width:16px; height:16px; }
+        .top-actions { gap:8px; }
+        .top-action { min-height:34px; gap:7px; padding:0 13px; border:1px solid var(--agv-line,#dfe5ea); border-radius:18px; background:#fff; font-size:13px; cursor:pointer; }
+        .top-action:hover { border-color:#c7d0d8; background:#f9fbfc; }
+        .top-action:active { transform:translateY(1px); }
+        .top-action .icon { width:16px; height:16px; color:var(--agv-text-muted,#768392); }
+        .user-chip { gap:8px; margin-left:2px; font-size:13px; font-weight:650; }
+        .avatar { width:32px; height:32px; display:grid; place-items:center; border-radius:50%; color:#fff; background:var(--agv-blue,#1677c8); }
+        .avatar svg { width:18px; height:18px; fill:currentColor; }
+        .menu-btn { display:none; }
+        .scrim { display:none; }
+        @media (max-width:760px) {
+          .sidebar { width:240px; transform:translateX(-100%); box-shadow:12px 0 30px rgba(9,26,42,.14); }
+          .sidebar.open { transform:translateX(0); }
+          .shell { margin-left:0; }
+          .topbar { padding:0 12px; }
+          .menu-btn { width:36px; height:36px; display:grid; place-items:center; border:0; border-radius:8px; background:#f2f5f7; cursor:pointer; }
+          .title-icon { display:none; }
+          .top-title { gap:8px; }
+          .top-actions { gap:6px; }
+          .top-action { width:36px; justify-content:center; padding:0; }
+          .top-action span,.user-chip>span:last-child { display:none; }
+          .scrim.show { position:fixed; inset:0; z-index:25; display:block; background:rgba(9,26,42,.36); }
+        }
+        @media (prefers-reduced-motion:reduce) { .sidebar,.top-action { transition:none; } }
+      </style>
+      <aside class="sidebar" aria-label="主导航">
+        <div class="brand"><svg class="robot-logo" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M14 3a2 2 0 1 1 4 0v2h2.5A5.5 5.5 0 0 1 26 10.5V12h1a3 3 0 1 1 0 6h-1v1.5a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 6 19.5V18H5a3 3 0 1 1 0-6h1v-1.5A5.5 5.5 0 0 1 11.5 5H14V3Zm-3 10v5h3v-5h-3Zm7 0v5h3v-5h-3Z"/></svg><span>复合机器人调度系统</span></div>
+        <nav>${nav}</nav>
+      </aside>
+      <div class="scrim"></div>
+      <main class="shell">
+        <header class="topbar">
+          <div class="top-title"><button class="menu-btn" type="button" aria-label="打开导航菜单">${icon('menu')}</button><span class="title-icon">${icon('panel')}</span><span>${title}</span></div>
+          <div class="top-actions"><button class="top-action status" type="button">${icon('document')}<span>状态说明</span></button><button class="top-action alert" type="button">${icon('alert')}<span>异常提醒</span></button><div class="user-chip"><span class="avatar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0Z"/></svg></span><span>${user}</span></div></div>
+        </header>
+        <slot></slot>
+      </main>`;
+
+    const sidebar = this.shadowRoot.querySelector('.sidebar');
+    const scrim = this.shadowRoot.querySelector('.scrim');
+    const setOpen = open => { sidebar.classList.toggle('open', open); scrim.classList.toggle('show', open); };
+    this.shadowRoot.querySelector('.menu-btn').addEventListener('click', () => setOpen(!sidebar.classList.contains('open')));
+    scrim.addEventListener('click', () => setOpen(false));
+    this.shadowRoot.querySelector('.status').addEventListener('click', () => this.forwardAction(['statusInfoBtn', 'statusBtn'], 'statusModal'));
+    this.shadowRoot.querySelector('.alert').addEventListener('click', () => this.forwardAction(['alertInfoBtn', 'alertBtn'], 'alertDrawer'));
+    this.shadowRoot.querySelectorAll('.nav-item').forEach(link => link.addEventListener('click', () => setOpen(false)));
+  }
+
+  forwardAction(ids, fallbackLayer) {
+    ids.forEach(id => document.getElementById(id)?.click());
+    setTimeout(() => {
+      const layer = document.getElementById(fallbackLayer);
+      if (layer?.hidden && window.agvUi) window.agvUi.openLayer(fallbackLayer);
+    });
+  }
+}
+
+customElements.define('agv-app-shell', AgvAppShell);

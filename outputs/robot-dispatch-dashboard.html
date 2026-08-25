@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f5f7f9" />
+  <title>复合机器人调度系统 · 运行总览</title>
+  <link rel="stylesheet" href="assets/styles/pages/robot-dispatch-dashboard.css">
+  <link rel="stylesheet" href="assets/styles/tokens.css">
+  <link rel="stylesheet" href="assets/styles/base.css">
+  <link rel="stylesheet" href="assets/styles/components.css">
+  <script type="module" src="assets/components/register.js"></script>
+  
+</head>
+<body>
+
+  <agv-app-shell id="overview" active-route="robot-dispatch-dashboard.html" section-title="运行总览" user-name="陈工"><div class="agv-legacy-hooks" hidden><aside id="sidebar"></aside><div id="scrim"></div><button id="menuBtn" type="button"></button><button id="statusInfoBtn" type="button"></button><button id="statusBtn" type="button"></button><button id="alertInfoBtn" type="button"></button><button id="alertBtn" type="button"></button></div>
+
+    <agv-page-header class="intro">
+      <div>
+        <h1>运行总览</h1>
+        <p>查看单台 AGV、订单、资源和异常的实时状态</p>
+      </div>
+      <button class="fullscreen-btn" id="fullscreenBtn" aria-label="全屏大屏"><svg class="icon"><use href="assets/icons.svg#i-expand"/></svg><span>全屏大屏</span></button>
+    </agv-page-header>
+
+    <div class="dashboard">
+      <section class="stats" aria-label="运行指标">
+        <article class="stat-card" data-overview-card="agv">
+          <div class="stat-head"><span>AGV 状态</span><span class="status-pill"><i class="dot"></i>在线</span></div>
+          <div class="stat-value">AGV-01 · 执行中</div>
+          <div class="meter-row"><div class="meter"><span style="--value:78%"></span></div><b>电量78%</b></div>
+        </article>
+        <article class="stat-card" data-overview-card="orders">
+          <div class="stat-head"><span>当前订单</span></div>
+          <div class="stat-value">1 个执行 / 3 个排队</div>
+          <div class="meter-row blue"><div class="queue-meter"><span class="active"></span><span></span><span></span><span></span></div><b>上游下发</b></div>
+        </article>
+        <article class="stat-card" data-overview-card="locations">
+          <div class="stat-head"><span class="inline-label">库位一致性 <svg class="icon info-icon"><use href="assets/icons.svg#i-info"/></svg></span></div>
+          <div class="stat-value">98.6%</div>
+          <div class="meter-row yellow"><div class="meter"><span style="--value:96%"></span></div><b>1 处待确认</b></div>
+        </article>
+        <article class="stat-card" data-overview-card="tasks">
+          <div class="stat-head"><span class="inline-label">今日任务完成 <svg class="icon info-icon"><use href="assets/icons.svg#i-info"/></svg></span></div>
+          <div class="stat-value">47 / 48</div>
+          <div class="meter-row"><div class="meter"><span style="--value:97.9%"></span></div><b>97.9%</b></div>
+        </article>
+      </section>
+
+      <section class="module-section" id="hardwareModuleSection">
+        <h2 class="section-title" id="hardwareModuleTitle">AGV-01 硬件模组状态</h2>
+        <p class="section-subtitle">展示复合机器人各组成模组的实时连接与工作状态</p>
+        <div class="module-list" id="hardwareModuleList">
+          <article class="module-card"><div class="module-thumb thumb-1" aria-label="底盘设备缩略图"></div><div class="module-copy"><strong>底盘</strong><span>运动中</span></div></article>
+          <article class="module-card"><div class="module-thumb thumb-2" aria-label="机械臂设备缩略图"></div><div class="module-copy"><strong>机械臂</strong><span>待命</span></div></article>
+          <article class="module-card"><div class="module-thumb thumb-3" aria-label="视觉设备缩略图"></div><div class="module-copy"><strong>视觉</strong><span>在线</span></div></article>
+          <article class="module-card"><div class="module-thumb thumb-4" aria-label="夹具设备缩略图"></div><div class="module-copy"><strong>夹具</strong><span>已夹紧载具</span></div></article>
+          <article class="module-card"><div class="module-thumb thumb-5" aria-label="扫码器设备缩略图"></div><div class="module-copy"><strong>扫码器</strong><span>在线</span></div></article>
+        </div>
+      </section>
+
+      <div class="lower-grid">
+        <section class="task-card">
+          <h2 class="task-title">当前执行：MES-20260816-0031</h2>
+          <p class="task-meta">载具 TRAY-000238 · 立库A-第2层-03 → 检测仪B</p>
+          <div class="steps" aria-label="任务进度">
+            <div class="step done"><div class="step-bar"></div><div class="step-label">订单接收</div></div>
+            <div class="step done"><div class="step-bar"></div><div class="step-label">立库取料</div></div>
+            <div class="step active"><div class="step-bar"></div><div class="step-label">AGV 缓存</div></div>
+            <div class="step"><div class="step-bar"></div><div class="step-label">前往仪器</div></div>
+            <div class="step"><div class="step-bar"></div><div class="step-label">等待许可</div></div>
+            <div class="step"><div class="step-bar"></div><div class="step-label">放入进样位</div></div>
+            <div class="step"><div class="step-bar"></div><div class="step-label">完成回调</div></div>
+          </div>
+          <div class="map-art" role="group" aria-label="实验室 AGV 实时路线图">
+            <svg class="route-layer" viewBox="0 0 1024 551" preserveAspectRatio="none" aria-label="独立路线、点位与 AGV 当前位置图层">
+              <title>AGV-01 当前位于中央蓝色主路线南侧</title>
+              <defs>
+                <marker id="arrowPurple" viewBox="0 0 8 8" refX="6.5" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#7b1b75"/></marker>
+                <marker id="arrowBlue" viewBox="0 0 8 8" refX="6.5" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#27558b"/></marker>
+                <marker id="arrowRed" viewBox="0 0 8 8" refX="6.5" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#9f2449"/></marker>
+              </defs>
+
+              <g aria-label="仓储与缓存路线">
+                <path class="route-line route-purple" d="M92 304V192H259V306H164V328H220V405H293V471H391V405H348V326H292V232H430"/>
+                <path class="route-line route-purple" d="M92 247H259M116 192V304M162 192V304M207 192V304M220 328H349M220 405H391M293 405V471M348 326V405"/>
+                <path class="route-line route-purple" d="M819 444V382H903V349H943V445H821M903 294V382M819 348H943"/>
+                <path class="route-line route-purple" d="M118 247H143" marker-end="url(#arrowPurple)"/><path class="route-line route-purple" d="M204 304H176" marker-end="url(#arrowPurple)"/><path class="route-line route-purple" d="M220 392V363" marker-end="url(#arrowPurple)"/><path class="route-line route-purple" d="M327 405H355" marker-end="url(#arrowPurple)"/><path class="route-line route-purple" d="M819 423V397" marker-end="url(#arrowPurple)"/><path class="route-line route-purple" d="M943 382V407" marker-end="url(#arrowPurple)"/>
+              </g>
+
+              <g aria-label="AGV 主干路线">
+                <path class="route-line route-blue" d="M99 306V228H302H430V194H648V420H431V194"/>
+                <path class="route-line route-blue" d="M241 241H430M241 259H430M241 277H430"/>
+                <path class="route-line route-blue" d="M454 194V441H628V294H943V348H819V294"/>
+                <path class="route-line route-blue" d="M430 420H648M648 420V441H454"/>
+                <path class="route-line route-blue" d="M300 228H329" marker-end="url(#arrowBlue)"/><path class="route-line route-blue" d="M430 270V300" marker-end="url(#arrowBlue)"/><path class="route-line route-blue" d="M520 420H552" marker-end="url(#arrowBlue)"/><path class="route-line route-blue" d="M648 330V300" marker-end="url(#arrowBlue)"/><path class="route-line route-blue" d="M740 294H774" marker-end="url(#arrowBlue)"/><path class="route-line route-blue" d="M912 348H882" marker-end="url(#arrowBlue)"/>
+              </g>
+
+              <g aria-label="机台进样路线">
+                <path class="route-line route-red" d="M451 194V102H549V194M451 102H549M451 130H549M451 160H549M479 102V194M520 102V194"/>
+                <path class="route-line route-red" d="M479 105V124" marker-end="url(#arrowRed)"/><path class="route-line route-red" d="M520 136V156" marker-end="url(#arrowRed)"/><path class="route-line route-red" d="M451 149V129" marker-end="url(#arrowRed)"/>
+              </g>
+
+              <g aria-label="路线点位">
+                <circle class="route-node node-purple js-map-node" tabindex="0" role="button" aria-label="立库取料点 A03" data-map-label="立库取料点 A03" cx="164" cy="306" r="5"/>
+                <circle class="route-node node-purple js-map-node" tabindex="0" role="button" aria-label="缓存位 C01" data-map-label="缓存位 C01" cx="292" cy="405" r="5"/>
+                <circle class="route-node node-purple js-map-node" tabindex="0" role="button" aria-label="回库交汇点" data-map-label="回库交汇点" cx="348" cy="405" r="5"/>
+                <circle class="route-node node-purple js-map-node" tabindex="0" role="button" aria-label="检测区南侧点位" data-map-label="检测区南侧点位" cx="903" cy="445" r="5"/>
+                <circle class="route-node node-blue js-map-node" tabindex="0" role="button" aria-label="仓储区出口" data-map-label="仓储区出口" cx="302" cy="228" r="5"/>
+                <circle class="route-node node-blue js-map-node" tabindex="0" role="button" aria-label="中央通道西入口" data-map-label="中央通道西入口" cx="430" cy="194" r="5"/>
+                <circle class="route-node node-blue js-map-node" tabindex="0" role="button" aria-label="中央通道南侧" data-map-label="中央通道南侧" cx="454" cy="420" r="5"/>
+                <circle class="route-node node-blue js-map-node" tabindex="0" role="button" aria-label="检测区入口" data-map-label="检测区入口" cx="819" cy="294" r="5"/>
+                <circle class="route-node node-red js-map-node" tabindex="0" role="button" aria-label="机台进样位 B01" data-map-label="机台进样位 B01" cx="479" cy="130" r="5"/>
+                <circle class="route-node node-red js-map-node" tabindex="0" role="button" aria-label="机台进样位 B02" data-map-label="机台进样位 B02" cx="520" cy="160" r="5"/>
+              </g>
+
+              <g class="agv-location js-map-node" tabindex="0" role="button" aria-label="AGV-01 当前位于中央通道南侧" data-map-label="AGV-01 当前位于中央通道南侧" transform="translate(566 420)">
+                <circle class="agv-pulse" cx="0" cy="0" r="14"/>
+                <circle class="agv-ring" cx="0" cy="0" r="10"/>
+                <rect class="agv-body" x="-6" y="-5" width="12" height="10" rx="3"/>
+                <path class="agv-arrow" d="M-2-3 4 0-2 3Z"/>
+                <rect class="agv-label-bg" x="14" y="-21" width="67" height="19" rx="5"/>
+                <text class="agv-label" x="21" y="-7">AGV-01</text>
+              </g>
+            </svg>
+            <div class="map-legend" aria-label="地图图例">
+              <span class="legend-item legend-purple"><i class="legend-line"></i><span>仓储路线</span></span>
+              <span class="legend-item legend-blue"><i class="legend-line"></i><span>主干路线</span></span>
+              <span class="legend-item legend-red"><i class="legend-line"></i><span>机台路线</span></span>
+              <span class="legend-item legend-agv"><i class="legend-line"></i><span>AGV 当前点</span></span>
+            </div>
+            <div class="map-shade"></div>
+            <button class="map-action js-toast" data-message="已打开任务 MES-20260816-0031 的完整流程。">查看完整任务</button>
+          </div>
+        </section>
+
+        <div class="right-column">
+          <section class="side-panel">
+            <h2>当前任务占用与预约资源</h2>
+            <div class="resource-list">
+              <article class="resource-card">
+                <div class="resource-head"><strong>检测仪B进样位</strong><span class="mini-pill"><i class="dot"></i>预约中</span></div>
+                <div class="resource-details"><div class="detail-row"><span class="detail-label">⚑ 关联任务</span><span>TRN-0031-01</span></div><div class="detail-row"><span class="detail-label">⌁ 原因</span><span>等待机台许可</span></div><div class="detail-row"><span class="detail-label">☑ 释放条件</span><span>放料完成</span></div></div>
+              </article>
+              <article class="resource-card">
+                <div class="resource-head"><strong>机器人缓存位 C01</strong><span class="mini-pill yellow"><i class="dot"></i>占用</span></div>
+                <div class="resource-details"><div class="detail-row"><span class="detail-label">⚑ 关联任务</span><span>TRN-0031-01</span></div><div class="detail-row"><span class="detail-label">⌁ 原因</span><span>载具在车</span></div><div class="detail-row"><span class="detail-label">☑ 释放条件</span><span>从缓存取走</span></div></div>
+              </article>
+              <article class="resource-card">
+                <div class="resource-head"><strong>检测仪B进样位</strong><span class="mini-pill green"><i class="dot"></i>已预约</span></div>
+                <div class="resource-details"><div class="detail-row"><span class="detail-label">⚑ 关联任务</span><span>TRN-0031-01</span></div><div class="detail-row"><span class="detail-label">⌁ 原因</span><span>等待机台许可</span></div><div class="detail-row"><span class="detail-label">☑ 释放条件</span><span>放料完成</span></div></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="side-panel">
+            <h2>待处理事项</h2>
+            <div class="issue-list">
+              <article class="issue-card"><div class="issue-head"><strong>库位状态不一致</strong></div><p>立库A-第4层-07 · 建议扫码核对</p></article>
+              <article class="issue-card"><div class="issue-head"><strong>库位人工确认待处理</strong><span class="mini-pill yellow"><i class="dot"></i>待处理</span></div><p>立库A-第4层-07 · 等待操作员完成现场扫码</p></article>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </agv-app-shell>
+
+  <div class="modal-overlay" id="statusModal" hidden>
+    <section class="status-modal" role="dialog" aria-modal="true" aria-labelledby="statusModalTitle" tabindex="-1">
+      <h2 id="statusModalTitle">系统运行状态</h2>
+      <div class="status-list">
+        <article class="status-item normal"><strong>绿色·系统正常</strong><p>核心服务、数据库、任务引擎和机器人连接正常。</p></article>
+        <article class="status-item limited"><strong>黄色·受限运行</strong><p>部分非核心设备或上游接口异常，系统仍可继续部分业务。</p></article>
+        <article class="status-item abnormal"><strong>红色·系统异常</strong><p>核心能力异常，系统暂停接收和分配新任务。</p></article>
+        <article class="status-item maintenance"><strong>灰色·维护模式</strong><p>系统处于人工维护、升级或硬件调试状态。</p></article>
+      </div>
+      <div class="modal-actions"><button class="modal-close" id="statusModalClose">关闭</button></div>
+    </section>
+  </div>
+  <div class="alert-overlay" id="alertDrawer" hidden>
+    <aside class="alert-drawer" role="dialog" aria-modal="true" aria-labelledby="alertDrawerTitle" tabindex="-1">
+      <header class="alert-header">
+        <h2 id="alertDrawerTitle">异常提醒</h2>
+        <p>3条未完成·1条严重</p>
+      </header>
+      <div class="alert-feed">
+        <div class="alert-list">
+          <article class="alert-card">
+            <div class="alert-card-head"><strong>机台允许进样事件等待超过流程配置的30秒</strong><span class="severity severe">严重</span></div>
+            <p class="alert-id">ALM-20260817-0042 · 2026-08-17 09:42:18</p>
+            <p class="alert-line object"><span class="label">异常对象：</span> <span class="value">贴标机台进样许可</span></p>
+            <p class="alert-line"><span class="label">影响：</span><span>运输任务保持在 W-B01；贴标机台进样位继续预约；后续同目标任务暂停派发</span></p>
+            <p class="alert-line"><span class="label">当前状态：</span><span class="alert-status pending">待处理</span></p>
+            <p class="alert-line"><span class="label">负责人：</span><span>陈工</span></p>
+            <div class="alert-card-actions"><button class="alert-detail-btn js-alert-detail" data-alert="ALM-20260817-0042">查看详情与处理</button></div>
+          </article>
+          <article class="alert-card">
+            <div class="alert-card-head"><strong>系统记录为空，但库位传感器检测有物</strong><span class="severity warning">警告</span></div>
+            <p class="alert-id">ALM-20260817-0041 · 2026-08-17 09:36:54</p>
+            <p class="alert-line object"><span class="label">异常对象：</span> <span class="value">立库 A 第4层07位</span></p>
+            <p class="alert-line"><span class="label">影响：</span><span>库位 A-04-07 已锁定，不参与新任务分配；同层其他库位不受影响</span></p>
+            <p class="alert-line"><span class="label">当前状态：</span><span class="alert-status processing">处理中</span></p>
+            <p class="alert-line"><span class="label">负责人：</span><span>王工</span></p>
+            <div class="alert-card-actions"><button class="alert-detail-btn js-alert-detail" data-alert="ALM-20260817-0041">查看详情与处理</button></div>
+          </article>
+          <article class="alert-card">
+            <div class="alert-card-head"><strong>系统记录为空，但库位传感器检测有物</strong><span class="severity warning">警告</span></div>
+            <p class="alert-id">ALM-20260817-0041 · 2026-08-17 09:36:54</p>
+            <p class="alert-line object"><span class="label">异常对象：</span> <span class="value">立库 A 第4层07位</span></p>
+            <p class="alert-line"><span class="label">影响：</span><span>库位 A-04-07 已锁定，不参与新任务分配；同层其他库位不受影响</span></p>
+            <p class="alert-line"><span class="label">当前状态：</span><span class="alert-status processing">处理中</span></p>
+            <p class="alert-line"><span class="label">负责人：</span><span>王工</span></p>
+            <div class="alert-card-actions"><button class="alert-detail-btn js-alert-detail" data-alert="ALM-20260817-0041">查看详情与处理</button></div>
+          </article>
+          <article class="alert-card">
+            <div class="alert-card-head"><strong>视觉设备在60秒内出现3次短时断连</strong><span class="severity warning">警告</span></div>
+            <p class="alert-id">ALM-20260817-0040 · 2026-08-17 09:31:12</p>
+            <p class="alert-line object"><span class="label">异常对象：</span> <span class="value">视觉 VISION-01</span></p>
+            <p class="alert-line"><span class="label">影响：</span><span>当前动作在重试前暂停；底盘和机械臂保持安全状态；其他任务等待</span></p>
+            <p class="alert-line"><span class="label">当前状态：</span><span class="alert-status confirmed">已确认</span></p>
+            <p class="alert-line"><span class="label">负责人：</span><span>李工</span></p>
+            <div class="alert-card-actions"><button class="alert-detail-btn js-alert-detail" data-alert="ALM-20260817-0040">查看详情与处理</button></div>
+          </article>
+        </div>
+      </div>
+      <footer class="alert-footer"><button class="alert-primary" id="alertRecoveryBtn">进入异常与恢复</button></footer>
+    </aside>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const scrim = document.getElementById('scrim');
+    const menuBtn = document.getElementById('menuBtn');
+    const pageLabel = document.getElementById('currentPage');
+    const toast = document.getElementById('toast');
+    const statusInfoBtn = document.getElementById('statusInfoBtn');
+    const statusModal = document.getElementById('statusModal');
+    const statusDialog = statusModal.querySelector('.status-modal');
+    const statusModalClose = document.getElementById('statusModalClose');
+    const alertInfoBtn = document.getElementById('alertInfoBtn');
+    const alertDrawer = document.getElementById('alertDrawer');
+    const alertPanel = alertDrawer.querySelector('.alert-drawer');
+    const alertRecoveryBtn = document.getElementById('alertRecoveryBtn');
+    let toastTimer;
+
+    function setSidebar(open) {
+      sidebar.classList.toggle('open', open);
+      scrim.classList.toggle('show', open);
+      menuBtn.setAttribute('aria-expanded', String(open));
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2400);
+    }
+
+    function openStatusModal() {
+      statusModal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      requestAnimationFrame(function () {
+        statusModal.classList.add('open');
+        statusModalClose.focus();
+      });
+    }
+
+    function closeStatusModal() {
+      if (statusModal.hidden) return;
+      statusModal.classList.remove('open');
+      document.body.style.overflow = '';
+      setTimeout(function () {
+        statusModal.hidden = true;
+        statusInfoBtn.focus();
+      }, 180);
+    }
+
+    function openAlertDrawer() {
+      alertDrawer.hidden = false;
+      document.body.style.overflow = 'hidden';
+      requestAnimationFrame(function () {
+        alertDrawer.classList.add('open');
+        alertPanel.focus();
+      });
+    }
+
+    function closeAlertDrawer(restoreFocus) {
+      if (alertDrawer.hidden) return;
+      alertDrawer.classList.remove('open');
+      document.body.style.overflow = '';
+      setTimeout(function () {
+        alertDrawer.hidden = true;
+        if (restoreFocus !== false) alertInfoBtn.focus();
+      }, 240);
+    }
+
+    menuBtn.addEventListener('click', function () { setSidebar(!sidebar.classList.contains('open')); });
+    scrim.addEventListener('click', function () { setSidebar(false); });
+
+    document.querySelectorAll('.nav-item').forEach(function (item) {
+      item.addEventListener('click', function (event) {
+        if (item.getAttribute('href').endsWith('.html')) return;
+        event.preventDefault();
+        document.querySelectorAll('.nav-item').forEach(function (nav) { nav.classList.remove('active'); });
+        item.classList.add('active');
+        pageLabel.textContent = item.dataset.page;
+        showToast(item.dataset.page + ' 页面为演示导航');
+        if (window.innerWidth <= 760) setSidebar(false);
+      });
+    });
+
+    document.querySelectorAll('.js-toast').forEach(function (button) {
+      button.addEventListener('click', function () { showToast(button.dataset.message || '操作成功'); });
+    });
+
+    document.querySelectorAll('.js-map-node').forEach(function (node) {
+      function announcePoint() { showToast(node.dataset.mapLabel); }
+      node.addEventListener('click', announcePoint);
+      node.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          announcePoint();
+        }
+      });
+    });
+
+    statusInfoBtn.addEventListener('click', openStatusModal);
+    statusModalClose.addEventListener('click', closeStatusModal);
+    statusModal.addEventListener('click', function (event) {
+      if (event.target === statusModal) closeStatusModal();
+    });
+    statusDialog.addEventListener('keydown', function (event) {
+      if (event.key !== 'Tab') return;
+      event.preventDefault();
+      statusModalClose.focus();
+    });
+
+    alertInfoBtn.addEventListener('click', openAlertDrawer);
+    alertDrawer.addEventListener('click', function (event) {
+      if (event.target === alertDrawer) closeAlertDrawer();
+    });
+    alertPanel.addEventListener('keydown', function (event) {
+      if (event.key !== 'Tab') return;
+      const controls = Array.from(alertPanel.querySelectorAll('button:not([disabled])'));
+      if (!controls.length) return;
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
+    document.querySelectorAll('.js-alert-detail').forEach(function (button) {
+      button.addEventListener('click', function () { showToast('已打开异常 ' + button.dataset.alert + ' 的处理详情'); });
+    });
+    alertRecoveryBtn.addEventListener('click', function () {
+      closeAlertDrawer(false);
+      const targetNav = document.querySelector('.nav-item[data-page="异常与恢复"]');
+      document.querySelectorAll('.nav-item').forEach(function (nav) { nav.classList.remove('active'); });
+      targetNav.classList.add('active');
+      pageLabel.textContent = '异常与恢复';
+      setTimeout(function () { showToast('已进入异常与恢复页面'); }, 250);
+    });
+
+    document.getElementById('fullscreenBtn').addEventListener('click', async function () {
+      try {
+        if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+        else await document.exitFullscreen();
+      } catch (error) {
+        showToast('当前浏览器未允许全屏显示');
+      }
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        if (!alertDrawer.hidden) closeAlertDrawer();
+        else if (!statusModal.hidden) closeStatusModal();
+        else setSidebar(false);
+      }
+    });
+  </script>
+  <script type="module" src="dashboard-overview-api.js"></script>
+  <script type="module" src="dashboard-lab-map-api.js"></script>
+</body>
+</html>
