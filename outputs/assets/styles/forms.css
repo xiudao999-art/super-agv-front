@@ -82,3 +82,226 @@ a {
 button:disabled {
     cursor: not-allowed;
 }
+
+/* 列表页筛选条：先统一为 Ant Design 式字段、控件与按钮节奏。 */
+.agv-filter-bar {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)) !important;
+    gap: 12px !important;
+    align-items: end !important;
+    margin: 16px 0 !important;
+    padding: 14px !important;
+    border: 1px solid #f0f0f0 !important;
+    border-radius: 8px !important;
+    background: #fafafa !important;
+}
+
+.agv-filter-field {
+    display: grid !important;
+    grid-template-rows: 20px 40px !important;
+    gap: 6px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+}
+
+.agv-filter-field > span {
+    display: block !important;
+    margin: 0 !important;
+    color: rgba(0, 0, 0, 0.65) !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    line-height: 20px !important;
+    white-space: nowrap;
+}
+
+.agv-filter-field > input,
+.agv-filter-field > select {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    margin: 0 !important;
+    border: 1px solid #d9d9d9 !important;
+    border-radius: 6px !important;
+    outline: 0 !important;
+    background-color: #fff !important;
+    color: rgba(0, 0, 0, 0.88) !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+    box-shadow: none !important;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease !important;
+}
+
+.agv-filter-field > input {
+    padding: 8px 11px !important;
+}
+
+.agv-filter-field > select {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: 11px !important;
+    padding-right: 34px !important;
+}
+
+.agv-filter-field > input::placeholder,
+.agv-filter-search > input::placeholder {
+    color: rgba(0, 0, 0, 0.25) !important;
+}
+
+.agv-filter-field > input:hover,
+.agv-filter-field > select:hover,
+.agv-filter-search:hover {
+    border-color: #4096ff !important;
+}
+
+.agv-filter-field > input:focus,
+.agv-filter-field > input:focus-visible,
+.agv-filter-field > select:focus,
+.agv-filter-field > select:focus-visible,
+.agv-filter-search:focus-within {
+    border-color: #1677ff !important;
+    outline: 0 !important;
+    box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.12) !important;
+}
+
+.agv-filter-field > input:disabled,
+.agv-filter-field > select:disabled {
+    border-color: #d9d9d9 !important;
+    background-color: rgba(0, 0, 0, 0.04) !important;
+    color: rgba(0, 0, 0, 0.25) !important;
+    cursor: not-allowed;
+}
+
+.agv-filter-actions {
+    display: flex !important;
+    min-height: 40px;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    align-self: end;
+    gap: 8px !important;
+}
+
+.agv-filter-actions > button {
+    display: inline-flex !important;
+    height: 40px !important;
+    min-width: 72px;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 0 15px !important;
+    border: 1px solid #d9d9d9 !important;
+    border-radius: 6px !important;
+    background: #fff !important;
+    color: rgba(0, 0, 0, 0.88) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.02);
+    cursor: pointer;
+    transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease !important;
+}
+
+.agv-filter-actions > button:hover {
+    border-color: #4096ff !important;
+    color: #1677ff !important;
+    filter: none !important;
+}
+
+.agv-filter-actions > button.primary {
+    border-color: #1677ff !important;
+    background: #1677ff !important;
+    color: #fff !important;
+}
+
+.agv-filter-actions > button.primary:hover {
+    border-color: #4096ff !important;
+    background: #4096ff !important;
+    color: #fff !important;
+}
+
+.agv-filter-bar--single {
+    grid-template-columns: minmax(240px, 380px) !important;
+}
+
+.agv-filter-bar--search {
+    grid-template-columns: minmax(240px, 420px) !important;
+}
+
+.agv-filter-search {
+    display: flex !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 40px !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 11px !important;
+    border: 1px solid #d9d9d9 !important;
+    border-radius: 6px !important;
+    background: #fff !important;
+    transition: border-color 160ms ease, box-shadow 160ms ease !important;
+}
+
+.agv-filter-search > span {
+    margin: 0 !important;
+    color: rgba(0, 0, 0, 0.45) !important;
+    font-size: 15px !important;
+}
+
+.agv-filter-search > input {
+    min-width: 0 !important;
+    height: 100% !important;
+    flex: 1;
+    padding: 0 !important;
+    border: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    color: rgba(0, 0, 0, 0.88) !important;
+    font-size: 13px !important;
+    box-shadow: none !important;
+}
+
+@media (max-width: 1100px) {
+    .agv-filter-bar {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .agv-filter-actions {
+        grid-column: 1 / -1;
+    }
+
+    .agv-filter-bar--single,
+    .agv-filter-bar--search {
+        grid-template-columns: minmax(240px, 380px) !important;
+    }
+}
+
+@media (max-width: 760px) {
+    .agv-filter-bar,
+    .agv-filter-bar--single,
+    .agv-filter-bar--search {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        margin: 12px 0 !important;
+        padding: 12px !important;
+    }
+
+    .agv-filter-actions {
+        grid-column: auto;
+    }
+
+    .agv-filter-actions > button {
+        flex: 1;
+    }
+}
+
+.agv-filter-field--capacity {
+    width: min(550px, 100%) !important;
+}

@@ -30,3 +30,70 @@ agv-app-shell:not(:defined) { padding-left: var(--agv-sidebar-width); }
     animation-iteration-count: 1 !important;
   }
 }
+
+/* 跨 HTML 页签只过渡业务内容；根页面和公共壳层始终完全不透明。 */
+@view-transition {
+  navigation: auto;
+}
+
+agv-app-shell > .page-canvas,
+agv-app-shell > .detail-canvas {
+  view-transition-name: agv-tab-content;
+}
+
+::view-transition-group(root),
+::view-transition-new(root) {
+  animation: none !important;
+  mix-blend-mode: normal;
+}
+
+::view-transition-group(root) {
+  z-index: 1;
+}
+
+::view-transition-old(root) {
+  animation: agv-shell-hold 160ms step-end both !important;
+  mix-blend-mode: normal;
+}
+
+::view-transition-group(agv-tab-content) {
+  z-index: 2;
+}
+
+::view-transition-group(agv-tab-content) {
+  animation-duration: 110ms;
+  animation-timing-function: cubic-bezier(.2, .8, .2, 1);
+}
+
+::view-transition-old(agv-tab-content) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(agv-tab-content) {
+  animation: agv-tab-content-in 110ms cubic-bezier(.2, .8, .2, 1) both;
+  mix-blend-mode: normal;
+}
+
+@keyframes agv-shell-hold {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes agv-tab-content-in {
+  from {
+    transform: translateY(3px);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(agv-tab-content),
+  ::view-transition-new(agv-tab-content) {
+    animation-duration: 0.01ms;
+    animation: none;
+  }
+}
