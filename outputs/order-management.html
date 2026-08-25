@@ -16,31 +16,26 @@
 
   <agv-app-shell active-route="order-management.html" section-title="订单管理" user-name="陈工"><div class="agv-legacy-hooks" hidden><aside id="sidebar"></aside><div id="scrim"></div><button id="menuBtn" type="button"></button><button id="statusInfoBtn" type="button"></button><button id="statusBtn" type="button"></button><button id="alertInfoBtn" type="button"></button><button id="alertBtn" type="button"></button></div>
 
-    <agv-page-header class="page-head">
-      <div><h1>订单管理</h1><p>查询订单，并从订单逐层查看任务、动作执行链和结果回调</p></div>
-      <button class="sync-btn" id="syncOrders"><svg class="icon"><use href="assets/icons.svg#i-refresh"/></svg><span>同步订单</span></button>
-    </agv-page-header>
-
-    <div class="orders-canvas">
+    <div class="orders-canvas agv-list-page">
       <section class="orders-panel">
         <div class="tabs-row"><agv-tabs class="tabs" role="tablist"><button class="tab-btn active" role="tab" aria-selected="true">订单列表</button><button class="tab-btn" id="taskDetailTab" role="tab" aria-selected="false" aria-disabled="true" disabled>订单任务详情</button></agv-tabs></div>
         <div class="list-content">
           <div class="list-heading"><h2>订单列表</h2><p>点击“详情”或“查看任务”进入该订单的任务与动作执行链</p></div>
-          <div class="filters">
+          <div class="filters" data-agv-list-filters>
             <label class="field-shell"><span>状态选择</span><select id="statusFilter" aria-label="订单状态"><option value="">全部状态</option><option value="QUEUED">排队中</option><option value="RUNNING">执行中</option><option value="SUCCEEDED">已完成</option><option value="FAILED">失败</option><option value="CANCELLED">已取消</option></select></label>
-            <label class="field-shell"><span>订单来源</span><input id="sourceFilter" placeholder="例如 MES" aria-label="订单来源" /></label>
             <label class="field-shell"><span>查询订单</span><input id="orderQuery" type="search" placeholder="订单号/系统订单号" aria-label="查询订单" /></label>
-            <div class="filter-actions"><button class="filter-btn" id="resetFilters"><svg class="icon"><use href="assets/icons.svg#i-refresh"/></svg>重置</button><button class="filter-btn primary" id="searchOrders"><svg class="icon"><use href="assets/icons.svg#i-search"/></svg>搜索</button></div>
+            <div class="filter-actions"><button class="filter-btn" id="resetFilters"><img class="filter-action-icon" src="assets/list-icons/refresh.svg" alt="">重置</button><button class="filter-btn primary" id="searchOrders"><img class="filter-action-icon" src="assets/list-icons/search.svg" alt="">搜索</button></div>
           </div>
           <div class="table-wrap">
-            <table aria-label="订单列表">
+            <table class="agv-list-table" aria-label="订单列表">
+              <colgroup><col style="width:13.65%"><col style="width:11.64%"><col style="width:11.64%"><col style="width:12.16%"><col style="width:11.64%"><col style="width:7.40%"><col style="width:11.21%"><col style="width:13.52%"><col style="width:7.14%"></colgroup>
               <thead><tr><th>订单号</th><th>系统订单号</th><th>来源</th><th>状态</th><th>优先级</th><th>任务数</th><th>完成进度</th><th>下发时间</th><th>操作</th></tr></thead>
               <tbody id="ordersBody"></tbody>
             </table>
           </div>
           <div class="pagination">
             <div class="page-summary" id="pageSummary"></div>
-            <div class="page-controls"><select class="page-size" id="pageSize" aria-label="每页条数"><option value="6">6 条/页</option><option value="10">10 条/页</option><option value="15">15 条/页</option></select><button class="page-btn" id="prevPage">上一页</button><div id="pageNumbers" style="display:flex;gap:7px"></div><button class="page-btn" id="nextPage">下一页</button></div>
+            <div class="page-controls"><select class="page-size" id="pageSize" aria-label="每页条数"><option value="9">9 条/页</option><option value="10">10 条/页</option><option value="15">15 条/页</option></select><button class="page-btn" id="prevPage">上一页</button><div id="pageNumbers" style="display:flex;gap:7px"></div><button class="page-btn" id="nextPage">下一页</button></div>
           </div>
         </div>
       </section>
@@ -146,7 +141,7 @@
     nextPage.addEventListener('click', function () { currentPage += 1; renderOrders(); });
 
     const syncOrders = document.getElementById('syncOrders');
-    syncOrders.addEventListener('click', function () {
+    syncOrders?.addEventListener('click', function () {
       syncOrders.disabled = true;
       syncOrders.querySelector('span').textContent = '同步中…';
       setTimeout(function () { syncOrders.disabled = false; syncOrders.querySelector('span').textContent = '同步订单'; showToast('订单同步完成，共更新 17 条记录'); }, 800);

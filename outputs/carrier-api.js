@@ -45,8 +45,8 @@
   if(banner)banner.textContent='载具信息由后端统一维护；当前位置已通过库位接口解析为库位名称和编码。';
 
   const filter=document.createElement('div');
-  filter.className='carrier-filter';
-  filter.innerHTML='<input id="carrierCodeFilter" placeholder="按载具编码查询"><select id="carrierStatusFilter"><option value="">全部载具状态</option><option value="IDLE">空闲</option><option value="STORED">在库</option><option value="PENDING">待处理</option><option value="TRANSPORTING">运输中</option><option value="PROCESSING">机台处理中</option><option value="ABNORMAL">异常</option></select><select id="carrierEnabledFilter"><option value="">全部启用状态</option><option value="1">启用</option><option value="0">停用</option></select><button type="button" id="carrierQuery">查询</button><button type="button" id="carrierReset">重置</button>';
+  filter.className='carrier-filter agv-filter-bar';
+  filter.innerHTML='<label class="agv-filter-field"><span>查询载具</span><input id="carrierCodeFilter" placeholder="载具编码/条码"></label><label class="agv-filter-field"><span>载具状态</span><select id="carrierStatusFilter"><option value="">全部载具状态</option><option value="IDLE">空闲</option><option value="STORED">在库</option><option value="PENDING">待处理</option><option value="TRANSPORTING">运输中</option><option value="PROCESSING">机台处理中</option><option value="ABNORMAL">异常</option></select></label><label class="agv-filter-field"><span>启用状态</span><select id="carrierEnabledFilter"><option value="">全部启用状态</option><option value="1">启用</option><option value="0">停用</option></select></label><div class="agv-filter-actions"><button type="button" id="carrierReset"><img class="filter-action-icon" src="assets/list-icons/refresh.svg" alt="">重置</button><button class="primary" type="button" id="carrierQuery"><img class="filter-action-icon" src="assets/list-icons/search.svg" alt="">搜索</button></div>';
   document.querySelector('.table-wrap').before(filter);
   const codeFilter=document.getElementById('carrierCodeFilter');
   const statusFilter=document.getElementById('carrierStatusFilter');

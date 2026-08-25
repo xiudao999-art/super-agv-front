@@ -126,3 +126,19 @@
 .status-failed{color:var(--red);border-color:#f4cfcd;background:#fff5f4}.order-loading-cell{height:120px!important;text-align:center}.order-loading{display:inline-flex;align-items:center;justify-content:center;gap:10px;color:var(--muted);font-size:12px}.order-loading:before{content:"";width:17px;height:17px;border:2px solid #dbe8f2;border-top-color:var(--blue);border-radius:50%;animation:order-loading-spin .7s linear infinite}@keyframes order-loading-spin{to{transform:rotate(360deg)}}
 
 .tab-btn:disabled{color:#8d949c;cursor:default;opacity:.72}
+
+/* The order list now uses the shared Figma list primitives. */
+.orders-canvas.agv-list-page {
+  min-height: calc(100vh - var(--agv-topbar-height));
+  padding: 20px;
+  background: #fff;
+}
+.agv-list-page .orders-panel { min-height: 0; overflow: visible; border-radius: 0; background: transparent; }
+.agv-list-page .list-content { padding: 20px 0 0; }
+.agv-list-page .list-heading h2 { margin: 0 0 4px; color: #081829; font-size: 14px; font-weight: 600; line-height: 20px; }
+.agv-list-page .list-heading p { margin: 0; color: rgba(8,24,41,.48); font-size: 12px; line-height: 16px; }
+.agv-list-page .pagination { display: none; }
+
+@media (max-width: 760px) {
+  .orders-canvas.agv-list-page { padding: 16px 12px; }
+}

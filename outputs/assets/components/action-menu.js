@@ -28,15 +28,13 @@ class AgvActionMenu extends HTMLElement {
         if (this.dataset.ready === 'true') return;
 
         this.dataset.ready = 'true';
-        this.innerHTML = `
-            <button class="agv-action-menu__trigger" type="button" aria-haspopup="menu" aria-expanded="false">
-                <span>更多</span>
-                <span class="agv-action-menu__chevron" aria-hidden="true"></span>
-            </button>
-            <div class="agv-action-menu__panel" role="menu" hidden></div>
-        `;
+        const iconTrigger = this.dataset.agvActionMenuTrigger === 'icon';
+        this.innerHTML = iconTrigger
+            ? `<button class="agv-action-menu__trigger" type="button" aria-label="更多操作" title="更多操作" aria-haspopup="menu" aria-expanded="false"><img class="agv-action-menu__icon" src="assets/list-icons/more.svg" alt=""></button><div class="agv-action-menu__panel" role="menu" hidden></div>`
+            : `<button class="agv-action-menu__trigger" type="button" aria-haspopup="menu" aria-expanded="false"><span>更多</span><span class="agv-action-menu__chevron" aria-hidden="true"></span></button><div class="agv-action-menu__panel" role="menu" hidden></div>`;
         this._trigger = this.querySelector('.agv-action-menu__trigger');
         this._panel = this.querySelector('.agv-action-menu__panel');
+        if (iconTrigger) this._panel.classList.add('agv-action-menu__panel--compact');
 
         this._trigger.addEventListener('click', (event) => {
             event.preventDefault();
@@ -56,6 +54,7 @@ class AgvActionMenu extends HTMLElement {
         window.removeEventListener('resize', this._onViewportChange);
         window.removeEventListener('scroll', this._onViewportChange, true);
         window.removeEventListener('agv-action-menu-open', this._onAnotherMenuOpen);
+        this._panel?.remove();
         this._restoreSourceActions();
     }
 
@@ -82,8 +81,10 @@ class AgvActionMenu extends HTMLElement {
     open() {
         this._renderItems();
         window.dispatchEvent(new CustomEvent('agv-action-menu-open', { detail: this }));
+        if (this._panel.parentElement !== document.body) document.body.appendChild(this._panel);
         this._panel.hidden = false;
         this._trigger.setAttribute('aria-expanded', 'true');
+        this._positionPanel();
         requestAnimationFrame(() => {
             this._positionPanel();
             this._panel.querySelector('.agv-action-menu__item:not(:disabled)')?.focus();
@@ -130,17 +131,18 @@ class AgvActionMenu extends HTMLElement {
             window.innerWidth - panel.width - edge,
             Math.max(edge, trigger.right - panel.width)
         );
+        const preferAbove = this.dataset.agvActionMenuPlacement === 'top';
         const fitsBelow = trigger.bottom + gap + panel.height <= window.innerHeight - edge;
-        const top = fitsBelow
-            ? trigger.bottom + gap
-            : Math.max(edge, trigger.top - panel.height - gap);
+        const top = preferAbove
+            ? Math.max(edge, trigger.top - panel.height - gap)
+            : (fitsBelow ? trigger.bottom + gap : Math.max(edge, trigger.top - panel.height - gap));
 
         this._panel.style.left = `${Math.round(left)}px`;
         this._panel.style.top = `${Math.round(top)}px`;
     }
 
     _onDocumentPointerDown(event) {
-        if (!this.contains(event.target)) this.close();
+        if (!this.contains(event.target) && !this._panel?.contains(event.target)) this.close();
     }
 
     _onDocumentKeyDown(event) {
@@ -317,12 +319,16 @@ function enhanceTableActions(root = document) {
 
     root.querySelectorAll?.('table tbody td:last-child').forEach((cell) => {
         const container = findActionContainer(cell);
-        if (!container || container.dataset.agvActionEnhanced === 'true') return;
+        if (!container || container.dataset.agvActionMenu === 'none' || container.dataset.agvActionEnhanced === 'true') return;
 
         const actions = getDirectActions(container);
         if (actions.length <= 2) return;
 
         const menu = document.createElement('agv-action-menu');
+        if (container.dataset.agvActionMenu === 'icon') {
+            menu.dataset.agvActionMenuTrigger = 'icon';
+            menu.dataset.agvActionMenuPlacement = 'top';
+        }
         container.appendChild(menu);
         menu.actions = actions.slice(2);
         container.dataset.agvActionEnhanced = 'true';

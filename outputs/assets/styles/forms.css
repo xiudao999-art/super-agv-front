@@ -302,6 +302,231 @@ button:disabled {
     }
 }
 
+/* Figma-aligned inline filters for shared list pages. */
+[data-agv-list-filters].agv-filter-bar {
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    margin: 16px 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+}
+
+[data-agv-list-filters] .agv-filter-field {
+    display: flex !important;
+    flex: 0 0 480px !important;
+    grid-template-rows: none !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 0 12px !important;
+    border: 1px solid rgba(8, 24, 41, 0.1) !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+}
+
+[data-agv-list-filters] .agv-filter-field > span {
+    flex: 0 0 auto;
+    color: rgba(8, 24, 41, 0.48) !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 20px !important;
+}
+
+[data-agv-list-filters] .agv-filter-field > input,
+[data-agv-list-filters] .agv-filter-field > select {
+    height: 38px !important;
+    min-height: 38px !important;
+    flex: 1;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #081829 !important;
+    font-size: 14px !important;
+    line-height: 20px !important;
+    box-shadow: none !important;
+}
+
+[data-agv-list-filters] .agv-filter-field > select {
+    padding-right: 28px !important;
+    background-image: url('../list-icons/arrow-down.svg') !important;
+    background-position: right 10px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px 16px !important;
+}
+[data-agv-list-filters] .agv-filter-actions { min-height: 36px; margin-left: auto; gap: 12px !important; }
+[data-agv-list-filters] .agv-filter-actions > button { min-width: 84px; height: 36px !important; min-height: 36px; padding: 0 16px !important; border: 0 !important; border-radius: 8px !important; box-shadow: none !important; font-size: 14px !important; }
+[data-agv-list-filters] .agv-filter-actions > button:not(.primary) { background: rgba(8, 24, 41, 0.04) !important; color: #081829 !important; }
+[data-agv-list-filters] .agv-filter-actions > button.primary { background: #1577d2 !important; color: #fff !important; }
+[data-agv-list-filters] .agv-filter-actions .icon { width: 18px; height: 18px; }
+[data-agv-list-filters] .agv-filter-actions .filter-action-icon { width: 18px; height: 18px; }
+
+@media (max-width: 1120px) {
+    [data-agv-list-filters].agv-filter-bar { flex-wrap: wrap; }
+    [data-agv-list-filters] .agv-filter-actions { margin-left: 0; }
+}
+
+@media (max-width: 760px) {
+    [data-agv-list-filters] .agv-filter-field { flex-basis: 100% !important; }
+    [data-agv-list-filters] .agv-filter-actions { width: 100%; }
+    [data-agv-list-filters] .agv-filter-actions > button { flex: 1; }
+}
+
 .agv-filter-field--capacity {
     width: min(550px, 100%) !important;
+}
+
+/* Attribute hook keeps the shared list treatment available before component JS upgrades. */
+[data-agv-list-filters] { display: flex !important; align-items: center !important; gap: 16px !important; margin: 16px 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; }
+[data-agv-list-filters] .field-shell { display: flex !important; flex: 0 0 480px !important; height: 40px !important; min-height: 40px !important; align-items: center !important; gap: 12px !important; padding: 0 12px !important; border: 1px solid rgba(8,24,41,.1) !important; border-radius: 8px !important; background: #fff !important; }
+[data-agv-list-filters] .field-shell > span { flex: 0 0 auto; color: rgba(8,24,41,.48) !important; font-size: 14px !important; font-weight: 400 !important; line-height: 20px !important; }
+[data-agv-list-filters] .field-shell > input,
+[data-agv-list-filters] .field-shell > select { height: 38px !important; min-height: 38px !important; flex: 1; padding: 0 !important; border: 0 !important; background-color: transparent !important; color: #081829 !important; font-size: 14px !important; line-height: 20px !important; box-shadow: none !important; }
+[data-agv-list-filters] .field-shell > select { padding-right: 28px !important; background-image: url('../list-icons/arrow-down.svg') !important; background-position: right 10px center !important; background-repeat: no-repeat !important; background-size: 16px 16px !important; }
+[data-agv-list-filters] .filter-actions { min-height: 36px; margin-left: auto; gap: 12px !important; }
+[data-agv-list-filters] .filter-actions > button { min-width: 84px; height: 36px !important; min-height: 36px; padding: 0 16px !important; border: 0 !important; border-radius: 8px !important; box-shadow: none !important; font-size: 14px !important; }
+[data-agv-list-filters] .filter-actions > button:not(.primary) { background: rgba(8,24,41,.04) !important; color: #081829 !important; }
+[data-agv-list-filters] .filter-actions > button.primary { background: #1577d2 !important; color: #fff !important; }
+[data-agv-list-filters] .filter-actions .filter-action-icon { width: 18px; height: 18px; }
+
+@media (max-width:1120px) { [data-agv-list-filters] { flex-wrap: wrap; } [data-agv-list-filters] .filter-actions { margin-left: 0; } }
+@media (max-width:760px) { [data-agv-list-filters] .field-shell { flex-basis: 100% !important; } [data-agv-list-filters] .filter-actions { width: 100%; } [data-agv-list-filters] .filter-actions > button { flex: 1; } }
+
+/* Global list-filter system, aligned with the order list. */
+.agv-filter-bar {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center !important;
+    gap: 16px !important;
+    margin: 16px 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+}
+
+.agv-filter-bar .agv-filter-field {
+    display: flex !important;
+    flex: 1 1 320px !important;
+    grid-template-rows: none !important;
+    width: auto !important;
+    max-width: 480px;
+    height: 40px !important;
+    min-height: 40px !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    border: 1px solid rgba(8, 24, 41, 0.1) !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+}
+
+.agv-filter-bar .agv-filter-field > span {
+    display: block !important;
+    flex: 0 0 auto;
+    margin: 0 !important;
+    color: rgba(8, 24, 41, 0.48) !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 20px !important;
+}
+
+.agv-filter-bar .agv-filter-field > input,
+.agv-filter-bar .agv-filter-field > select {
+    width: auto !important;
+    min-width: 0 !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    flex: 1;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    outline: 0 !important;
+    background-color: transparent !important;
+    color: #081829 !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 20px !important;
+    box-shadow: none !important;
+}
+
+.agv-filter-bar .agv-filter-field > select {
+    padding-right: 28px !important;
+    background-image: url('../list-icons/arrow-down.svg') !important;
+    background-position: right 10px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px 16px !important;
+}
+
+.agv-filter-bar .agv-filter-field:focus-within {
+    border-color: #1577d2 !important;
+    box-shadow: 0 0 0 2px rgba(21, 119, 210, 0.1) !important;
+}
+
+.agv-filter-bar .agv-filter-search {
+    display: flex !important;
+    flex: 1 1 320px !important;
+    width: auto !important;
+    max-width: 480px;
+    height: 40px !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    border: 1px solid rgba(8, 24, 41, 0.1) !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+}
+
+.agv-filter-bar .agv-filter-search > span { color: rgba(8, 24, 41, 0.48) !important; font-size: 14px !important; }
+.agv-filter-bar .agv-filter-search > input { color: #081829 !important; font-size: 14px !important; }
+.agv-filter-bar .agv-filter-search:focus-within { border-color: #1577d2 !important; box-shadow: 0 0 0 2px rgba(21, 119, 210, 0.1) !important; }
+
+.agv-filter-bar .agv-filter-actions {
+    display: flex !important;
+    min-height: 36px;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    align-self: center;
+    gap: 12px !important;
+    margin-left: auto;
+}
+
+.agv-filter-bar .agv-filter-actions > button {
+    display: inline-flex !important;
+    min-width: 84px;
+    height: 36px !important;
+    min-height: 36px;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 0 16px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: rgba(8, 24, 41, 0.04) !important;
+    color: #081829 !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    box-shadow: none !important;
+}
+
+.agv-filter-bar .agv-filter-actions > button.primary {
+    background: #1577d2 !important;
+    color: #fff !important;
+}
+
+.agv-filter-bar .agv-filter-actions > button:hover { filter: brightness(.97) !important; }
+.agv-filter-bar .agv-filter-actions .filter-action-icon { width: 18px; height: 18px; }
+.agv-filter-bar--single .agv-filter-field,
+.agv-filter-bar--search .agv-filter-search { flex: 0 1 480px !important; max-width: 480px; }
+
+@media (max-width: 760px) {
+    .agv-filter-bar { gap: 10px !important; margin: 12px 0 !important; }
+    .agv-filter-bar .agv-filter-field { max-width: none; flex-basis: 100% !important; }
+    .agv-filter-bar .agv-filter-actions { width: 100%; margin-left: 0; }
+    .agv-filter-bar .agv-filter-actions > button { flex: 1; }
 }

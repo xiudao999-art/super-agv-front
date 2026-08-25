@@ -33,8 +33,8 @@
   table.style.minWidth='1120px';
 
   const filter=document.createElement('div');
-  filter.className='carrier-filter';
-  filter.innerHTML='<input id="carrierTypeCodeFilter" placeholder="按类型编码查询"><select id="carrierTypeStatusFilter"><option value="">全部状态</option><option value="DRAFT">草稿</option><option value="PUBLISHED">已发布</option><option value="DISABLED">已停用</option></select><button type="button" id="carrierTypeQuery">查询</button><button type="button" id="carrierTypeReset">重置</button>';
+  filter.className='carrier-filter agv-filter-bar';
+  filter.innerHTML='<label class="agv-filter-field"><span>查询类型</span><input id="carrierTypeCodeFilter" placeholder="类型编码/名称"></label><label class="agv-filter-field"><span>状态选择</span><select id="carrierTypeStatusFilter"><option value="">全部状态</option><option value="DRAFT">草稿</option><option value="PUBLISHED">已发布</option><option value="DISABLED">已停用</option></select></label><div class="agv-filter-actions"><button type="button" id="carrierTypeReset"><img class="filter-action-icon" src="assets/list-icons/refresh.svg" alt="">重置</button><button class="primary" type="button" id="carrierTypeQuery"><img class="filter-action-icon" src="assets/list-icons/search.svg" alt="">搜索</button></div>';
   document.querySelector('.table-wrap').before(filter);
   const codeFilter=document.getElementById('carrierTypeCodeFilter');
   const statusFilter=document.getElementById('carrierTypeStatusFilter');

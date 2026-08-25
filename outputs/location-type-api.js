@@ -25,8 +25,8 @@
   table.style.minWidth='1280px';
 
   const filter=document.createElement('div');
-  filter.className='location-type-filter';
-  filter.innerHTML='<input id="locationTypeCodeFilter" placeholder="按类型编码查询"><select id="locationTypeStatusFilter"><option value="">全部状态</option><option value="1">启用</option><option value="0">停用</option></select><button type="button" id="locationTypeQuery">查询</button><button type="button" id="locationTypeReset">重置</button>';
+  filter.className='location-type-filter agv-filter-bar';
+  filter.innerHTML='<label class="agv-filter-field"><span>查询类型</span><input id="locationTypeCodeFilter" placeholder="类型编码/名称"></label><label class="agv-filter-field"><span>状态选择</span><select id="locationTypeStatusFilter"><option value="">全部状态</option><option value="1">启用</option><option value="0">停用</option></select></label><div class="agv-filter-actions"><button type="button" id="locationTypeReset"><img class="filter-action-icon" src="assets/list-icons/refresh.svg" alt="">重置</button><button class="primary" type="button" id="locationTypeQuery"><img class="filter-action-icon" src="assets/list-icons/search.svg" alt="">搜索</button></div>';
   document.querySelector('.table-wrap').before(filter);
   const codeFilter=document.getElementById('locationTypeCodeFilter');
   const statusFilter=document.getElementById('locationTypeStatusFilter');

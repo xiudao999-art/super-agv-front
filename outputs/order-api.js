@@ -21,7 +21,7 @@ import { getOrders, ordersEndpoint, ordersSyncEndpoint, syncOrders as requestOrd
   const searchButton=document.getElementById('searchOrders');
   const resetButton=document.getElementById('resetFilters');
   const syncButton=document.getElementById('syncOrders');
-  if(!body||!statusFilter||!sourceFilter||!orderQuery||!pageSizeSelect||!pageNumbers||!pageSummary||!prevPage||!nextPage)return;
+  if(!body||!statusFilter||!orderQuery||!pageSizeSelect||!pageNumbers||!pageSummary||!prevPage||!nextPage)return;
 
   let currentPage=1;
   let pageSize=Number(pageSizeSelect.value)||10;
@@ -111,13 +111,20 @@ import { getOrders, ordersEndpoint, ordersSyncEndpoint, syncOrders as requestOrd
       const operationCell=document.createElement('td');
       const actions=document.createElement('div');
       actions.className='row-actions';
+      actions.dataset.agvActionMenu='icon';
       const detail=document.createElement('button');
-      detail.type='button';detail.className='row-btn';detail.textContent='详情';
+      detail.type='button';detail.className='row-btn row-icon-button';detail.setAttribute('aria-label','查看详情');detail.title='查看详情';detail.innerHTML='<img src="assets/list-icons/file-detail.svg" alt="">';
       const tasks=document.createElement('button');
-      tasks.type='button';tasks.className='row-btn tasks';tasks.textContent='查看任务';
+      tasks.type='button';tasks.className='row-btn row-icon-button tasks';tasks.setAttribute('aria-label','查看任务');tasks.title='查看任务';tasks.innerHTML='<img src="assets/list-icons/document.svg" alt="">';
+      const edit=document.createElement('button');
+      edit.type='button';edit.className='row-btn';edit.textContent='编辑';edit.setAttribute('aria-label','编辑订单');
+      const remove=document.createElement('button');
+      remove.type='button';remove.className='row-btn delete';remove.textContent='删除';remove.setAttribute('aria-label','删除订单');
       detail.addEventListener('click',()=>openOrder(item));
       tasks.addEventListener('click',()=>openOrder(item));
-      actions.append(detail,tasks);operationCell.appendChild(actions);row.appendChild(operationCell);body.appendChild(row);
+      edit.addEventListener('click',()=>showMessage('订单编辑功能待接入：'+(item.upstreamOrderNo||item.systemOrderNo||item.id)));
+      remove.addEventListener('click',()=>showMessage('订单删除功能待接入：'+(item.upstreamOrderNo||item.systemOrderNo||item.id)));
+      actions.append(detail,tasks,edit,remove);operationCell.appendChild(actions);row.appendChild(operationCell);body.appendChild(row);
     });
   }
 
@@ -154,7 +161,7 @@ import { getOrders, ordersEndpoint, ordersSyncEndpoint, syncOrders as requestOrd
     renderPagination();
     const params=new URLSearchParams({pageNum:String(currentPage),pageSize:String(pageSize)});
     if(statusFilter.value)params.set('status',statusFilter.value);
-    const source=sourceFilter.value.trim();
+    const source=sourceFilter?.value.trim()||'';
     if(source)params.set('source',source);
     const keyword=orderQuery.value.trim();
     if(keyword)params.set('keyword',keyword);
@@ -208,11 +215,11 @@ import { getOrders, ordersEndpoint, ordersSyncEndpoint, syncOrders as requestOrd
   }
 
   intercept(searchButton,'click',()=>{currentPage=1;loadOrders()});
-  intercept(resetButton,'click',()=>{statusFilter.value='';sourceFilter.value='';orderQuery.value='';currentPage=1;loadOrders()});
+  intercept(resetButton,'click',()=>{statusFilter.value='';if(sourceFilter)sourceFilter.value='';orderQuery.value='';currentPage=1;loadOrders()});
   statusFilter.addEventListener('change',event=>{event.stopImmediatePropagation();currentPage=1;loadOrders()},true);
   pageSizeSelect.addEventListener('change',event=>{event.stopImmediatePropagation();pageSize=Number(pageSizeSelect.value)||10;currentPage=1;loadOrders()},true);
   orderQuery.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();event.stopImmediatePropagation();currentPage=1;loadOrders()}},true);
-  sourceFilter.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();event.stopImmediatePropagation();currentPage=1;loadOrders()}},true);
+  sourceFilter?.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();event.stopImmediatePropagation();currentPage=1;loadOrders()}},true);
   intercept(prevPage,'click',()=>{if(!loading&&currentPage>1){currentPage-=1;loadOrders()}});
   intercept(nextPage,'click',()=>{const totalPages=Math.max(1,Math.ceil(total/pageSize));if(!loading&&currentPage<totalPages){currentPage+=1;loadOrders()}});
   intercept(syncButton,'click',syncOrders);
