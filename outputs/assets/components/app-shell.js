@@ -109,8 +109,8 @@ export class AgvAppShell extends HTMLElement {
         * { box-sizing:border-box; }
         .icon { width:18px; height:18px; flex:0 0 auto; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
         .sidebar { position:fixed; inset:0 auto 0 0; z-index:30; width:var(--agv-sidebar-width,220px); display:flex; flex-direction:column; padding:18px 10px 14px; overflow:hidden; background:#fff; border-right:1px solid var(--agv-line-soft,#e9edf1); transition:transform .2s ease; }
-        .brand { height:38px; display:flex; align-items:center; gap:10px; padding:0 9px; margin-bottom:20px; color:var(--agv-blue,#1677c8); font-size:15px; font-weight:750; white-space:nowrap; }
-        .robot-logo { width:29px; height:29px; flex:0 0 auto; }
+        .brand { height:44px; display:flex; align-items:center; padding:0 8px; margin-bottom:18px; text-decoration:none; }
+        .brand-logo { display:block; width:100%; height:auto; max-height:40px; object-fit:contain; object-position:left center; }
         nav { flex:1; min-height:0; overflow-y:auto; }
         .nav-group { margin:12px 0 19px; }
         .nav-group:first-child { margin-top:0; }
@@ -153,7 +153,7 @@ export class AgvAppShell extends HTMLElement {
         @media (prefers-reduced-motion:reduce) { .sidebar,.top-action { transition:none; } }
       </style>
       <aside class="sidebar" aria-label="主导航">
-        <div class="brand"><svg class="robot-logo" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M14 3a2 2 0 1 1 4 0v2h2.5A5.5 5.5 0 0 1 26 10.5V12h1a3 3 0 1 1 0 6h-1v1.5a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 6 19.5V18H5a3 3 0 1 1 0-6h1v-1.5A5.5 5.5 0 0 1 11.5 5H14V3Zm-3 10v5h3v-5h-3Zm7 0v5h3v-5h-3Z"/></svg><span>复合机器人调度系统</span></div>
+        <a class="brand" href="robot-dispatch-dashboard.html" aria-label="返回运行总览"><img class="brand-logo" src="assets/logo.svg" alt="昆灵科技"></a>
         <nav>${nav}</nav>
         <div class="version" aria-label="系统版本">v2.3</div>
       </aside>
