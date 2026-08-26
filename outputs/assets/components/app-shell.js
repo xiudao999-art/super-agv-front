@@ -57,6 +57,14 @@ function removeLaboratoryWording() {
   const root = document.body;
   if (!root) return;
   const strip = value => String(value || '').replace(/实验室\s*/g, '');
+  const removableSubtitles = new Set([
+    '一期固定一台复合机器人，可由底盘、机械臂、视觉、PLC 和夹具等模组组成',
+    '当前项目只使用一张地图，无需选择或多选',
+    '点击编辑可维护空间内地图信息，并通过导航点查看地图内已标记的目标位置。',
+    '坐标值与坐标系必须成对保存，发布前校验地图版本和到达关系',
+    '外围资源坐标用于路径连接、资源预约和到位校验',
+    '当前共 4 个流程；点击流程行查看详情，点击“编辑”在弹窗中维护流程基本信息'
+  ]);
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   let node;
   while ((node = walker.nextNode())) {
@@ -69,6 +77,10 @@ function removeLaboratoryWording() {
       if (value?.includes('实验室')) element.setAttribute(attribute, strip(value));
     });
   });
+  root.querySelectorAll('p').forEach(paragraph => {
+    if (removableSubtitles.has(strip(paragraph.textContent).trim())) paragraph.remove();
+  });
+  root.querySelectorAll('.api-scope-note').forEach(note => note.remove());
   if (document.title.includes('实验室')) document.title = strip(document.title);
 }
 
