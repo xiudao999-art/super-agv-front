@@ -14,6 +14,31 @@ button { color: inherit; }
 [hidden] { display: none !important; }
 :focus-visible { outline: 2px solid var(--agv-blue); outline-offset: 2px; }
 
+/* 全局原生下拉项：白底、舒展行距，并尽量靠近 Ant Design 的选中层次。
+   展开面板受浏览器及操作系统控制，不支持完整覆盖的环境会使用系统高亮。 */
+select:not([multiple]):not([size]),
+select:not([multiple]):not([size]) option {
+  color-scheme: light;
+}
+select:not([multiple]):not([size]) option {
+  min-height: 36px;
+  padding: 8px 12px;
+  background: #fff;
+  color: rgba(0, 0, 0, .88);
+  font-size: 14px;
+  line-height: 20px;
+}
+select:not([multiple]):not([size]) option:checked {
+  background: #e6f4ff linear-gradient(0deg, #e6f4ff, #e6f4ff);
+  color: #1677ff;
+  font-weight: 500;
+}
+select:not([multiple]):not([size]) option:hover,
+select:not([multiple]):not([size]) option:focus {
+  background: #f5f5f5;
+  color: rgba(0, 0, 0, .88);
+}
+
 agv-app-shell, agv-page-header, agv-tabs { display: block; }
 agv-app-shell:not(:defined) { padding-left: var(--agv-sidebar-width); }
 
@@ -96,4 +121,57 @@ agv-app-shell > .detail-canvas {
     animation-duration: 0.01ms;
     animation: none;
   }
+}
+
+
+/* Segmented tabs use spacing and active surfaces only; remove legacy divider strokes. */
+.tab-divider { display: none !important; }
+.log-tab:not(:first-child)::before,
+.log-tab:not(:first-child):before { display: none !important; }
+
+
+/* Shared page-heading status bar: reserved for summary states, not table statuses. */
+.title-status-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.title-status {
+  display: inline-flex;
+  min-height: 24px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.title-status::before {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+.title-status--danger {
+  color: #f24e3f;
+  border-color: #f3d7d5;
+  background: #fff5f4;
+}
+ (max-width: 760px) {
+  .title-status-bar { align-items: flex-start; flex-direction: column; gap: 8px; }
+}
+
+
+/* Summary status aligns with the heading description baseline, as in anomaly recovery. */
+.log-heading-row.title-status-bar,
+.list-head.title-status-bar { align-items: flex-end; }
+ (max-width: 760px) {
+  .log-heading-row.title-status-bar,
+  .list-head.title-status-bar { align-items: flex-start; }
 }

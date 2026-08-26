@@ -4,3 +4,4 @@ import './page-header.js';
 import './action-menu.js';
 import './filter-bar.js';
 import './tabs.js';
+import './select-menu.js';

@@ -35,6 +35,126 @@ select:not([multiple]):not([size]) {
     transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
 }
 
+/* 原生下拉选项：以 Ant Design 的留白、白底和浅蓝选中态为基准。
+   下拉面板仍由浏览器/系统渲染，无法在所有平台完全覆盖系统高亮。 */
+select:not([multiple]):not([size]),
+select:not([multiple]):not([size]) option {
+    color-scheme: light;
+}
+
+select:not([multiple]):not([size]) option {
+    min-height: 36px;
+    padding: 8px 12px;
+    background: #fff;
+    color: rgba(0, 0, 0, 0.88);
+    font-size: 14px;
+    line-height: 20px;
+}
+
+select:not([multiple]):not([size]) option:checked {
+    background: #e6f4ff linear-gradient(0deg, #e6f4ff, #e6f4ff);
+    color: #1677ff;
+    font-weight: 500;
+}
+
+select:not([multiple]):not([size]) option:hover,
+select:not([multiple]):not([size]) option:focus {
+    background: #f5f5f5;
+    color: rgba(0, 0, 0, 0.88);
+}
+
+/* 可访问的下拉面板：用于替代各浏览器无法统一的原生 option 弹层。 */
+select.agv-select-native {
+    position: absolute !important;
+    width: 1px !important;
+    min-width: 1px !important;
+    height: 1px !important;
+    min-height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    border: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.agv-select-trigger {
+    position: relative;
+    display: inline-flex;
+    min-width: 0;
+    min-height: var(--agv-control, 40px);
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 34px 0 11px;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    outline: 0;
+    background: #fff;
+    color: rgba(0, 0, 0, 0.88);
+    font: inherit;
+    line-height: 1.5;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+.agv-select-trigger::after {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    width: 6px;
+    height: 6px;
+    border-right: 1.5px solid rgba(8, 24, 41, 0.48);
+    border-bottom: 1.5px solid rgba(8, 24, 41, 0.48);
+    content: '';
+    pointer-events: none;
+    transform: translateY(-65%) rotate(45deg);
+}
+.agv-select-trigger:hover { border-color: #4096ff; }
+.agv-select-trigger:focus-visible,
+.agv-select-trigger[aria-expanded='true'] { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.12); }
+.agv-select-trigger:disabled { border-color: #d9d9d9; background: rgba(0, 0, 0, 0.04); color: rgba(0, 0, 0, 0.25); cursor: not-allowed; }
+.agv-select-trigger:disabled::after { border-color: rgba(0, 0, 0, 0.25); }
+
+.agv-select-menu {
+    position: fixed;
+    z-index: 10001;
+    display: grid;
+    gap: 2px;
+    overflow: auto;
+    padding: 4px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+}
+.agv-select-option {
+    display: flex;
+    width: 100%;
+    min-height: 36px;
+    align-items: center;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 4px;
+    background: #fff;
+    color: rgba(0, 0, 0, 0.88);
+    font: inherit;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: left;
+    cursor: pointer;
+}
+.agv-select-option:hover,
+.agv-select-option:focus-visible { outline: 0; background: #f5f5f5; }
+.agv-select-option.is-selected { background: #e6f4ff; color: #1677ff; font-weight: 500; }
+.agv-select-option:disabled { color: rgba(0, 0, 0, 0.25); cursor: not-allowed; }
+
+.field-shell > .agv-select-trigger { flex: 1; height: 100%; min-height: 0; padding: 0 28px 0 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.field-shell > .agv-select-trigger:hover,
+.field-shell > .agv-select-trigger:focus-visible,
+.field-shell > .agv-select-trigger[aria-expanded='true'] { border: 0; box-shadow: none; }
+.field-shell > .agv-select-trigger::after { right: 10px; }
+.agv-filter-field > .agv-select-trigger { width: 100%; }
+
 select:not([multiple]):not([size]):hover {
     border-color: #4096ff;
 }
@@ -530,3 +650,30 @@ button:disabled {
     .agv-filter-bar .agv-filter-actions { width: 100%; margin-left: 0; }
     .agv-filter-bar .agv-filter-actions > button { flex: 1; }
 }
+
+
+/* Custom select triggers share the order-list filter single-border treatment. */
+.agv-filter-bar .agv-filter-field > .agv-select-trigger {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 28px 0 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  color: #081829 !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 20px !important;
+  box-shadow: none !important;
+}
+.agv-filter-bar .agv-filter-field > .agv-select-trigger:hover,
+.agv-filter-bar .agv-filter-field > .agv-select-trigger:focus-visible,
+.agv-filter-bar .agv-filter-field > .agv-select-trigger[aria-expanded=true] {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.agv-filter-bar .agv-filter-field > .agv-select-trigger::after { right: 10px; }

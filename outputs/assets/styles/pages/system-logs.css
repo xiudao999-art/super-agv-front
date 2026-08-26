@@ -12,4 +12,26 @@
 @media(max-width:760px){.page-canvas.log-page{padding:12px}.log-tabs{height:68px;padding:0 14px}.log-body{padding:14px}.log-filters{grid-template-columns:1fr}.log-filters .field:last-child{grid-column:auto}}
 
 /* Order-list-aligned log filters. */
-.log-title-meta{display:flex;align-items:center;gap:8px}.log-title-meta h2{margin:0!important}.log-title-meta .process-count{margin:0;font-size:12px;font-weight:500}.log-heading-row{align-items:flex-start;margin-bottom:16px}.log-filters.agv-filter-bar{margin:0 0 16px!important}.log-filters.agv-filter-bar .agv-filter-field{flex:1 1 200px!important;max-width:none}.log-filters.agv-filter-bar .agv-filter-actions{margin-left:auto}(max-width:1180px){.log-filters.agv-filter-bar .agv-filter-field{flex-basis:calc(50% - 8px)!important}.log-filters.agv-filter-bar .agv-filter-actions{margin-left:0}}(max-width:760px){.log-title-meta{align-items:flex-start;flex-direction:column;gap:5px}.log-filters.agv-filter-bar .agv-filter-field{flex-basis:100%!important}.log-filters.agv-filter-bar .agv-filter-actions{margin-left:0}}
+.log-title-meta{display:flex;align-items:center;gap:8px}.log-title-meta h2{margin:0!important}.log-title-meta .process-count{margin:0;font-size:12px;font-weight:500}.log-heading-row{align-items:flex-start;margin-bottom:16px}.log-filters.agv-filter-bar{margin:0 0 16px!important}.log-filters.agv-filter-bar .agv-filter-field{flex:1 1 200px!important;max-width:none}.log-filters.agv-filter-bar .agv-filter-actions{margin-left:auto}@media(max-width:1180px){.log-filters.agv-filter-bar .agv-filter-field{flex-basis:calc(50% - 8px)!important}.log-filters.agv-filter-bar .agv-filter-actions{margin-left:0}}@media(max-width:760px){.log-title-meta{align-items:flex-start;flex-direction:column;gap:5px}.log-filters.agv-filter-bar .agv-filter-field{flex-basis:100%!important}.log-filters.agv-filter-bar .agv-filter-actions{margin-left:0}}
+
+
+/* Log detail action follows the compact detail icon used by the order list. */
+.log-table .view-log.row-icon-button {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+.log-table .view-log.row-icon-button img {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+.log-table .view-log.row-icon-button:hover { background: rgba(21,119,210,.08); }
+.log-table .view-log.row-icon-button:focus-visible { outline: 2px solid #1577d2; outline-offset: 2px; }
