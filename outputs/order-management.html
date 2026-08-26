@@ -20,7 +20,7 @@
       <section class="orders-panel">
         <div class="tabs-row"><agv-tabs class="tabs" role="tablist"><button class="tab-btn active" role="tab" aria-selected="true">订单列表</button><button class="tab-btn" id="taskDetailTab" role="tab" aria-selected="false" aria-disabled="true" disabled>订单任务详情</button></agv-tabs></div>
         <div class="list-content">
-          <div class="list-heading"><h2>订单列表</h2><p>点击“详情”或“查看任务”进入该订单的任务与动作执行链</p></div>
+          <div class="list-heading"><div><h2>订单列表</h2><p>点击“详情”或“查看任务”进入该订单的任务与动作执行链</p></div><button class="create-order-btn" id="createOrderBtn" type="button"><svg class="icon"><use href="assets/icons.svg#i-plus"/></svg>新建</button></div>
           <div class="filters" data-agv-list-filters>
             <label class="field-shell"><span>状态选择</span><select id="statusFilter" aria-label="订单状态"><option value="">全部状态</option><option value="QUEUED">排队中</option><option value="RUNNING">执行中</option><option value="SUCCEEDED">已完成</option><option value="FAILED">失败</option><option value="CANCELLED">已取消</option></select></label>
             <label class="field-shell"><span>查询订单</span><input id="orderQuery" type="search" placeholder="订单号/系统订单号" aria-label="查询订单" /></label>
@@ -41,6 +41,25 @@
       </section>
     </div>
   </agv-app-shell>
+
+  <div class="modal-overlay" id="createOrderModal" hidden>
+    <section class="create-order-modal" role="dialog" aria-modal="true" aria-labelledby="createOrderTitle" tabindex="-1">
+      <header class="create-order-header"><h2 id="createOrderTitle">手动创建订单</h2><p>填写订单信息并为每个任务选择流程</p></header>
+      <form id="createOrderForm">
+        <div class="create-order-body">
+          <div class="create-order-grid">
+            <label class="create-field"><span>订单号</span><input id="manualOrderNo" maxlength="100" autocomplete="off" required placeholder="请输入订单号"></label>
+            <label class="create-field"><span>来源</span><select id="orderSource" required><option value="MANUAL">MANUAL</option><option value="MES">MES</option><option value="LIMS">LIMS</option><option value="UPSTREAM">UPSTREAM</option></select></label>
+            <label class="create-field"><span>优先级</span><select id="orderPriority" required><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4（最低）</option></select></label>
+            <label class="create-field"><span>任务数</span><input id="orderTaskCount" type="number" min="1" max="10" step="1" value="1" required></label>
+          </div>
+          <section class="create-tasks" aria-labelledby="createTasksTitle"><div class="create-tasks-heading"><h3 id="createTasksTitle">任务明细</h3><span id="flowLoadState" role="status">正在加载流程…</span></div><div class="create-task-rows" id="createTaskRows"></div></section>
+          <p class="create-order-feedback" id="createOrderFeedback" role="alert" hidden></p>
+        </div>
+        <div class="modal-actions create-order-actions"><button class="modal-close" id="cancelCreateOrder" type="button">取消</button><button class="create-order-submit modal-primary" id="createOrderSubmit" type="submit" disabled>创建订单</button></div>
+      </form>
+    </section>
+  </div>
 
   <div class="modal-overlay" id="statusModal" hidden>
     <section class="status-modal" role="dialog" aria-modal="true" aria-labelledby="statusTitle" tabindex="-1">

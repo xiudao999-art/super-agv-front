@@ -1,4 +1,4 @@
-import { getOrders, ordersEndpoint, ordersSyncEndpoint, syncOrders as requestOrderSync } from './assets/data/orders-data.js';
+import { createOrder as requestCreateOrder, getFlows, getOrders, orderCreateEndpoint, ordersEndpoint, ordersSyncEndpoint, syncOrders as requestOrderSync } from './assets/data/orders-data.js';
 
 (function(){
   'use strict';
@@ -9,6 +9,7 @@ import { getOrders, ordersEndpoint, ordersSyncEndpoint, syncOrders as requestOrd
     :(location.protocol==='file:'?DIRECT_API_BASE_URL:'');
   const endpoint=ordersEndpoint(apiBaseUrl);
   const syncEndpoint=ordersSyncEndpoint(apiBaseUrl);
+  const createEndpoint=orderCreateEndpoint(apiBaseUrl);
   const body=document.getElementById('ordersBody');
   const statusFilter=document.getElementById('statusFilter');
   const sourceFilter=document.getElementById('sourceFilter');
@@ -21,6 +22,18 @@ import { getOrders, ordersEndpoint, ordersSyncEndpoint, syncOrders as requestOrd
   const searchButton=document.getElementById('searchOrders');
   const resetButton=document.getElementById('resetFilters');
   const syncButton=document.getElementById('syncOrders');
+  const createButton=document.getElementById('createOrderBtn');
+  const createModal=document.getElementById('createOrderModal');
+  const createForm=document.getElementById('createOrderForm');
+  const orderNoInput=document.getElementById('manualOrderNo');
+  const sourceInput=document.getElementById('orderSource');
+  const priorityInput=document.getElementById('orderPriority');
+  const taskCountInput=document.getElementById('orderTaskCount');
+  const taskRows=document.getElementById('createTaskRows');
+  const flowLoadState=document.getElementById('flowLoadState');
+  const createFeedback=document.getElementById('createOrderFeedback');
+  const createSubmit=document.getElementById('createOrderSubmit');
+  const createCancel=document.getElementById('cancelCreateOrder');
   if(!body||!statusFilter||!orderQuery||!pageSizeSelect||!pageNumbers||!pageSummary||!prevPage||!nextPage)return;
 
   let currentPage=1;
@@ -30,6 +43,9 @@ import { getOrders, ordersEndpoint, ordersSyncEndpoint, syncOrders as requestOrd
   let loading=false;
   let syncing=false;
   let listController=null;
+  let availableFlows=null;
+  let flowLoading=false;
+  let creating=false;
 
   const statusMeta={
     QUEUED:{label:'排队中',className:'queued'},
@@ -41,6 +57,107 @@ import { getOrders, ordersEndpoint, ordersSyncEndpoint, syncOrders as requestOrd
 
   function showMessage(message){
     if(typeof showToast==='function')showToast(message);
+  }
+
+  function setCreateFeedback(message){
+    if(!createFeedback)return;
+    createFeedback.textContent=message||'';
+    createFeedback.hidden=!message;
+  }
+
+  function updateCreateSubmit(){
+    if(createSubmit)createSubmit.disabled=creating||flowLoading||!availableFlows?.length;
+  }
+
+  function taskDrafts(){
+    if(!taskRows)return[];
+    return[...taskRows.querySelectorAll('.create-task-row')].map(row=>({
+      taskName:row.querySelector('[data-task-name]')?.value||'',
+      flowTemplateId:row.querySelector('[data-task-flow]')?.value||''
+    }));
+  }
+
+  function renderTaskRows(){
+    if(!taskRows||!taskCountInput)return;
+    const drafts=taskDrafts();
+    const parsed=Number(taskCountInput.value);
+    const count=Number.isInteger(parsed)?Math.max(1,Math.min(10,parsed)):1;
+    taskCountInput.value=String(count);
+    taskRows.innerHTML='';
+    for(let index=0;index<count;index+=1){
+      const sequence=index+1;
+      const draft=drafts[index]||{};
+      const row=document.createElement('div');row.className='create-task-row';
+      const sequenceLabel=document.createElement('span');sequenceLabel.className='task-sequence';sequenceLabel.textContent='#'+sequence;
+      const nameField=document.createElement('label');nameField.className='task-field';nameField.innerHTML='<span>\u4efb\u52a1\u540d\u79f0</span>';
+      const name=document.createElement('input');name.type='text';name.required=true;name.maxLength=100;name.dataset.taskName='';name.value=draft.taskName||('\u4efb\u52a1 '+sequence);nameField.appendChild(name);
+      const templateField=document.createElement('label');templateField.className='task-field';templateField.innerHTML='<span>\u6d41\u7a0b</span>';
+      const select=document.createElement('select');select.required=true;select.dataset.taskFlow='';select.disabled=flowLoading||!availableFlows?.length;
+      const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent=flowLoading?'\u6b63\u5728\u52a0\u8f7d\u6d41\u7a0b\u2026':'\u8bf7\u9009\u62e9\u6d41\u7a0b';select.appendChild(placeholder);
+      (availableFlows||[]).forEach(flow=>{const option=document.createElement('option');option.value=String(flow.id);option.textContent=(flow.flowName||'\u672a\u547d\u540d\u6d41\u7a0b')+' \u00b7 '+(flow.flowNumber||'-')+(flow.templateName?' \u00b7 '+flow.templateName:'')+' \u00b7 ID '+flow.id;select.appendChild(option)});
+      if(draft.flowTemplateId&&[...select.options].some(option=>option.value===draft.flowTemplateId))select.value=draft.flowTemplateId;
+      templateField.appendChild(select);row.append(sequenceLabel,nameField,templateField);taskRows.appendChild(row);
+    }
+    updateCreateSubmit();
+  }
+
+  async function loadFlows(){
+    if(flowLoading||availableFlows)return;
+    flowLoading=true;flowLoadState.textContent='\u6b63\u5728\u52a0\u8f7d\u6d41\u7a0b\u2026';setCreateFeedback('');renderTaskRows();
+    try{
+      const templates=[];
+      let pageNum=1,total=0;
+      do{
+        const result=await getFlows({pageNum:String(pageNum),pageSize:'100'},{baseUrl:apiBaseUrl,timeout:30000});
+        const page=result.data||result||{};
+        const records=Array.isArray(page.records)?page.records:[];
+        templates.push(...records);total=Number(page.total)||templates.length;
+        if(!records.length)break;
+        pageNum+=1;
+      }while(templates.length<total);
+      const seen=new Set();
+      availableFlows=templates.filter(flow=>flow.id!==null&&flow.id!==undefined&&!seen.has(String(flow.id))&&seen.add(String(flow.id)));
+      flowLoadState.textContent=availableFlows.length?'\u5df2\u52a0\u8f7d '+availableFlows.length+' \u4e2a\u6d41\u7a0b':'\u6682\u65e0\u53ef\u7528\u6d41\u7a0b';
+      if(!availableFlows.length)setCreateFeedback('\u6682\u65e0\u53ef\u7528\u6d41\u7a0b\uff0c\u65e0\u6cd5\u521b\u5efa\u8ba2\u5355');
+    }catch(error){
+      console.error('\u52a0\u8f7d\u6d41\u7a0b\u5931\u8d25',error);availableFlows=null;flowLoadState.textContent='\u6d41\u7a0b\u52a0\u8f7d\u5931\u8d25';setCreateFeedback('\u6d41\u7a0b\u52a0\u8f7d\u5931\u8d25\uff1a'+error.message);showMessage('\u6d41\u7a0b\u52a0\u8f7d\u5931\u8d25\uff1a'+error.message);
+    }finally{
+      flowLoading=false;renderTaskRows();
+    }
+  }
+
+  function resetCreateForm(){
+    createForm?.reset();
+    if(taskCountInput)taskCountInput.value='1';
+    setCreateFeedback('');renderTaskRows();
+  }
+
+  function openCreateModal(){
+    if(!createModal)return;
+    resetCreateForm();createModal.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>{createModal.classList.add('open');orderNoInput?.focus()});loadFlows();
+  }
+
+  function closeCreateModal(){
+    if(!createModal||creating)return;
+    createModal.classList.remove('open');document.body.style.overflow='';setTimeout(()=>{createModal.hidden=true;createButton?.focus()},200);
+  }
+
+  async function submitCreateOrder(event){
+    event.preventDefault();
+    if(creating||!createForm?.reportValidity()||!availableFlows?.length)return;
+    const tasks=taskDrafts().map((task,index)=>({taskSeq:index+1,taskName:task.taskName.trim(),flowTemplateId:Number(task.flowTemplateId)}));
+    if(tasks.some(task=>!task.taskName||!Number.isInteger(task.flowTemplateId)||task.flowTemplateId<=0))return setCreateFeedback('\u8bf7\u5b8c\u6574\u586b\u5199\u6bcf\u4e2a\u4efb\u52a1\u7684\u540d\u79f0\u5e76\u9009\u62e9\u6d41\u7a0b');
+    const payload={upstreamOrderNo:orderNoInput.value.trim(),source:sourceInput.value,priority:Number(priorityInput.value),tasks};
+    if(!payload.upstreamOrderNo)return setCreateFeedback('\u8bf7\u586b\u5199\u8ba2\u5355\u53f7');
+    creating=true;setCreateFeedback('');createSubmit.disabled=true;createSubmit.textContent='\u521b\u5efa\u4e2d\u2026';
+    try{
+      await requestCreateOrder(payload,{baseUrl:apiBaseUrl,timeout:30000});
+      creating=false;createSubmit.textContent='\u521b\u5efa\u8ba2\u5355';closeCreateModal();resetCreateForm();statusFilter.value='';if(sourceFilter)sourceFilter.value='';orderQuery.value='';currentPage=1;await loadOrders();showMessage('\u8ba2\u5355 '+payload.upstreamOrderNo+' \u521b\u5efa\u6210\u529f');
+    }catch(error){
+      console.error('\u521b\u5efa\u8ba2\u5355\u5931\u8d25',error);setCreateFeedback('\u521b\u5efa\u5931\u8d25\uff1a'+error.message);showMessage('\u521b\u5efa\u8ba2\u5355\u5931\u8d25\uff1a'+error.message);
+    }finally{
+      creating=false;createSubmit.textContent='\u521b\u5efa\u8ba2\u5355';updateCreateSubmit();
+    }
   }
 
   function setTableMessage(message,loadingState){
@@ -223,6 +340,14 @@ import { getOrders, ordersEndpoint, ordersSyncEndpoint, syncOrders as requestOrd
   intercept(prevPage,'click',()=>{if(!loading&&currentPage>1){currentPage-=1;loadOrders()}});
   intercept(nextPage,'click',()=>{const totalPages=Math.max(1,Math.ceil(total/pageSize));if(!loading&&currentPage<totalPages){currentPage+=1;loadOrders()}});
   intercept(syncButton,'click',syncOrders);
-  window.__orderApi={endpoint,syncEndpoint,records,total,reload:loadOrders,sync:syncOrders};
+  createButton?.addEventListener('click',openCreateModal);
+  createCancel?.addEventListener('click',closeCreateModal);
+  createModal?.addEventListener('click',event=>{if(event.target===createModal)closeCreateModal()});
+  createForm?.addEventListener('submit',submitCreateOrder);
+  taskCountInput?.addEventListener('input',()=>{if(taskCountInput.value!=='')renderTaskRows()});
+  taskCountInput?.addEventListener('change',renderTaskRows);
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!createModal?.hidden)closeCreateModal()});
+  window.__orderApi={endpoint,syncEndpoint,createEndpoint,records,total,reload:loadOrders,sync:syncOrders,openCreate:openCreateModal};
+  renderTaskRows();
   loadOrders();
 })();

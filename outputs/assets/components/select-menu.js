@@ -104,7 +104,10 @@ document.addEventListener('click', event => {
 });
 document.addEventListener('keydown', event => { if (event.key === 'Escape') closeAll(); });
 window.addEventListener('resize', () => closeAll());
-window.addEventListener('scroll', () => closeAll(), true);
+window.addEventListener('scroll', event => {
+  const targetIsNode=event.target instanceof Node;
+  menus.forEach(menu => { if (!targetIsNode||!menu.menu.contains(event.target)) menu.close(); });
+}, true);
 document.addEventListener('DOMContentLoaded', () => enhance());
 new MutationObserver(records => records.forEach(record => record.addedNodes.forEach(node => {
   if (node.nodeType !== Node.ELEMENT_NODE) return;

@@ -285,7 +285,9 @@
     .section-subtitle { margin: 4px 0 20px; color: rgba(8,24,41,.48); font-size: 12px; line-height: 16px; }
     .module-list {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      /* grid-template-columns: repeat(6, minmax(0, 1fr)); */
+      grid-template-columns: repeat(6, minmax(220px, 1fr));
+      overflow-x: auto;
       gap: 12px;
     }
     .module-card {
@@ -794,7 +796,7 @@
 
     @media (max-width: 1180px) {
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .module-list { overflow-x: auto; grid-template-columns: repeat(5, minmax(220px, 1fr)); padding-bottom: 4px; }
+      .module-list { overflow-x: auto; grid-template-columns: repeat(6, minmax(220px, 1fr)); padding-bottom: 4px; }
       .lower-grid { grid-template-columns: 1fr; }
       .map-art { flex: none; aspect-ratio: 1089 / 705; }
       .right-column { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -825,7 +827,7 @@
       .stat-card { min-height: 104px; }
       .module-section, .lower-grid { margin-top: 12px; }
       .right-column { grid-template-columns: 1fr; gap: 12px; }
-      .module-list { grid-template-columns: repeat(5, 205px); }
+      .module-list { grid-template-columns: repeat(6, 205px); }
       .steps { grid-template-columns: repeat(7, 92px); overflow-x: auto; padding-bottom: 8px; }
       .map-art { min-height: 0; aspect-ratio: 171 / 92; background-size: 100% 100%; background-position: center; }
       .map-legend { top: 6px; right: 6px; gap: 6px; padding: 5px 6px; }

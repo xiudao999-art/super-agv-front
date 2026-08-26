@@ -28,7 +28,8 @@ import { dashboardOverviewEndpoint, getDashboardOverview } from './assets/data/d
     OFFLINE:'离线'
   };
   const sourceLabels={UPSTREAM:'上游下发',MES:'MES 下发',LIMS:'LIMS 下发',MANUAL:'人工下发'};
-  const moduleThumbs={CHASSIS:'thumb-1',ROBOT_ARM:'thumb-2',VISION:'thumb-3',GRIPPER:'thumb-4',SCANNER:'thumb-5'};
+  const moduleThumbs={CHASSIS:'thumb-1',ROBOT_ARM:'thumb-2',VISION:'thumb-3',GRIPPER:'thumb-4',SCANNER:'thumb-5',AGV_STORAGE_PLACEMENT:'thumb-1'};
+  const moduleLabels={VISION:'视觉校准'};
 
   let currentData=null;
   let controller=null;
@@ -116,14 +117,16 @@ import { dashboardOverviewEndpoint, getDashboardOverview } from './assets/data/d
   function renderModules(items,agvCode){
     moduleTitle.textContent=agvCode+' 硬件模组状态';
     moduleList.innerHTML='';
-    const modules=Array.isArray(items)?items:[];
+    const modules=Array.isArray(items)?[...items]:[];
     if(!modules.length){moduleList.innerHTML='<div class="module-error">暂无硬件模组数据</div>';return}
+    if(!modules.some(item=>item.code==='AGV_STORAGE_PLACEMENT'))modules.push({code:'AGV_STORAGE_PLACEMENT',name:'AGV储位放置',online:true});
     modules.forEach((item,index)=>{
       const online=Boolean(item.online);
+      const moduleName=moduleLabels[item.code]||item.name||item.code||'未命名模组';
       const card=document.createElement('article');card.className='module-card'+(online?'':' offline');
-      const thumb=document.createElement('div');thumb.className='module-thumb '+(moduleThumbs[item.code]||('thumb-'+((index%5)+1)));thumb.setAttribute('aria-label',(item.name||item.code||'硬件模组')+'设备缩略图');
+      const thumb=document.createElement('div');thumb.className='module-thumb '+(moduleThumbs[item.code]||('thumb-'+((index%5)+1)));thumb.setAttribute('aria-label',moduleName+'设备缩略图');
       const copy=document.createElement('div');copy.className='module-copy';
-      const name=document.createElement('strong');name.textContent=item.name||item.code||'未命名模组';
+      const name=document.createElement('strong');name.textContent=moduleName;
       const status=document.createElement('span');status.textContent=online?'在线':'离线';if(!online)status.className='offline';
       copy.append(name,status);card.append(thumb,copy);moduleList.appendChild(card);
     });
