@@ -3,6 +3,7 @@ import { labRequest, uploadLabMap } from './assets/data/lab-data.js';
 (function(){
   'use strict';
 
+
   const DIRECT_API_BASE_URL='http://192.168.20.187:8081';
   const apiBaseUrl=location.protocol==='file:'?DIRECT_API_BASE_URL:'';
   const apiUrl=path=>(apiBaseUrl?apiBaseUrl.replace(/\/$/,''):'')+path;
@@ -17,14 +18,8 @@ import { labRequest, uploadLabMap } from './assets/data/lab-data.js';
   if(!tableBody||!totalLabel||!uniqueLabButton||!form)return;
 
 
-  uniqueLabButton.disabled=true;
-  uniqueLabButton.textContent='唯一实验室';
-  const tableHeaders=[...document.querySelectorAll('.content thead th')];
-  if(tableHeaders[0])tableHeaders[0].textContent='实验室名称 / 模式';
-  if(tableHeaders[2])tableHeaders[2].textContent='配置内对象';
-  if(tableHeaders[3])tableHeaders[3].textContent='关联点位';
   const ruleBanner=document.querySelector('.rule-banner');
-  if(ruleBanner)ruleBanner.textContent='数据规则：系统全局只有一个实验室；页面通过 GET /api/lab 获取唯一实验室，并优先使用 draft.id 作为当前 configId。';
+  if(ruleBanner)ruleBanner.innerHTML='<svg class="icon"><use href="assets/icons.svg#i-info"/></svg><span>数据规则：一个实验室空间只对应一张当前发布的底盘地图，但该地图可以关联多个导航点。实验室空间是机台、库位、动作点位、路径和外围资源的统一归属对象。</span>';
   form.innerHTML='<div class="form-grid">'
     +'<label class="form-field lab-name-field"><span>实验室名称</span><input id="labName" maxlength="128" required></label>'
     +'<label class="form-field map-only"><span>地图名称</span><input id="labMapName" maxlength="128" required></label>'
@@ -68,6 +63,7 @@ import { labRequest, uploadLabMap } from './assets/data/lab-data.js';
   function twoLineCell(row,primary,secondary){const cell=document.createElement('td');cell.className='two-line';const strong=document.createElement('strong');strong.textContent=primary||'-';const span=document.createElement('span');span.textContent=secondary||'-';cell.append(strong,span);row.appendChild(cell)}
   function textCell(row,value){const cell=document.createElement('td');cell.textContent=value??'-';row.appendChild(cell)}
   function actionButton(label,className,handler){const item=document.createElement('button');item.type='button';item.className='row-btn'+(className?' '+className:'');item.textContent=label;item.addEventListener('click',()=>handler(item));return item}
+  function iconAction(icon,label,handler){const item=document.createElement('button');item.type='button';item.className='icon-action';item.setAttribute('aria-label',label);item.title=label;item.innerHTML='<svg class="icon"><use href="assets/icons.svg#'+icon+'"/></svg>';item.addEventListener('click',()=>handler(item));return item}
 
   async function validateConfig(config,trigger){
     const original=trigger.textContent;trigger.disabled=true;trigger.textContent='校验中…';
@@ -83,16 +79,14 @@ import { labRequest, uploadLabMap } from './assets/data/lab-data.js';
     const config=lab.draft||lab.published,map=config?.map||{},counts=config?.counts||{},row=document.createElement('tr');twoLineCell(row,lab.name,'唯一实验室');twoLineCell(row,(map.name||'-')+(map.version?' '+map.version:''),map.imageUrl||'-');textCell(row,'机台 '+(counts.machineCount??0)+' · 节点 '+(counts.nodeCount??0)+' · 连线 '+(counts.linkCount??0));
     const pointCell=document.createElement('td'),pointButton=document.createElement('button');pointButton.type='button';pointButton.className='nav-count';pointButton.textContent=(counts.pointCount??0)+' 个点位';pointButton.disabled=!config;pointButton.addEventListener('click',()=>showMapDetails(config,'点位概要'));pointCell.appendChild(pointButton);row.appendChild(pointCell);
     const statusCell=document.createElement('td'),status=document.createElement('span');status.className='badge '+(lab.draft?'badge-blue':lab.published?'badge-green':'');status.textContent=lab.draft?'草稿 R'+lab.draft.revision:lab.published?'已发布 R'+lab.published.revision:'未配置';statusCell.appendChild(status);row.appendChild(statusCell);
-    const actionCell=document.createElement('td'),actions=document.createElement('div');actions.className='row-actions';const view=actionButton('配置详情','',()=>showConfigDetails(config,lab.draft?'当前草稿':'已发布配置'));view.disabled=!config;const rename=actionButton('修改名称','blue',()=>{setFormMode('rename');openModal('spaceFormModal')});const draft=actionButton(lab.draft?'已有草稿':'创建草稿','',trigger=>createDraft(trigger));draft.disabled=Boolean(lab.draft)||!lab.published;actions.append(view,rename,draft);
-    if(config)actions.appendChild(actionButton('配置通行/机台','blue',()=>location.href=configUrl('passage-rules.html',config)));
-    if(lab.draft)actions.append(actionButton('编辑地图','',()=>{setFormMode('map',lab.draft);openModal('spaceFormModal')}),actionButton('校验','',trigger=>validateConfig(lab.draft,trigger)),actionButton('发布','blue',trigger=>publishConfig(lab.draft,trigger)),actionButton('删除草稿','danger',trigger=>deleteDraft(lab.draft,trigger)));
+    const actionCell=document.createElement('td'),actions=document.createElement('div');actions.className='row-actions';actions.dataset.agvActionMenu='icon';const edit=iconAction('i-edit','编辑地图',()=>{if(lab.draft){setFormMode('map',lab.draft);openModal('spaceFormModal')}else showToast('请先创建地图草稿')});edit.disabled=!config;const view=iconAction('i-map','查看地图',()=>showMapDetails(config,'地图信息'));view.disabled=!config;const detail=actionButton('配置详情','',()=>showConfigDetails(config,lab.draft?'当前草稿':'已发布配置'));detail.disabled=!config;const rename=actionButton('修改名称','blue',()=>{setFormMode('rename');openModal('spaceFormModal')});actions.append(edit,view,detail,rename);if(config)actions.appendChild(actionButton('配置通行/机台','blue',()=>location.href=configUrl('passage-rules.html',config)));if(lab.draft)actions.append(actionButton('校验','',trigger=>validateConfig(lab.draft,trigger)),actionButton('发布','blue',trigger=>publishConfig(lab.draft,trigger)),actionButton('删除草稿','danger',trigger=>deleteDraft(lab.draft,trigger)));else if(lab.published)actions.appendChild(actionButton('创建草稿','',trigger=>createDraft(trigger)));
     actionCell.appendChild(actions);row.appendChild(actionCell);tableBody.appendChild(row);totalLabel.textContent='共计 1 条数据';updateSummary(lab);
   }
 
-  function updateSummary(lab){const cards=[...document.querySelectorAll('.summary-card')],config=lab&&(lab.draft||lab.published),counts=config?.counts||{};if(cards[0]){cards[0].querySelector('span').textContent='实验室模式';cards[0].querySelector('strong').textContent=lab?'唯一':'-';cards[0].querySelector('p').textContent='系统全局只保留一个实验室'}if(cards[1]){cards[1].querySelector('span').textContent='当前 configId / 版本';cards[1].querySelector('strong').textContent=config?(configIdOf(config)+' / R'+config.revision):'-';cards[1].querySelector('p').textContent=config?.status||'暂无配置'}if(cards[2]){cards[2].querySelector('span').textContent='配置对象';cards[2].querySelector('strong').textContent=(counts.machineCount??0)+' / '+(counts.nodeCount??0);cards[2].querySelector('p').textContent='机台数 / 通行节点数'}}
+  function updateSummary(lab){const cards=[...document.querySelectorAll('.summary-card')],config=lab&&(lab.draft||lab.published),map=config?.map||{},counts=config?.counts||{};if(cards[0]){cards[0].querySelector('strong').textContent=lab?((lab.name||'-')+' / '+(map.name||'-')):'-';cards[0].querySelector('p').textContent=lab?'当前实验室空间与其发布地图':'暂无实验室数据'}if(cards[1]){cards[1].querySelector('strong').textContent=config?('1 : '+(counts.pointCount??0)):'-';cards[1].querySelector('p').textContent='一张地图可定义多个导航点'}if(cards[2]){cards[2].querySelector('strong').textContent=(counts.machineCount??0)+' / '+(counts.nodeCount??0)+' / '+(counts.pointCount??0);cards[2].querySelector('p').textContent='机台 / 通行节点 / 导航点'}}
 
   async function loadLab(){
-    tableBody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted)">正在加载唯一实验室…</td></tr>';listDescription.textContent='通过 GET /api/lab 获取唯一实验室，草稿优先使用 draft.id 作为 configId';
+    tableBody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted)">正在加载唯一实验室…</td></tr>';
     try{const result=await request('/api/lab');renderLab(result.data||null)}catch(error){console.error('加载唯一实验室失败',error);labSummary=null;tableBody.innerHTML='<tr class="empty-row"><td colspan="6" class="backend-warning">唯一实验室接口加载失败：'+String(error.message).replace(/[<>]/g,'')+'</td></tr>';totalLabel.textContent='接口加载失败';updateSummary(null);showToast('唯一实验室加载失败：'+error.message)}
   }
 
@@ -107,5 +101,6 @@ import { labRequest, uploadLabMap } from './assets/data/lab-data.js';
   },true);
 
   window.__labSpaceApi={summaryEndpoint:apiUrl('/api/lab'),uploadEndpoint:apiUrl('/api/files/images'),reload:loadLab,get configId(){return configIdOf(labSummary?.draft||labSummary?.published)}};
+  uniqueLabButton.addEventListener('click',()=>{setFormMode('rename');openModal('spaceFormModal')});
   setFormMode('rename');loadLab();
 })();

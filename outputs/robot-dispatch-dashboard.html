@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#f5f7f9" />
   <title>复合机器人调度系统 · 运行总览</title>
+  <link rel="stylesheet" href="assets/styles/tokens.css">
+  <link rel="stylesheet" href="assets/styles/base.css">
+  <link rel="stylesheet" href="assets/styles/components.css">
+  <script type="module" src="assets/components/register.js" blocking="render"></script>
   <style>
     :root {
       --blue: #2182d1;
@@ -786,6 +790,9 @@
     @media (prefers-reduced-motion: reduce) {
       * { scroll-behavior: auto !important; transition-duration: .01ms !important; }
     }
+    /* Shared application shell: only business content is slotted here. */
+    agv-app-shell > .overview-content { min-height: calc(100dvh - var(--agv-topbar-height, 56px)); }
+    .overview-content > .topbar { display: none !important; }
   </style>
 </head>
 <body>
@@ -807,6 +814,8 @@
     <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
   </svg>
 
+  <agv-app-shell active-route="robot-dispatch-dashboard.html" section-title="运行总览" user-name="陈工">
+  <div class="agv-legacy-hooks" hidden>
   <aside class="sidebar" id="sidebar" aria-label="主导航">
     <div class="brand">
       <svg class="robot-logo" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M14 3a2 2 0 1 1 4 0v2h2.5A5.5 5.5 0 0 1 26 10.5V12h1a3 3 0 1 1 0 6h-1v1.5a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 6 19.5V18H5a3 3 0 1 1 0-6h1v-1.5A5.5 5.5 0 0 1 11.5 5H14V3Zm-3 10v5h3v-5h-3Zm7 0v5h3v-5h-3Z"/></svg>
@@ -835,8 +844,9 @@
     </nav>
   </aside>
   <div class="scrim" id="scrim" aria-hidden="true"></div>
+  </div>
 
-  <main class="shell" id="overview">
+  <main class="overview-content" id="overview">
     <header class="topbar">
       <div class="top-title">
         <button class="menu-btn" id="menuBtn" aria-label="打开导航菜单"><svg class="icon"><use href="#i-menu"/></svg></button>
@@ -1000,6 +1010,7 @@
       </div>
     </div>
   </main>
+  </agv-app-shell>
 
   <div class="modal-overlay" id="statusModal" hidden>
     <section class="status-modal" role="dialog" aria-modal="true" aria-labelledby="statusModalTitle" tabindex="-1">
