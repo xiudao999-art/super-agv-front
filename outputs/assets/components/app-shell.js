@@ -6,7 +6,9 @@ const navGroups = [
   ] },
   { label: '配置中心', items: [
     { href: 'robots-and-devices.html', label: '机器人与设备', icon: 'panel' },
-    { href: 'laboratory-configuration.html', label: '实验室配置', icon: 'map' },
+    { href: 'laboratory-configuration.html', label: '地图信息', icon: 'map' },
+    { href: 'stations-and-points.html', label: '机台与点位', icon: 'panel' },
+    { href: 'peripheral-resources.html', label: '外围资源', icon: 'sliders' },
     { href: 'process-list.html', label: '流程与动作', icon: 'flow' }
   ] },
   { label: '运维与数据', items: [
@@ -39,7 +41,7 @@ function activeHref(current, itemHref) {
   if (current === itemHref) return true;
   const groups = {
     'storage-and-carriers.html': ['carrier-list.html', 'storage-type-list.html', 'carrier-type-list.html'],
-    'laboratory-configuration.html': ['passage-rules.html', 'stations-and-points.html', 'peripheral-resources.html'],
+    'laboratory-configuration.html': ['passage-rules.html'],
     'process-list.html': ['process-templates.html', 'process-template-editor.html'],
     'current-anomalies.html': ['alarm-records.html', 'task-recovery-status.html'],
     'order-management.html': ['order-task-detail.html']
