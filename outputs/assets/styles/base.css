@@ -163,7 +163,7 @@ agv-app-shell > .detail-canvas {
   border-color: #f3d7d5;
   background: #fff5f4;
 }
- (max-width: 760px) {
+@media (max-width: 760px) {
   .title-status-bar { align-items: flex-start; flex-direction: column; gap: 8px; }
 }
 
@@ -171,7 +171,7 @@ agv-app-shell > .detail-canvas {
 /* Summary status aligns with the heading description baseline, as in anomaly recovery. */
 .log-heading-row.title-status-bar,
 .list-head.title-status-bar { align-items: flex-end; }
- (max-width: 760px) {
+@media (max-width: 760px) {
   .log-heading-row.title-status-bar,
   .list-head.title-status-bar { align-items: flex-start; }
 }
