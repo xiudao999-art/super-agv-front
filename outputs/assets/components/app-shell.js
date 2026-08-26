@@ -68,9 +68,10 @@ export class AgvAppShell extends HTMLElement {
         :host { display:block; min-height:100dvh; color:var(--agv-ink,#122235); background:var(--agv-canvas,#f3f6f8); }
         * { box-sizing:border-box; }
         .icon { width:18px; height:18px; flex:0 0 auto; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-        .sidebar { position:fixed; inset:0 auto 0 0; z-index:30; width:var(--agv-sidebar-width,220px); padding:18px 10px 22px; overflow:auto; background:#fff; border-right:1px solid var(--agv-line-soft,#e9edf1); transition:transform .2s ease; }
+        .sidebar { position:fixed; inset:0 auto 0 0; z-index:30; width:var(--agv-sidebar-width,220px); display:flex; flex-direction:column; padding:18px 10px 14px; overflow:hidden; background:#fff; border-right:1px solid var(--agv-line-soft,#e9edf1); transition:transform .2s ease; }
         .brand { height:38px; display:flex; align-items:center; gap:10px; padding:0 9px; margin-bottom:20px; color:var(--agv-blue,#1677c8); font-size:15px; font-weight:750; white-space:nowrap; }
         .robot-logo { width:29px; height:29px; flex:0 0 auto; }
+        nav { flex:1; min-height:0; overflow-y:auto; }
         .nav-group { margin:12px 0 19px; }
         .nav-group:first-child { margin-top:0; }
         .nav-label { margin:0 10px 8px; color:var(--agv-text-muted,#768392); font-size:12px; line-height:24px; }
@@ -78,6 +79,7 @@ export class AgvAppShell extends HTMLElement {
         .nav-item + .nav-item { margin-top:2px; }
         .nav-item:hover { background:#f4f7f9; }
         .nav-item.active { color:var(--agv-blue,#1677c8); background:var(--agv-blue-soft,#eaf4fd); font-weight:700; }
+        .version { flex:0 0 auto; margin:4px 8px 0; padding-top:12px; border-top:1px solid var(--agv-line-soft,#e9edf1); color:var(--agv-text-muted,#768392); font-size:12px; line-height:20px; text-align:center; }
         .shell { min-height:100dvh; margin-left:var(--agv-sidebar-width,220px); }
         .topbar { position:sticky; top:0; z-index:20; height:var(--agv-topbar-height,56px); display:flex; align-items:center; justify-content:space-between; padding:0 20px; background:rgba(255,255,255,.96); border-bottom:1px solid var(--agv-line-soft,#e9edf1); backdrop-filter:blur(12px); }
         .top-title,.top-actions,.top-action,.user-chip { display:flex; align-items:center; }
@@ -112,6 +114,7 @@ export class AgvAppShell extends HTMLElement {
       <aside class="sidebar" aria-label="主导航">
         <div class="brand"><svg class="robot-logo" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M14 3a2 2 0 1 1 4 0v2h2.5A5.5 5.5 0 0 1 26 10.5V12h1a3 3 0 1 1 0 6h-1v1.5a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 6 19.5V18H5a3 3 0 1 1 0-6h1v-1.5A5.5 5.5 0 0 1 11.5 5H14V3Zm-3 10v5h3v-5h-3Zm7 0v5h3v-5h-3Z"/></svg><span>复合机器人调度系统</span></div>
         <nav>${nav}</nav>
+        <div class="version" aria-label="系统版本">v2.3</div>
       </aside>
       <div class="scrim"></div>
       <main class="shell">
