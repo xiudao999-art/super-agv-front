@@ -351,3 +351,36 @@ body:has(.editor-shell) .property-actions .tool-btn:focus-visible {
 .status-item.limited strong { color: var(--agv-tag-warning); }
 .status-item.abnormal strong { color: var(--agv-tag-danger); }
 .status-item.maintenance strong { color: var(--agv-tag-neutral); }
+
+/* Keep status tags in configuration pages visually consistent. */
+body .page-canvas :is(.badge, .status-tag, .resource-status) {
+  min-width: 0;
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+}
+body .page-canvas :is(.badge, .status-tag, .resource-status)::before {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+body .page-canvas .editor-meta-head .status-tag {
+  padding: 3px 10px;
+  line-height: 18px;
+}
+body .page-canvas .editor-meta-head .status-tag::before {
+  display: block;
+}
