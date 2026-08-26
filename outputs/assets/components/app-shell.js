@@ -15,6 +15,9 @@ const navGroups = [
     { href: 'current-anomalies.html', label: '异常与恢复', icon: 'shield' },
     { href: 'system-logs.html', label: '系统日志', icon: 'log' },
     { href: 'lab-capacity.html', label: 'AGV产能', icon: 'chart' }
+  ] },
+  { label: '系统管理', items: [
+    { href: 'role-permissions.html', label: '角色权限管理', icon: 'users' }
   ] }
 ];
 
@@ -28,6 +31,7 @@ const iconPaths = {
   shield: '<path d="M12 3 4 6v5c0 5 3.4 8.3 8 10 4.6-1.7 8-5 8-10V6l-8-3Z"/><path d="M12 8v4M12 16h.01"/>',
   log: '<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V4Z"/><path d="M7 8h7M7 12h7M7 16h5"/>',
   chart: '<path d="M4 20V10h5v10M9 20V4h6v16M15 20v-7h5v7M2 20h20"/>',
+  users: '<circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 13a5 5 0 0 1 4 5"/>',
   document: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
   alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/>',
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>'
@@ -94,7 +98,8 @@ export class AgvAppShell extends HTMLElement {
         .top-action:hover { border-color:#c7d0d8; background:#f9fbfc; }
         .top-action:active { transform:translateY(1px); }
         .top-action .icon { width:16px; height:16px; color:var(--agv-text-muted,#768392); }
-        .user-chip { gap:8px; margin-left:2px; font-size:13px; font-weight:650; }
+        .user-chip { gap:8px; margin-left:2px; color:inherit; font-size:13px; font-weight:650; text-decoration:none; }
+        .user-chip:hover { color:var(--agv-blue,#1677c8); }
         .avatar { width:32px; height:32px; display:grid; place-items:center; border-radius:50%; color:#fff; background:var(--agv-blue,#1677c8); }
         .avatar svg { width:18px; height:18px; fill:currentColor; }
         .menu-btn { display:none; }
@@ -123,7 +128,7 @@ export class AgvAppShell extends HTMLElement {
       <main class="shell">
         <header class="topbar">
           <div class="top-title"><button class="menu-btn" type="button" aria-label="打开导航菜单">${icon('menu')}</button><span class="title-icon">${icon('panel')}</span><span>${title}</span></div>
-          <div class="top-actions"><button class="top-action status" type="button">${icon('document')}<span>状态说明</span></button><button class="top-action alert" type="button">${icon('alert')}<span>异常提醒</span></button><div class="user-chip"><span class="avatar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0Z"/></svg></span><span>${user}</span></div></div>
+          <div class="top-actions"><button class="top-action status" type="button">${icon('document')}<span>状态说明</span></button><button class="top-action alert" type="button">${icon('alert')}<span>异常提醒</span></button><a class="user-chip" href="login.html" title="退出并返回登录页"><span class="avatar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0Z"/></svg></span><span>${user}</span></a></div>
         </header>
         <slot></slot>
       </main>`;
@@ -141,6 +146,7 @@ export class AgvAppShell extends HTMLElement {
     const sidebar = this.shadowRoot.querySelector('.sidebar');
     const scrim = this.shadowRoot.querySelector('.scrim');
     const setOpen = open => { sidebar.classList.toggle('open', open); scrim.classList.toggle('show', open); };
+    requestAnimationFrame(() => this.shadowRoot.querySelector('.nav-item.active')?.scrollIntoView({ block: 'nearest' }));
     this.shadowRoot.querySelector('.menu-btn').addEventListener('click', () => setOpen(!sidebar.classList.contains('open')));
     scrim.addEventListener('click', () => setOpen(false));
     this.shadowRoot.querySelector('.status').addEventListener('click', () => this.forwardAction(['statusInfoBtn', 'statusBtn'], 'statusModal'));
