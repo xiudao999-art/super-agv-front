@@ -4,7 +4,7 @@
   const page=location.pathname.split('/').pop();
   if(!['passage-rules.html','stations-and-points.html'].includes(page))return;
 
-  const DIRECT_API_BASE_URL='http://192.168.20.187:8081';
+  const DIRECT_API_BASE_URL='http://121.196.164.163:8081';
   const apiBaseUrl=location.protocol==='file:'?DIRECT_API_BASE_URL:'';
   const apiUrl=path=>(apiBaseUrl?apiBaseUrl.replace(/\/$/,''):'')+path;
   const tableBody=document.querySelector('.content .table-wrap tbody');

@@ -182,7 +182,7 @@ Object.defineProperty(window.__flowEditorState,'subflows',{get(){return Object.f
 Object.defineProperty(window.__flowEditorState,'subflowConnections',{get(){return Object.fromEntries(subflowConnectionsV2)}});
 renderSubflowV2();
 
-const WORKFLOW_DIRECT_API_BASE_URL='http://192.168.20.187:8081';
+const WORKFLOW_DIRECT_API_BASE_URL='http://121.196.164.163:8081';
 const WORKFLOW_API_BASE_URL=typeof window.WORKFLOW_API_BASE_URL==='string'?window.WORKFLOW_API_BASE_URL:(location.protocol==='file:'?WORKFLOW_DIRECT_API_BASE_URL:'');
 const WORKFLOW_TEMPLATE_ENDPOINT=(WORKFLOW_API_BASE_URL?WORKFLOW_API_BASE_URL.replace(/\/$/,''):'')+'/api/workflow-templates';
 const WORKFLOW_TEMPLATE_UPDATE_ENDPOINT=WORKFLOW_TEMPLATE_ENDPOINT+'/update';
@@ -327,7 +327,7 @@ async function saveWorkflowTemplateV2(){
     console.error(isWorkflowTemplateEditModeV2?'更新流程模板失败':'保存流程模板失败',error);
     isSavingWorkflowTemplateV2=false;
     templateSaveStatusV2.textContent=isWorkflowTemplateEditModeV2?'更新失败':'保存失败';
-    showToast(error.name==='AbortError'?'连接后端超时，请检查 192.168.20.187':(isWorkflowTemplateEditModeV2?'更新失败：':'保存失败：')+error.message);
+    showToast(error.name==='AbortError'?'连接后端超时，请检查 121.196.164.163':(isWorkflowTemplateEditModeV2?'更新失败：':'保存失败：')+error.message);
   }finally{
     clearTimeout(timeoutId);
     if(!isSavingWorkflowTemplateV2){saveTemplateButtonV2.disabled=false;saveTemplateButtonV2.textContent=originalLabel}

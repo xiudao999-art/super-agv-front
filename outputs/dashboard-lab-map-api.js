@@ -3,7 +3,7 @@ import { getLaboratory, getLaboratoryConfig, resolveDashboardAssetUrl } from './
 (function(){
   'use strict';
 
-  const DIRECT_API_BASE_URL='http://192.168.20.187:8081';
+  const DIRECT_API_BASE_URL='http://121.196.164.163:8081';
   const DEMO_MODE=false;
   const DEMO_LAB={name:'点位路线演示'};
   const DEMO_CONFIG={id:'DEMO',revision:'-',status:'STATIC',map:{name:'四点位直角路线演示'}};

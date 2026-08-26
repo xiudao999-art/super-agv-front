@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 
 const HOST='0.0.0.0';
 const PORT=4173;
-const BACKEND_HOST ='192.168.20.40';
+const BACKEND_HOST ='121.196.164.163';
 const BACKEND_PORT = 8081;
 const ROOT=fileURLToPath(new URL('.',import.meta.url));
 const MIME_TYPES={

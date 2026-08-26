@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  const DIRECT_API_BASE_URL='http://192.168.20.187:8081';
+  const DIRECT_API_BASE_URL='http://121.196.164.163:8081';
   const apiBaseUrl=typeof window.WORKFLOW_API_BASE_URL==='string'
     ?window.WORKFLOW_API_BASE_URL
     :(location.protocol==='file:'?DIRECT_API_BASE_URL:'');
@@ -51,7 +51,7 @@
       await loadTemplatePage(pageState.pageNum);
     }catch(error){
       console.error('发布流程模板失败',error);
-      showToast(error.name==='AbortError'?'发布超时，请检查 192.168.20.187:8081':'发布失败：'+error.message);
+      showToast(error.name==='AbortError'?'发布超时，请检查 121.196.164.163:8081':'发布失败：'+error.message);
     }finally{clearTimeout(timeoutId);button.disabled=false;button.textContent=originalLabel}
   }
 

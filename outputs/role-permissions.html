@@ -162,11 +162,14 @@
     function openModal() {
       const modal = document.getElementById('roleModal');
       modal.hidden = false;
+      document.body.style.overflow = 'hidden';
       requestAnimationFrame(() => modal.classList.add('open'));
+      setTimeout(() => document.getElementById('newRoleName').focus(), 100);
     }
     function closeModal() {
       const modal = document.getElementById('roleModal');
       modal.classList.remove('open');
+      document.body.style.overflow = '';
       setTimeout(() => modal.hidden = true, 180);
     }
     document.getElementById('openRoleModal').addEventListener('click', openModal);
