@@ -22,7 +22,7 @@
         <div class="tabs-row"><agv-tabs class="tabs" role="tablist"><a class="tab-btn" role="tab" aria-selected="false" href="order-management.html">订单列表</a><a class="tab-btn active" role="tab" aria-selected="true" href="#task-list">订单任务详情</a></agv-tabs></div>
         <div class="task-list-section" id="task-list">
           <div class="section-heading"><h2>订单任务列表</h2><p>点击任意一行切换下方订单信息、动作链和执行配置</p></div>
-          <div class="toolbar"><label class="field-shell"><span>选择订单</span><select id="orderSelect" aria-label="选择订单"></select></label><div class="toolbar-actions"><button class="filter-btn" id="resetOrder"><svg class="icon"><use href="assets/icons.svg#i-refresh"/></svg>重置</button><button class="filter-btn primary" id="searchOrder"><svg class="icon"><use href="assets/icons.svg#i-search"/></svg>搜索</button></div></div>
+          <div class="toolbar"><label class="field-shell"><span>选择订单</span><select id="orderSelect" aria-label="选择订单" data-agv-select-searchable data-agv-select-search-placeholder="筛选订单号/系统订单号" data-agv-select-menu-min-width="580"></select></label><div class="toolbar-actions"><button class="filter-btn" id="resetOrder"><svg class="icon"><use href="assets/icons.svg#i-refresh"/></svg>重置</button><button class="filter-btn primary" id="searchOrder"><svg class="icon"><use href="assets/icons.svg#i-search"/></svg>搜索</button></div></div>
           <div class="table-wrap"><table class="task-table" aria-label="订单任务列表"><thead><tr><th>任务编号</th><th>流程编号</th><th>订单号</th><th>系统订单号</th><th>当前状态</th><th>当前步骤</th><th>下发时间</th></tr></thead><tbody id="taskBody"></tbody></table></div>
           <div class="table-summary" id="taskSummary">共计 0 条数据</div>
         </div>

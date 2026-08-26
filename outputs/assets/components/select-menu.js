@@ -7,10 +7,27 @@ function isEnhanceable(select) {
 class AgvSelectMenu {
   constructor(select) {
     this.select = select;
+    this.searchable = select.hasAttribute('data-agv-select-searchable');
     this.menu = document.createElement('div');
     this.menu.className = 'agv-select-menu';
-    this.menu.setAttribute('role', 'listbox');
+    if (!this.searchable) this.menu.setAttribute('role', 'listbox');
     this.menu.hidden = true;
+    if (this.searchable) {
+      this.menu.classList.add('is-searchable');
+      this.searchInput = document.createElement('input');
+      this.searchInput.type = 'search';
+      this.searchInput.className = 'agv-select-search';
+      this.searchInput.placeholder = select.dataset.agvSelectSearchPlaceholder || '输入关键词筛选';
+      this.searchInput.setAttribute('aria-label', this.searchInput.placeholder);
+      this.options = document.createElement('div');
+      this.options.className = 'agv-select-options';
+      this.options.setAttribute('role', 'listbox');
+      this.empty = document.createElement('div');
+      this.empty.className = 'agv-select-empty';
+      this.empty.textContent = '没有匹配项';
+      this.empty.hidden = true;
+      this.menu.append(this.searchInput, this.options, this.empty);
+    }
     this.trigger = document.createElement('button');
     this.trigger.type = 'button';
     this.trigger.className = 'agv-select-trigger';
@@ -27,7 +44,7 @@ class AgvSelectMenu {
     const selected = this.select.selectedOptions[0];
     this.trigger.textContent = selected?.textContent?.trim() || this.select.getAttribute('placeholder') || '请选择';
     this.trigger.disabled = this.select.disabled;
-    this.menu.replaceChildren(...[...this.select.options].map((option, index) => {
+    const items = [...this.select.options].map((option, index) => {
       const item = document.createElement('button');
       item.type = 'button';
       item.className = 'agv-select-option';
@@ -39,7 +56,25 @@ class AgvSelectMenu {
       item.setAttribute('aria-selected', String(option.selected));
       if (option.selected) item.classList.add('is-selected');
       return item;
-    }));
+    });
+    if (this.searchable) {
+      this.options.replaceChildren(...items);
+      this.filter(this.searchInput.value);
+    } else {
+      this.menu.replaceChildren(...items);
+    }
+  }
+
+  filter(value) {
+    if (!this.searchable) return;
+    const keyword = value.trim().toLocaleLowerCase('zh-CN');
+    let visible = 0;
+    this.options.querySelectorAll('.agv-select-option').forEach(item => {
+      const matched = !keyword || item.textContent.toLocaleLowerCase('zh-CN').includes(keyword);
+      item.hidden = !matched;
+      if (matched) visible += 1;
+    });
+    this.empty.hidden = visible > 0;
   }
 
   bind() {
@@ -58,6 +93,14 @@ class AgvSelectMenu {
       this.close();
       this.trigger.focus();
     });
+    this.searchInput?.addEventListener('input', () => this.filter(this.searchInput.value));
+    this.searchInput?.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        this.options.querySelector('.agv-select-option:not([hidden]):not(:disabled)')?.focus();
+      }
+      if (event.key === 'Escape') { event.preventDefault(); this.close(); this.trigger.focus(); }
+    });
     this.select.addEventListener('change', () => this.render());
     this.observer = new MutationObserver(() => this.render());
     this.observer.observe(this.select, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled', 'selected', 'label'] });
@@ -70,12 +113,19 @@ class AgvSelectMenu {
     this.menu.hidden = false;
     this.trigger.setAttribute('aria-expanded', 'true');
     const rect = this.trigger.getBoundingClientRect();
-    const width = Math.max(rect.width, 160);
+    const requestedMinWidth = Number(this.select.dataset.agvSelectMenuMinWidth) || 160;
+    const availableWidth = Math.max(160, window.innerWidth - rect.left - 8);
+    const width = Math.min(Math.max(rect.width, requestedMinWidth), availableWidth);
     const maxHeight = Math.min(288, window.innerHeight - rect.bottom - 16);
     this.menu.style.width = `${width}px`;
     this.menu.style.left = `${rect.left}px`;
     this.menu.style.top = `${rect.bottom + 4}px`;
     this.menu.style.maxHeight = `${Math.max(maxHeight, 120)}px`;
+    if (this.searchable) {
+      this.options.style.maxHeight = `${Math.max(maxHeight - 52, 68)}px`;
+      this.searchInput.focus({ preventScroll: true });
+      return;
+    }
     const selected = this.menu.querySelector('.is-selected');
     const focusTarget = direction ? (selected?.[direction > 0 ? 'nextElementSibling' : 'previousElementSibling'] || selected) : selected;
     focusTarget?.focus({ preventScroll: true });
@@ -85,6 +135,7 @@ class AgvSelectMenu {
     if (this.menu.hidden) return;
     this.menu.hidden = true;
     this.trigger.setAttribute('aria-expanded', 'false');
+    if (this.searchable) { this.searchInput.value = ''; this.filter(''); }
   }
 }
 

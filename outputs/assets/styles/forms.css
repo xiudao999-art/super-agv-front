@@ -148,6 +148,12 @@ select.agv-select-native {
 .agv-select-option.is-selected { background: #e6f4ff; color: #1677ff; font-weight: 500; }
 .agv-select-option:disabled { color: rgba(0, 0, 0, 0.25); cursor: not-allowed; }
 
+.agv-select-menu.is-searchable { grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; }
+.agv-select-search { width: 100%; height: 38px; padding: 0 11px; border: 1px solid #d9d9d9; border-radius: 6px; outline: 0; color: var(--agv-ink, #1f1f1f); background: #fff; font: inherit; font-size: 13px; }
+.agv-select-search:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.1); }
+.agv-select-options { min-height: 0; display: grid; gap: 2px; overflow-y: auto; overscroll-behavior: contain; }
+.agv-select-empty { padding: 12px; color: rgba(0, 0, 0, 0.45); font-size: 12px; text-align: center; }
+
 .field-shell > .agv-select-trigger { flex: 1; height: 100%; min-height: 0; padding: 0 28px 0 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .field-shell > .agv-select-trigger:hover,
 .field-shell > .agv-select-trigger:focus-visible,
@@ -533,7 +539,7 @@ button:disabled {
     flex: 1 1 320px !important;
     grid-template-rows: none !important;
     width: auto !important;
-    max-width: 480px;
+    max-width: 660px;
     height: 40px !important;
     min-height: 40px !important;
     align-items: center !important;
@@ -642,7 +648,7 @@ button:disabled {
 .agv-filter-bar .agv-filter-actions > button:hover { filter: brightness(.97) !important; }
 .agv-filter-bar .agv-filter-actions .filter-action-icon { width: 18px; height: 18px; }
 .agv-filter-bar--single .agv-filter-field,
-.agv-filter-bar--search .agv-filter-search { flex: 0 1 480px !important; max-width: 480px; }
+.agv-filter-bar--search .agv-filter-search { flex: 0 1 660px !important; max-width: 660px; }
 
 @media (max-width: 760px) {
     .agv-filter-bar { gap: 10px !important; margin: 12px 0 !important; }

@@ -1,4 +1,4 @@
-import { getOrderDetail, orderDetailEndpoint } from './assets/data/orders-data.js';
+import { getOrderDetail, getOrders, orderDetailEndpoint } from './assets/data/orders-data.js';
 
 (function(){
   'use strict';
@@ -10,8 +10,9 @@ import { getOrderDetail, orderDetailEndpoint } from './assets/data/orders-data.j
   const baseUrl=apiBaseUrl?apiBaseUrl.replace(/\/$/,''):'';
   const endpoint=orderDetailEndpoint(apiBaseUrl);
   const params=new URLSearchParams(location.search);
-  const orderId=Number(params.get('id'));
-  const requestedTask=params.get('task');
+  const initialOrderId=Number(params.get('id'));
+  const requestedOrder=params.get('order');
+  let requestedTask=params.get('task');
   const orderSelect=document.getElementById('orderSelect');
   const taskBody=document.getElementById('taskBody');
   const actionBody=document.getElementById('actionBody');
@@ -40,6 +41,8 @@ import { getOrderDetail, orderDetailEndpoint } from './assets/data/orders-data.j
 
   let detail=null;
   let selectedTaskId=null;
+  let selectedOrderId=null;
+  let orderRecords=[];
   let controller=null;
 
   function notify(message){if(typeof showToast==='function')showToast(message)}
@@ -63,14 +66,14 @@ import { getOrderDetail, orderDetailEndpoint } from './assets/data/orders-data.j
   function statusCell(row,value){const meta=statusInfo(value),cell=document.createElement('td'),tag=document.createElement('span');tag.className='status-tag status-'+meta.className;tag.textContent=meta.label;cell.appendChild(tag);row.appendChild(cell)}
 
   function setLoading(){
-    setTableMessage(taskBody,7,'正在加载订单详情…',true);setTableMessage(actionBody,5,'正在加载动作链…',true);taskSummary.textContent='正在加载…';actionSummary.textContent='正在加载…';summaryOrder.textContent='--';summarySystem.textContent='--';summaryStatus.textContent='加载中…';stepBadge.textContent='加载中…';stepBadge.className='status-tag status-waiting current-step';orderSelect.innerHTML='<option>正在加载订单…</option>';orderSelect.disabled=true;configList.innerHTML='<div class="config-loading">正在加载执行配置…</div>';
+    setTableMessage(taskBody,7,'正在加载订单详情…',true);setTableMessage(actionBody,5,'正在加载动作链…',true);taskSummary.textContent='正在加载…';actionSummary.textContent='正在加载…';summaryOrder.textContent='--';summarySystem.textContent='--';summaryStatus.textContent='加载中…';stepBadge.textContent='加载中…';stepBadge.className='status-tag status-waiting current-step';orderSelect.disabled=true;configList.innerHTML='<div class="config-loading">正在加载执行配置…</div>';
   }
 
   function selectTask(task){
     selectedTaskId=task?.id??null;
     renderTasks();renderSummary(task);renderActions();renderConfig();
     const order=detail?.order||{};
-    const query=new URLSearchParams({id:String(order.id||orderId),order:String(order.upstreamOrderNo||order.systemOrderNo||''),task:String(task?.taskNumber||'')});
+    const query=new URLSearchParams({id:String(order.id||selectedOrderId),order:String(order.upstreamOrderNo||order.systemOrderNo||''),task:String(task?.taskNumber||'')});
     history.replaceState(null,'','?'+query.toString());
   }
 
@@ -109,7 +112,7 @@ import { getOrderDetail, orderDetailEndpoint } from './assets/data/orders-data.j
   }
 
   function render(){
-    const order=detail.order||{};orderSelect.innerHTML='';const option=document.createElement('option');option.value=String(order.id||orderId);option.textContent=(order.upstreamOrderNo||'-')+' / '+(order.systemOrderNo||'-');orderSelect.appendChild(option);orderSelect.disabled=false;
+    const order=detail.order||{};selectedOrderId=Number(order.id)||selectedOrderId;orderSelect.value=String(selectedOrderId);orderSelect.disabled=false;orderSelect.dispatchEvent(new Event('change',{bubbles:false}));
     const tasks=Array.isArray(detail.tasks)?detail.tasks:[];
     const requested=tasks.find(task=>String(task.taskNumber)===String(requestedTask)||String(task.id)===String(requestedTask));
     const current=detail.currentTask&&tasks.find(task=>String(task.id)===String(detail.currentTask.id));
@@ -117,18 +120,40 @@ import { getOrderDetail, orderDetailEndpoint } from './assets/data/orders-data.j
   }
 
   function renderError(error){
-    setTableMessage(taskBody,7,'订单详情加载失败：'+error.message,false);setTableMessage(actionBody,5,'暂无动作链数据',false);taskSummary.textContent='加载失败';actionSummary.textContent='共计 0 条数据';summaryOrder.textContent='-';summarySystem.textContent='-';summaryStatus.textContent='加载失败';stepBadge.textContent='不可用';stepBadge.className='status-tag status-failed current-step';orderSelect.innerHTML='<option>订单详情不可用</option>';orderSelect.disabled=true;configList.innerHTML='';addConfig('加载失败',error.message);errorNote.textContent='请返回订单列表重新选择订单，或检查后端详情接口。';
+    setTableMessage(taskBody,7,'订单详情加载失败：'+error.message,false);setTableMessage(actionBody,5,'暂无动作链数据',false);taskSummary.textContent='加载失败';actionSummary.textContent='共计 0 条数据';summaryOrder.textContent='-';summarySystem.textContent='-';summaryStatus.textContent='加载失败';stepBadge.textContent='不可用';stepBadge.className='status-tag status-failed current-step';orderSelect.disabled=!orderRecords.length;configList.innerHTML='';addConfig('加载失败',error.message);errorNote.textContent='请选择其他订单重试，或检查后端详情接口。';
+  }
+
+  function renderOrderOptions(){
+    orderSelect.innerHTML='';
+    orderRecords.forEach(order=>{const option=document.createElement('option');option.value=String(order.id);option.textContent=(order.upstreamOrderNo||'-')+' / '+(order.systemOrderNo||'-');orderSelect.appendChild(option)});
+    if(selectedOrderId!==null)orderSelect.value=String(selectedOrderId);
+    orderSelect.disabled=!orderRecords.length;
+  }
+
+  async function loadOrderOptions(){
+    orderSelect.innerHTML='<option>正在加载全部订单…</option>';orderSelect.disabled=true;
+    const all=[];let pageNum=1,total=0;
+    do{
+      const result=await getOrders(new URLSearchParams({pageNum:String(pageNum),pageSize:'100'}),{baseUrl:apiBaseUrl,timeout:30000});
+      const page=result.data||{},pageRecords=Array.isArray(page.records)?page.records:[];all.push(...pageRecords);total=Number(page.total)||all.length;if(!pageRecords.length)break;pageNum+=1;
+    }while(all.length<total);
+    const seen=new Set();orderRecords=all.filter(order=>order.id!==null&&order.id!==undefined&&!seen.has(String(order.id))&&seen.add(String(order.id)));
+    const requested=orderRecords.find(order=>String(order.id)===String(initialOrderId))||orderRecords.find(order=>String(order.upstreamOrderNo)===String(requestedOrder)||String(order.systemOrderNo)===String(requestedOrder))||orderRecords[0];
+    selectedOrderId=requested?Number(requested.id):null;renderOrderOptions();
   }
 
   async function load(){
-    if(!Number.isInteger(orderId)||orderId<1){const error=new Error('缺少有效的订单 ID，请从订单列表进入详情');renderError(error);notify(error.message);return}
+    const orderId=Number(selectedOrderId??orderSelect.value);
+    if(!Number.isInteger(orderId)||orderId<1){const error=new Error('暂无可查看的订单');renderError(error);notify(error.message);return}
     if(controller)controller.abort();controller=new AbortController();const activeController=controller;setLoading();
-    try{const result=await getOrderDetail(orderId,{baseUrl:apiBaseUrl,signal:activeController.signal});if(!result.data?.order)throw new Error('接口未返回订单详情');detail=result.data;render();window.__orderDetailApi.detail=detail}
+    try{const result=await getOrderDetail(orderId,{baseUrl:apiBaseUrl,signal:activeController.signal});if(!result.data?.order)throw new Error('接口未返回订单详情');detail=result.data;render();window.__orderDetailApi.detail=detail;window.__orderDetailApi.orderId=selectedOrderId}
     catch(error){if(error.name==='AbortError')return;console.error('加载订单详情失败',error);detail=null;renderError(error);notify('订单详情加载失败：'+error.message)}
   }
 
   function intercept(element,handler){if(!element)return;element.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();handler()},true)}
-  intercept(searchButton,load);intercept(resetButton,load);
-  window.__orderDetailApi={endpoint,orderId,detail,reload:load};
-  load();
+  orderSelect.addEventListener('change',event=>{if(!event.bubbles)return;const nextId=Number(orderSelect.value);if(Number.isInteger(nextId)&&nextId>0&&nextId!==selectedOrderId){selectedOrderId=nextId;requestedTask=null;load()}});
+  intercept(searchButton,()=>{const nextId=Number(orderSelect.value);if(Number.isInteger(nextId)&&nextId>0){selectedOrderId=nextId;requestedTask=null;load()}});
+  intercept(resetButton,()=>{const initial=orderRecords.find(order=>String(order.id)===String(initialOrderId))||orderRecords[0];if(initial){selectedOrderId=Number(initial.id);requestedTask=null;orderSelect.value=String(selectedOrderId);orderSelect.dispatchEvent(new Event('change',{bubbles:false}));load()}});
+  window.__orderDetailApi={endpoint,orderId:selectedOrderId,detail,orders:orderRecords,reload:load};
+  loadOrderOptions().then(()=>{window.__orderDetailApi.orders=orderRecords;if(orderRecords.length)load();else renderError(new Error('订单列表为空'))}).catch(error=>{console.error('加载订单列表失败',error);orderRecords=[];renderError(error);notify('订单列表加载失败：'+error.message)});
 })();
