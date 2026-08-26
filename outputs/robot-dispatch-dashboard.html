@@ -286,7 +286,7 @@
     .module-list {
       display: grid;
       /* grid-template-columns: repeat(6, minmax(0, 1fr)); */
-      grid-template-columns: repeat(6, minmax(220px, 1fr));
+      grid-template-columns: repeat(6, minmax(280px, 1fr));
       overflow-x: auto;
       gap: 12px;
     }
@@ -318,10 +318,11 @@
     .thumb-4 { background-image: url('assets/overview/gripper.png'); }
     .thumb-5 { background-image: url('assets/overview/scanner.png'); }
     .module-copy { min-width: 0; flex: 1; }
-    .module-name { display: flex; align-items: center; gap: 10px; }
+    .module-name { display: flex; align-items: center; gap: 10px; width: 100%; }
     .module-copy strong { display: block; font-size: 16px; line-height: 24px; white-space: nowrap; }
     .module-copy > span { display: block; margin-top: 6px; color: var(--green); font-size: 14px; line-height: 20px; white-space: nowrap; }
     .module-card.offline .module-copy > span { color: rgba(8,24,41,.24); }
+    .module-signal { width: 17px; height: 13px; margin-left: auto; flex: 0 0 auto; }
     .signal { margin-left: auto; height: 14px; display: inline-flex; align-items: flex-end; gap: 2px; color: var(--signal, var(--green)); }
     .signal i { width: 3px; border-radius: 1px; background: currentColor; }
     .signal i:nth-child(1) { height: 4px; }
@@ -487,6 +488,25 @@
     .lab-map-node { cursor: pointer; pointer-events: all; filter: drop-shadow(0 2px 3px rgba(12,29,47,.22)); }
     .lab-map-node:hover,
     .lab-map-node:focus { filter: drop-shadow(0 0 5px rgba(33,130,209,.6)); outline: 0; }
+    .lab-map-tooltip {
+      position: absolute;
+      z-index: 4;
+      box-sizing: border-box;
+      width: max-content;
+      max-width: min(320px, calc(100% - 16px));
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 7px;
+      color: #f7fafc;
+      background: rgba(12,29,47,.94);
+      box-shadow: 0 8px 22px rgba(12,29,47,.24);
+      font-size: 12px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+      pointer-events: none;
+      backdrop-filter: blur(5px);
+    }
+    .lab-map-tooltip[hidden] { display: none; }
     .lab-map-link {
       fill: none;
       stroke: #27558b;
@@ -796,7 +816,7 @@
 
     @media (max-width: 1180px) {
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .module-list { overflow-x: auto; grid-template-columns: repeat(6, minmax(220px, 1fr)); padding-bottom: 4px; }
+      .module-list { overflow-x: auto; grid-template-columns: repeat(6, minmax(280px, 1fr)); padding-bottom: 4px; }
       .lower-grid { grid-template-columns: 1fr; }
       .map-art { flex: none; aspect-ratio: 1089 / 705; }
       .right-column { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -958,11 +978,11 @@
         <h2 class="section-title" id="hardwareModuleTitle">AGV-01 硬件模组状态</h2>
         <p class="section-subtitle">展示复合机器人各组成模组的实时连接与工作状态</p>
         <div class="module-list" id="hardwareModuleList">
-          <article class="module-card"><div class="module-thumb thumb-1" role="img" aria-label="底盘设备"></div><div class="module-copy"><div class="module-name"><strong>底盘</strong><span class="signal" aria-label="信号强度四格"><i></i><i></i><i></i><i></i></span></div><span>运动中</span></div></article>
-          <article class="module-card"><div class="module-thumb thumb-2" role="img" aria-label="机械臂设备"></div><div class="module-copy"><div class="module-name"><strong>机械臂</strong><span class="signal level-3" style="--signal:#009fe3" aria-label="信号强度三格"><i></i><i></i><i></i><i></i></span></div><span>待命</span></div></article>
-          <article class="module-card"><div class="module-thumb thumb-3" role="img" aria-label="视觉设备"></div><div class="module-copy"><div class="module-name"><strong>视觉</strong><span class="signal level-3" style="--signal:#009fe3" aria-label="信号强度三格"><i></i><i></i><i></i><i></i></span></div><span>在线</span></div></article>
-          <article class="module-card"><div class="module-thumb thumb-4" role="img" aria-label="夹具设备"></div><div class="module-copy"><div class="module-name"><strong>夹具</strong><span class="signal level-2" style="--signal:#f6b714" aria-label="信号强度两格"><i></i><i></i><i></i><i></i></span></div><span>已夹紧载具</span></div></article>
-          <article class="module-card offline"><div class="module-thumb thumb-5" role="img" aria-label="扫码器设备"></div><div class="module-copy"><div class="module-name"><strong>扫码器</strong><span class="signal level-1" style="--signal:#f24e3f" aria-label="信号强度一格"><i></i><i></i><i></i><i></i></span></div><span>离线 · 网络连接错误</span></div></article>
+          <article class="module-card"><div class="module-thumb thumb-1" role="img" aria-label="底盘设备"></div><div class="module-copy"><div class="module-name"><strong>底盘</strong><img class="module-signal" src="assets/images/wifi.svg" alt="" aria-hidden="true"></div><span>运动中</span></div></article>
+          <article class="module-card"><div class="module-thumb thumb-2" role="img" aria-label="机械臂设备"></div><div class="module-copy"><div class="module-name"><strong>机械臂</strong><img class="module-signal" src="assets/images/wifi.svg" alt="" aria-hidden="true"></div><span>待命</span></div></article>
+          <article class="module-card"><div class="module-thumb thumb-3" role="img" aria-label="视觉设备"></div><div class="module-copy"><div class="module-name"><strong>视觉</strong><img class="module-signal" src="assets/images/wifi.svg" alt="" aria-hidden="true"></div><span>在线</span></div></article>
+          <article class="module-card"><div class="module-thumb thumb-4" role="img" aria-label="夹具设备"></div><div class="module-copy"><div class="module-name"><strong>夹具</strong><img class="module-signal" src="assets/images/wifi.svg" alt="" aria-hidden="true"></div><span>已夹紧载具</span></div></article>
+          <article class="module-card offline"><div class="module-thumb thumb-5" role="img" aria-label="扫码器设备"></div><div class="module-copy"><div class="module-name"><strong>扫码器</strong><img class="module-signal" src="assets/images/wifi.svg" alt="" aria-hidden="true"></div><span>离线 · 网络连接错误</span></div></article>
         </div>
       </section>
 
@@ -971,13 +991,15 @@
           <h2 class="task-title">当前执行：MES-20260816-0031</h2>
           <p class="task-meta">载具 TRAY-000238 · 立库A-第2层-03 → 检测仪B</p>
           <div class="steps" aria-label="任务进度">
-            <div class="step done"><div class="step-bar"></div><div class="step-label">订单接收</div></div>
-            <div class="step done"><div class="step-bar"></div><div class="step-label">立库取料</div></div>
-            <div class="step active"><div class="step-bar"></div><div class="step-label">AGV 缓存</div></div>
-            <div class="step"><div class="step-bar"></div><div class="step-label">前往贴标机台</div></div>
-            <div class="step"><div class="step-bar"></div><div class="step-label">等待许可</div></div>
-            <div class="step"><div class="step-bar"></div><div class="step-label">放入进样位</div></div>
-            <div class="step"><div class="step-bar"></div><div class="step-label">完成回调</div></div>
+            <!-- <div class="step done"><div class="step-bar"></div><div class="step-label">开始</div></div> -->
+            <div class="step done"><div class="step-bar"></div><div class="step-label">底盘移动</div></div>
+            <!-- <div class="step done"><div class="step-bar"></div><div class="step-label">立库取料</div></div> -->
+            <div class="step active"><div class="step-bar"></div><div class="step-label">底盘移动</div></div>
+            <div class="step"><div class="step-bar"></div><div class="step-label">视觉拍照</div></div>
+            <div class="step"><div class="step-bar"></div><div class="step-label">底盘移动</div></div>
+            <div class="step"><div class="step-bar"></div><div class="step-label">机械臂放置</div></div>
+            <!-- <div class="step"><div class="step-bar"></div><div class="step-label">结束</div></div> -->
+            <!-- <div class="step"><div class="step-bar"></div><div class="step-label">完成回调</div></div> -->
           </div>
           <div class="map-art" role="group" aria-label="实验室 AGV 实时路线图">
             <svg class="route-layer" viewBox="0 0 1024 551" preserveAspectRatio="none" aria-label="独立路线、点位与 AGV 当前位置图层" hidden>

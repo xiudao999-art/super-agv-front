@@ -350,7 +350,13 @@ agv-action-menu {
 
 .agv-list-page .status-tag::before { width: 4px; height: 4px; }
 .agv-list-page .status-executing { color: #28bd6b; border-color: #bfead3; background: rgba(40, 189, 107, 0.08); }
-.agv-list-page .status-queued { color: #28bd6b; border-color: #f7dfad; background: rgba(246, 183, 20, 0.08); }
+.agv-list-page .status-queued {
+     color: #28bd6b;
+    border-color: #f7dfad;
+    background: rgba(246, 183, 20, 0.08);
+    color: var(--agv-tag-warning);
+    border-color: var(--agv-tag-warning-border);
+    background: var(--agv-tag-warning-bg); }
 .agv-list-page .status-executing::before { background: #1577d2; }
 .agv-list-page .status-queued::before { background: #f6b714; }
 
@@ -443,6 +449,20 @@ agv-action-menu {
 
 .table-wrap .status-tag::before,
 .table-wrap .badge::before { width: 4px; height: 4px; }
+
+/* 列表状态标签的公共结构；页面仅提供业务状态到语义颜色的映射。 */
+.table-wrap .status-tag {
+    display: inline-flex;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+}
+
+.table-wrap .status-tag::before {
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: currentColor;
+    content: "";
+}
 
 .table-wrap tbody td:last-child .row-actions,
 .table-wrap tbody td:last-child [class*="action"] {

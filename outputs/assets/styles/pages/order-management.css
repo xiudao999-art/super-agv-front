@@ -50,7 +50,12 @@
     .status-tag { min-width: 61px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 4px 9px; border: 1px solid currentColor; border-radius: 16px; font-size: 11px; line-height: 1; }
     .status-tag::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
     .status-executing { color: #2182d1; border-color: #cbe3f7; background: #f2f8fd; }
-    .status-queued { color: #f2b719; border-color: #f8e8b4; background: #fffaf0; }
+    .status-queued { color: #28bd6b;
+      border-color: #f7dfad;
+      background: rgba(246, 183, 20, 0.08);
+      color: var(--agv-tag-warning);
+      border-color: var(--agv-tag-warning-border);
+      background: var(--agv-tag-warning-bg); }
     .status-completed { color: #2fbd78; border-color: #d1efdf; background: #f4fcf7; }
     .status-cancelled { color: #8d949c; border-color: #e1e5e8; background: #f7f8f9; }
     .row-actions { display: flex; gap: 6px; }

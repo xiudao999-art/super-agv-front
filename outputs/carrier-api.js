@@ -28,14 +28,14 @@
   const deletingIds=new Set();
 
   const statusMeta={
-    IDLE:{label:'空闲',className:'idle'},
-    STORED:{label:'在库',className:'stored'},
-    PENDING:{label:'待处理',className:'pending'},
-    TRANSPORTING:{label:'运输中',className:'transporting'},
-    PROCESSING:{label:'机台处理中',className:'processing'},
-    IN_USE:{label:'使用中',className:'processing'},
-    LOCKED:{label:'锁定',className:'pending'},
-    ABNORMAL:{label:'异常',className:'abnormal'}
+    IDLE:{label:'空闲',className:'status-cancelled'},
+    STORED:{label:'在库',className:'status-completed'},
+    PENDING:{label:'待处理',className:'status-waiting'},
+    TRANSPORTING:{label:'运输中',className:'status-executing'},
+    PROCESSING:{label:'机台处理中',className:'status-executing'},
+    IN_USE:{label:'使用中',className:'status-executing'},
+    LOCKED:{label:'锁定',className:'status-waiting'},
+    ABNORMAL:{label:'异常',className:'status-failed'}
   };
 
 
@@ -57,7 +57,7 @@
   const formTypeSelect=document.getElementById('formType');
   const formLocationSelect=document.getElementById('formLocation');
 
-  function statusInfo(value){return statusMeta[value]||{label:value||'-',className:'idle'}}
+  function statusInfo(value){return statusMeta[value]||{label:value||'-',className:'status-cancelled'}}
   function carrierTypeName(id){const match=carrierTypes.find(item=>String(item.id)===String(id));return match?match.typeName+' · '+match.typeCode:(id===null||id===undefined||id===''?'-':'类型 #'+id)}
   function locationName(id){const match=locations.find(item=>String(item.id)===String(id));return match?match.locationName+' · '+match.locationCode:(id===null||id===undefined||id===''?'-':'库位 #'+id)}
 
@@ -77,9 +77,9 @@
     carrierRecords.forEach(item=>{
       const row=document.createElement('tr');row.dataset.id=String(item.id);if(String(item.id)===String(selectedId))row.classList.add('selected');
       setTextCell(row,item.carrierCode);setTextCell(row,item.barcode);setTextCell(row,carrierTypeName(item.carrierTypeId));setTextCell(row,locationName(item.currentLocationId));
-      const meta=statusInfo(item.carrierStatus),statusCell=document.createElement('td'),status=document.createElement('span');status.className='status-tag state-'+meta.className;status.textContent=meta.label;statusCell.appendChild(status);row.appendChild(statusCell);
+      const meta=statusInfo(item.carrierStatus),statusCell=document.createElement('td'),status=document.createElement('span');status.className='status-tag '+meta.className;status.textContent=meta.label;statusCell.appendChild(status);row.appendChild(statusCell);
       setTextCell(row,item.relatedOrderCode);
-      const enabledCell=document.createElement('td'),enabled=document.createElement('span');enabled.className='enabled-tag'+(Number(item.enabled)===1?'':' disabled');enabled.textContent=Number(item.enabled)===1?'启用':'停用';enabledCell.appendChild(enabled);row.appendChild(enabledCell);
+      const enabledCell=document.createElement('td'),enabled=document.createElement('span'),isEnabled=Number(item.enabled)===1;enabled.className='status-tag state-'+(isEnabled?'enabled':'disabled');enabled.textContent=isEnabled?'启用':'停用';enabledCell.appendChild(enabled);row.appendChild(enabledCell);
       setTextCell(row,item.lastScanTime||item.updateTime||item.createTime);
       const operationCell=document.createElement('td'),actions=document.createElement('div');actions.className='carrier-actions';
       const detailButton=document.createElement('button');detailButton.type='button';detailButton.className='carrier-row-btn';detailButton.textContent='详情';

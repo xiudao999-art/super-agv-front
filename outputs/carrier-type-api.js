@@ -22,9 +22,9 @@
   const deletingIds=new Set();
 
   const statusMeta={
-    DRAFT:{label:'草稿',className:'draft'},
-    PUBLISHED:{label:'已发布',className:'published'},
-    DISABLED:{label:'已停用',className:'disabled'}
+    DRAFT:{label:'草稿',className:'status-waiting'},
+    PUBLISHED:{label:'已发布',className:'state-published'},
+    DISABLED:{label:'已停用',className:'state-disabled'}
   };
 
 
@@ -74,8 +74,8 @@
       setTextCell(row,item.dimension);
       setTextCell(row,formatWeight(item.maxWeight));
       setTextCell(row,item.barcodeRule);
-      const statusCell=document.createElement('td'),status=document.createElement('span'),meta=statusMeta[item.status]||{label:item.status||'-',className:'disabled'};
-      status.className='status-tag state-'+meta.className;status.textContent=meta.label;statusCell.appendChild(status);row.appendChild(statusCell);
+      const statusCell=document.createElement('td'),status=document.createElement('span'),meta=statusMeta[item.status]||{label:item.status||'-',className:'state-disabled'};
+      status.className='status-tag '+meta.className;status.textContent=meta.label;statusCell.appendChild(status);row.appendChild(statusCell);
       setTextCell(row,item.remark);
       setTextCell(row,item.updateTime||item.createTime);
       const operationCell=document.createElement('td'),actions=document.createElement('div');actions.className='carrier-actions';

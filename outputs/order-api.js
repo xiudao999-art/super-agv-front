@@ -233,15 +233,12 @@ import { createOrder as requestCreateOrder, getFlows, getOrders, orderCreateEndp
       detail.type='button';detail.className='row-btn row-icon-button';detail.setAttribute('aria-label','查看详情');detail.title='查看详情';detail.innerHTML='<img src="assets/list-icons/file-detail.svg" alt="">';
       const tasks=document.createElement('button');
       tasks.type='button';tasks.className='row-btn row-icon-button tasks';tasks.setAttribute('aria-label','查看任务');tasks.title='查看任务';tasks.innerHTML='<img src="assets/list-icons/document.svg" alt="">';
-      const edit=document.createElement('button');
-      edit.type='button';edit.className='row-btn';edit.textContent='编辑';edit.setAttribute('aria-label','编辑订单');
       const remove=document.createElement('button');
       remove.type='button';remove.className='row-btn delete';remove.textContent='删除';remove.setAttribute('aria-label','删除订单');
       detail.addEventListener('click',()=>openOrder(item));
       tasks.addEventListener('click',()=>openOrder(item));
-      edit.addEventListener('click',()=>showMessage('订单编辑功能待接入：'+(item.upstreamOrderNo||item.systemOrderNo||item.id)));
       remove.addEventListener('click',()=>showMessage('订单删除功能待接入：'+(item.upstreamOrderNo||item.systemOrderNo||item.id)));
-      actions.append(detail,tasks,edit,remove);operationCell.appendChild(actions);row.appendChild(operationCell);body.appendChild(row);
+      actions.append(detail,tasks,remove);operationCell.appendChild(actions);row.appendChild(operationCell);body.appendChild(row);
     });
   }
 

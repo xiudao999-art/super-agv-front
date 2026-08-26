@@ -21,6 +21,13 @@ import { getLaboratory, getLaboratoryConfig, resolveDashboardAssetUrl } from './
   const taskMeta=document.querySelector('.task-meta');
   if(!mapArt||!routeLayer)return;
 
+  const tooltip=document.createElement('div');
+  tooltip.className='lab-map-tooltip';
+  tooltip.setAttribute('role','tooltip');
+  tooltip.setAttribute('aria-hidden','true');
+  tooltip.hidden=true;
+  mapArt.appendChild(tooltip);
+
   const SVG_NS='http://www.w3.org/2000/svg';
   const MAP_COORDINATE_WIDTH=1024;
   const MAP_COORDINATE_HEIGHT=551;
@@ -32,7 +39,19 @@ import { getLaboratory, getLaboratoryConfig, resolveDashboardAssetUrl } from './
   function finite(value){const number=Number(value);return Number.isFinite(number)?number:null}
   function svg(tag,attributes){const node=document.createElementNS(SVG_NS,tag);Object.entries(attributes||{}).forEach(([name,value])=>node.setAttribute(name,String(value)));return node}
 
-  function showState(message,error){mapArt.dataset.mapState=message;mapArt.classList.toggle('lab-map-error',Boolean(error));mapArt.classList.toggle('lab-map-loading',!error)}
+  function hideTooltip(){tooltip.hidden=true;tooltip.setAttribute('aria-hidden','true')}
+  function positionTooltip(clientX,clientY){
+    const mapRect=mapArt.getBoundingClientRect(),offset=14,padding=8;
+    tooltip.style.left='0px';tooltip.style.top='0px';
+    const width=tooltip.offsetWidth,height=tooltip.offsetHeight,localX=clientX-mapRect.left,localY=clientY-mapRect.top;
+    let left=localX+offset,top=localY+offset;
+    if(left+width>mapRect.width-padding)left=localX-width-offset;
+    if(top+height>mapRect.height-padding)top=localY-height-offset;
+    tooltip.style.left=Math.max(padding,Math.min(left,mapRect.width-width-padding))+'px';
+    tooltip.style.top=Math.max(padding,Math.min(top,mapRect.height-height-padding))+'px';
+  }
+  function showTooltip(label,clientX,clientY){tooltip.textContent=label;tooltip.hidden=false;tooltip.setAttribute('aria-hidden','false');positionTooltip(clientX,clientY)}
+  function showState(message,error){hideTooltip();mapArt.dataset.mapState=message;mapArt.classList.toggle('lab-map-error',Boolean(error));mapArt.classList.toggle('lab-map-loading',!error)}
   function clearState(){mapArt.classList.remove('lab-map-loading','lab-map-error');delete mapArt.dataset.mapState}
   function announce(message){if(typeof window.showToast==='function')window.showToast(message);else{const toast=document.getElementById('toast');if(toast){toast.textContent=message;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2400)}}}
 
@@ -60,10 +79,16 @@ import { getLaboratory, getLaboratoryConfig, resolveDashboardAssetUrl } from './
   }
 
   function addInteractiveNode(group,item,position,index){
-    const wrapper=svg('g',{class:'lab-map-node',tabindex:'0',role:'button','aria-label':pointLabel(item),'data-map-label':pointLabel(item),'data-point-id':item.id,'data-point-x':item.x,'data-point-y':item.y}),shape=svg('path',{class:'lab-map-point',d:'M '+position.x+' '+(position.y-9)+' L '+(position.x+9)+' '+position.y+' L '+position.x+' '+(position.y+9)+' L '+(position.x-9)+' '+position.y+' Z'});
-    const title=svg('title');title.textContent=pointLabel(item);wrapper.append(title,shape);
+    const labelText=pointLabel(item),wrapper=svg('g',{class:'lab-map-node',tabindex:'0',role:'button','aria-label':labelText,'data-map-label':labelText,'data-point-id':item.id,'data-point-x':item.x,'data-point-y':item.y}),shape=svg('path',{class:'lab-map-point',d:'M '+position.x+' '+(position.y-9)+' L '+(position.x+9)+' '+position.y+' L '+position.x+' '+(position.y+9)+' L '+(position.x-9)+' '+position.y+' Z'});
+    wrapper.appendChild(shape);
     if(index<24){const label=svg('text',{class:'lab-map-label',x:position.x+11,y:position.y-10});label.textContent='ID '+item.id;wrapper.appendChild(label)}
-    const announcePoint=()=>announce(pointLabel(item));wrapper.addEventListener('click',announcePoint);wrapper.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();announcePoint()}});group.appendChild(wrapper);
+    const announcePoint=()=>announce(labelText);
+    wrapper.addEventListener('pointerenter',event=>showTooltip(labelText,event.clientX,event.clientY));
+    wrapper.addEventListener('pointermove',event=>showTooltip(labelText,event.clientX,event.clientY));
+    wrapper.addEventListener('pointerleave',hideTooltip);
+    wrapper.addEventListener('focus',()=>{const rect=wrapper.getBoundingClientRect();showTooltip(labelText,rect.right,rect.bottom)});
+    wrapper.addEventListener('blur',hideTooltip);
+    wrapper.addEventListener('click',announcePoint);wrapper.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();announcePoint()}});group.appendChild(wrapper);
   }
 
   function renderLegend(){
@@ -73,7 +98,7 @@ import { getLaboratory, getLaboratoryConfig, resolveDashboardAssetUrl } from './
 
   function renderStatus(detail,entities){
     mapArt.querySelector('.lab-map-status')?.remove();const status=document.createElement('div');status.className='lab-map-status';
-    status.textContent=(detail.map?.name||'实验室地图')+' · '+entities.points.length+' 个点位 · 原始坐标不缩放';mapArt.appendChild(status);
+    status.textContent=(detail.map?.name||'地图')+' · '+entities.points.length+' 个点位 · 原始坐标不缩放';mapArt.appendChild(status);
   }
 
   function applyMapImage(imageUrl){
@@ -90,14 +115,13 @@ import { getLaboratory, getLaboratoryConfig, resolveDashboardAssetUrl } from './
   }
 
   function renderDetail(lab,config,detail){
-    clearState();const imageUrl=detail.map?.imageUrl||config.map?.imageUrl;if(imageUrl)applyMapImage(imageUrl);else{mapArt.style.removeProperty('--map-image');mapArt.style.removeProperty('aspect-ratio')}routeLayer.removeAttribute('hidden');if(legend)legend.removeAttribute('hidden');routeLayer.replaceChildren();routeLayer.setAttribute('viewBox','0 0 '+MAP_COORDINATE_WIDTH+' '+MAP_COORDINATE_HEIGHT);routeLayer.setAttribute('preserveAspectRatio','none');routeLayer.setAttribute('aria-label',DEMO_MODE?'四个写死点位的静态演示图层':'后端实验室地图点位图层；左下角为原点；原始坐标不缩放');
-    const title=svg('title');title.textContent=(lab.name||detail.labName||'实验室')+' 地图与点位';routeLayer.appendChild(title);
+    hideTooltip();clearState();const imageUrl=detail.map?.imageUrl||config.map?.imageUrl;if(imageUrl)applyMapImage(imageUrl);else{mapArt.style.removeProperty('--map-image');mapArt.style.removeProperty('aspect-ratio')}routeLayer.removeAttribute('hidden');if(legend)legend.removeAttribute('hidden');routeLayer.replaceChildren();routeLayer.setAttribute('viewBox','0 0 '+MAP_COORDINATE_WIDTH+' '+MAP_COORDINATE_HEIGHT);routeLayer.setAttribute('preserveAspectRatio','none');routeLayer.setAttribute('aria-label',DEMO_MODE?'四个写死点位的静态演示图层':'后端实验室地图点位图层；左下角为原点；原始坐标不缩放');
     const entities=resolveSpatialEntities(detail),project=createProjector(),positions=entities.points.map(point=>project(point));
     const defs=svg('defs'),marker=svg('marker',{id:'pointSequenceArrow',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto-start-reverse'}),arrow=svg('path',{d:'M 0 0 L 10 5 L 0 10 Z',fill:'#27558b'});marker.appendChild(arrow);defs.appendChild(marker);routeLayer.appendChild(defs);
     const linksGroup=svg('g',{'aria-label':'点位按 ID 从小到大的直角箭头路线'});
-    renderOrigin();for(let index=0;index<entities.points.length-1;index+=1){const startPoint=entities.points[index],endPoint=entities.points[index+1],path=svg('path',{class:'lab-map-link',d:rightAnglePath(positions[index],positions[index+1]),'marker-end':'url(#pointSequenceArrow)'}),pathTitle=svg('title');pathTitle.textContent='点位 ID '+startPoint.id+' → ID '+endPoint.id+' · 先横后竖';path.appendChild(pathTitle);linksGroup.appendChild(path)}routeLayer.appendChild(linksGroup);
+    renderOrigin();for(let index=0;index<entities.points.length-1;index+=1){const startPoint=entities.points[index],endPoint=entities.points[index+1],path=svg('path',{class:'lab-map-link',d:rightAnglePath(positions[index],positions[index+1]),'marker-end':'url(#pointSequenceArrow)','aria-label':'点位 ID '+startPoint.id+' → ID '+endPoint.id+' · 先横后竖'});linksGroup.appendChild(path)}routeLayer.appendChild(linksGroup);
     const markers=svg('g',{'aria-label':'按 ID 升序排列的点位'});entities.points.forEach((item,index)=>addInteractiveNode(markers,item,positions[index],index));routeLayer.appendChild(markers);renderLegend();renderStatus(detail,entities);
-    if(taskTitle)taskTitle.textContent='实验室地图：'+(detail.map?.name||config.map?.name||'-');
+    if(taskTitle)taskTitle.textContent='地图：'+(detail.map?.name||config.map?.name||'-');
     if(taskMeta)taskMeta.textContent=(lab.name||detail.labName||'实验室')+' · 配置 #'+detail.id+' · '+detail.status+' · '+entities.points.length+' 个点位 · 左下角 (0,0) · X→右 · Y→上 · 原始坐标 · 先横后竖';
     const oldAction=mapArt.querySelector('.map-action');if(oldAction)oldAction.hidden=true;
   }

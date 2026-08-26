@@ -119,16 +119,18 @@ import { dashboardOverviewEndpoint, getDashboardOverview } from './assets/data/d
     moduleList.innerHTML='';
     const modules=Array.isArray(items)?[...items]:[];
     if(!modules.length){moduleList.innerHTML='<div class="module-error">暂无硬件模组数据</div>';return}
-    if(!modules.some(item=>item.code==='AGV_STORAGE_PLACEMENT'))modules.push({code:'AGV_STORAGE_PLACEMENT',name:'AGV储位放置',online:true});
+    if(!modules.some(item=>item.code==='AGV_STORAGE_PLACEMENT'))modules.push({code:'AGV_STORAGE_PLACEMENT',name:'AGV存位',online:true});
     modules.forEach((item,index)=>{
       const online=Boolean(item.online);
       const moduleName=moduleLabels[item.code]||item.name||item.code||'未命名模组';
       const card=document.createElement('article');card.className='module-card'+(online?'':' offline');
       const thumb=document.createElement('div');thumb.className='module-thumb '+(moduleThumbs[item.code]||('thumb-'+((index%5)+1)));thumb.setAttribute('aria-label',moduleName+'设备缩略图');
       const copy=document.createElement('div');copy.className='module-copy';
+      const nameRow=document.createElement('div');nameRow.className='module-name';
       const name=document.createElement('strong');name.textContent=moduleName;
+      const signal=document.createElement('img');signal.className='module-signal';signal.src='assets/images/wifi.svg';signal.alt='';signal.setAttribute('aria-hidden','true');
       const status=document.createElement('span');status.textContent=online?'在线':'离线';if(!online)status.className='offline';
-      copy.append(name,status);card.append(thumb,copy);moduleList.appendChild(card);
+      nameRow.append(name,signal);copy.append(nameRow,status);card.append(thumb,copy);moduleList.appendChild(card);
     });
   }
 
