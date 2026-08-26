@@ -2,7 +2,8 @@ const navGroups = [
   { items: [{ href: 'robot-dispatch-dashboard.html', label: '运行总览', icon: 'grid' }] },
   { label: '运行调度', items: [
     { href: 'order-management.html', label: '订单管理', icon: 'clipboard' },
-    { href: 'storage-and-carriers.html', label: '库位与载具', icon: 'sliders' }
+    { href: 'storage-and-carriers.html', label: '库位与载具', icon: 'sliders' },
+    { href: 'device-debug.html', label: '设备调试', icon: 'wrench' }
   ] },
   { label: '配置中心', items: [
     { href: 'robots-and-devices.html', label: '机器人与设备', icon: 'panel' },
@@ -32,6 +33,7 @@ const iconPaths = {
   log: '<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V4Z"/><path d="M7 8h7M7 12h7M7 16h5"/>',
   chart: '<path d="M4 20V10h5v10M9 20V4h6v16M15 20v-7h5v7M2 20h20"/>',
   users: '<circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 13a5 5 0 0 1 4 5"/>',
+  wrench: '<path d="M14.7 6.3a4 4 0 0 0-5-5l2.2 2.2-2.4 2.4-2.2-2.2a4 4 0 0 0 5 5l6.5 6.5a2.1 2.1 0 1 1-3 3l-6.5-6.5Z"/><path d="m5 19 3.7-3.7"/>',
   document: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
   alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/>',
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>'
