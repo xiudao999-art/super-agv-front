@@ -10,6 +10,7 @@ const navGroups = [
     { href: 'laboratory-configuration.html', label: '地图信息', icon: 'map' },
     { href: 'stations-and-points.html', label: '机台与点位', icon: 'panel' },
     { href: 'peripheral-resources.html', label: '外围资源', icon: 'sliders' },
+    { href: 'charging-and-battery.html', label: '充电桩与电池配置', icon: 'battery' },
     { href: 'process-list.html', label: '流程与动作', icon: 'flow' }
   ] },
   { label: '运维与数据', items: [
@@ -35,6 +36,7 @@ const iconPaths = {
   chart: '<path d="M4 20V10h5v10M9 20V4h6v16M15 20v-7h5v7M2 20h20"/>',
   users: '<circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 13a5 5 0 0 1 4 5"/>',
   wrench: '<path d="M14.7 6.3a4 4 0 0 0-5-5l2.2 2.2-2.4 2.4-2.2-2.2a4 4 0 0 0 5 5l6.5 6.5a2.1 2.1 0 1 1-3 3l-6.5-6.5Z"/><path d="m5 19 3.7-3.7"/>',
+  battery: '<rect x="3" y="6" width="16" height="12" rx="2"/><path d="M21 10v4M7 10v4M5 12h4"/>',
   document: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
   alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/>',
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>'

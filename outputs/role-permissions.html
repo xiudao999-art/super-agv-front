@@ -54,7 +54,7 @@
             </section>
             <section class="permission-group">
               <header><span class="group-icon"><svg viewBox="0 0 24 24"><path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2V5Z"/><path d="M9 3v16M15 5v16"/></svg></span><div><h4>配置中心</h4><p>实验室与流程基础配置</p></div></header>
-              <div class="permission-options"><label><input type="checkbox" value="robots"><span>机器人与设备</span></label><label><input type="checkbox" value="map"><span>地图信息</span></label><label><input type="checkbox" value="stations"><span>机台与点位</span></label><label><input type="checkbox" value="peripheral"><span>外围资源</span></label><label><input type="checkbox" value="process"><span>流程与动作</span></label></div>
+              <div class="permission-options"><label><input type="checkbox" value="robots"><span>机器人与设备</span></label><label><input type="checkbox" value="map"><span>地图信息</span></label><label><input type="checkbox" value="stations"><span>机台与点位</span></label><label><input type="checkbox" value="peripheral"><span>外围资源</span></label><label><input type="checkbox" value="charging"><span>充电桩与电池配置</span></label><label><input type="checkbox" value="process"><span>流程与动作</span></label></div>
             </section>
             <section class="permission-group">
               <header><span class="group-icon"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v5c0 5 3.4 8.3 8 10 4.6-1.7 8-5 8-10V6l-8-3Z"/><path d="M12 8v4M12 16h.01"/></svg></span><div><h4>运维与数据</h4><p>异常、日志及产能数据</p></div></header>
@@ -65,7 +65,7 @@
               <div class="permission-options"><label><input type="checkbox" value="user-management"><span>用户管理</span></label><label><input type="checkbox" value="role-view"><span>查看角色</span></label><label><input type="checkbox" value="role-edit"><span>编辑权限</span></label><label><input type="checkbox" value="user-assign"><span>分配用户</span></label></div>
             </section>
           </div>
-          <footer class="permission-actions"><span id="permissionCount">已选择 0 / 14 项权限</span><div><button class="secondary-btn" id="resetPermission" type="button">重置</button><button class="primary-btn save-btn" id="savePermission" type="button">保存权限</button></div></footer>
+          <footer class="permission-actions"><span id="permissionCount">已选择 0 / 16 项权限</span><div><button class="secondary-btn" id="resetPermission" type="button">重置</button><button class="primary-btn save-btn" id="savePermission" type="button">保存权限</button></div></footer>
         </section>
       </section>
     </main>
@@ -85,12 +85,12 @@
   <div class="toast" id="toast" role="status"></div>
 
   <script>
-    const allPermissions = ['dashboard','orders','storage','robots','map','stations','peripheral','process','anomaly','logs','capacity','user-management','role-view','role-edit','user-assign'];
+    const allPermissions = ['dashboard','orders','storage','robots','map','stations','peripheral','charging','process','anomaly','logs','capacity','user-management','role-view','role-edit','user-assign'];
     const roleData = {
       admin: { name: '系统管理员', code: 'SUPER_ADMIN', description: '拥有系统全部功能及管理权限', avatar: '管', color: 'navy', permissions: [...allPermissions], enabled: true },
-      dispatcher: { name: '调度管理员', code: 'DISPATCHER', description: '可管理订单、流程及现场调度', avatar: '调', color: 'blue', permissions: ['dashboard','orders','storage','robots','map','stations','peripheral','process','anomaly','capacity'], enabled: true },
-      operator: { name: '运维工程师', code: 'OPERATOR', description: '负责异常处理、设备维护和日志排查', avatar: '运', color: 'cyan', permissions: ['dashboard','robots','map','stations','peripheral','anomaly','logs','capacity'], enabled: true },
-      viewer: { name: '只读访客', code: 'VIEWER', description: '仅可查看运行数据和基础配置', avatar: '访', color: 'gray', permissions: ['dashboard','orders','storage','robots','map','stations','peripheral','process','capacity','role-view'], enabled: true }
+      dispatcher: { name: '调度管理员', code: 'DISPATCHER', description: '可管理订单、流程及现场调度', avatar: '调', color: 'blue', permissions: ['dashboard','orders','storage','robots','map','stations','peripheral','charging','process','anomaly','capacity'], enabled: true },
+      operator: { name: '运维工程师', code: 'OPERATOR', description: '负责异常处理、设备维护和日志排查', avatar: '运', color: 'cyan', permissions: ['dashboard','robots','map','stations','peripheral','charging','anomaly','logs','capacity'], enabled: true },
+      viewer: { name: '只读访客', code: 'VIEWER', description: '仅可查看运行数据和基础配置', avatar: '访', color: 'gray', permissions: ['dashboard','orders','storage','robots','map','stations','peripheral','charging','process','capacity','role-view'], enabled: true }
     };
     let activeRole = 'dispatcher';
     let savedPermissions = {};
