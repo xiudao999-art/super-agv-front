@@ -16,22 +16,22 @@
   let locationTypes=[];
   let selectedId=null;
   let editingId=null;
+  let editingStatus=1;
   let listController=null;
   let saving=false;
   const deletingIds=new Set();
 
 
-  table.querySelector('thead tr').innerHTML='<th>类型编码</th><th>名称</th><th>容量</th><th>兼容载具类型</th><th>状态判定来源</th><th>隔离/互斥规则</th><th>状态</th><th>备注</th><th>更新时间</th><th>操作</th>';
-  table.style.minWidth='1280px';
+  table.querySelector('thead tr').innerHTML='<th>类型编码</th><th>名称</th><th>容量</th><th>兼容载具类型</th><th>状态判定来源</th><th>隔离/互斥规则</th><th>备注</th><th>更新时间</th><th>操作</th>';
+  table.style.minWidth='1160px';
 
   const filter=document.createElement('div');
   filter.className='location-type-filter agv-filter-bar';
-  filter.innerHTML='<label class="agv-filter-field"><span>查询类型</span><input id="locationTypeCodeFilter" placeholder="类型编码/名称"></label><label class="agv-filter-field"><span>状态选择</span><select id="locationTypeStatusFilter"><option value="">全部状态</option><option value="1">启用</option><option value="0">停用</option></select></label><div class="agv-filter-actions"><button type="button" id="locationTypeReset"><img class="filter-action-icon" src="assets/list-icons/refresh.svg" alt="">重置</button><button class="primary" type="button" id="locationTypeQuery"><img class="filter-action-icon" src="assets/list-icons/search.svg" alt="">搜索</button></div>';
+  filter.innerHTML='<label class="agv-filter-field"><span>查询类型</span><input id="locationTypeCodeFilter" placeholder="类型编码/名称"></label><div class="agv-filter-actions"><button type="button" id="locationTypeReset"><img class="filter-action-icon" src="assets/list-icons/refresh.svg" alt="">重置</button><button class="primary" type="button" id="locationTypeQuery"><img class="filter-action-icon" src="assets/list-icons/search.svg" alt="">搜索</button></div>';
   document.querySelector('.table-wrap').before(filter);
   const codeFilter=document.getElementById('locationTypeCodeFilter');
-  const statusFilter=document.getElementById('locationTypeStatusFilter');
 
-  form.querySelector('.form-grid').innerHTML='<label class="form-field"><span>类型编码 *</span><input id="formCode" required maxlength="64"></label><label class="form-field"><span>名称 *</span><input id="formName" required maxlength="100"></label><label class="form-field"><span>最大库位容量</span><input id="formCapacity" type="number" min="1" step="1" value="1"></label><label class="form-field"><span>状态</span><select id="formStatus"><option value="1">启用</option><option value="0">停用</option></select></label><label class="form-field wide"><span>兼容载具类型</span><input id="formCompatibleCarrierTypes" placeholder="多个类型编码用逗号分隔"></label><label class="form-field"><span>状态判定来源</span><input id="formStatusSource" placeholder="例如：PLC+扫码"></label><label class="form-field"><span>隔离/互斥规则</span><input id="formMutexRule"></label><label class="form-field wide"><span>备注</span><textarea id="formRemark" maxlength="500"></textarea></label>';
+  form.querySelector('.form-grid').innerHTML='<label class="form-field"><span>类型编码 *</span><input id="formCode" required maxlength="64"></label><label class="form-field"><span>名称 *</span><input id="formName" required maxlength="100"></label><label class="form-field"><span>最大库位容量</span><input id="formCapacity" type="number" min="1" step="1" value="1"></label><label class="form-field wide"><span>兼容载具类型</span><input id="formCompatibleCarrierTypes" placeholder="多个类型编码用逗号分隔"></label><label class="form-field"><span>状态判定来源</span><input id="formStatusSource" placeholder="例如：PLC+扫码"></label><label class="form-field"><span>隔离/互斥规则</span><input id="formMutexRule"></label><label class="form-field wide"><span>备注</span><textarea id="formRemark" maxlength="500"></textarea></label>';
   const submitButton=form.querySelector('[type="submit"]');
 
   function setTextCell(row,value){
@@ -43,9 +43,9 @@
   function setEmpty(message){
     body.innerHTML='';
     const row=document.createElement('tr'),cell=document.createElement('td');
-    cell.colSpan=10;cell.className='location-type-empty';cell.textContent=message;row.appendChild(cell);body.appendChild(row);
+    cell.colSpan=9;cell.className='location-type-empty';cell.textContent=message;row.appendChild(cell);body.appendChild(row);
   }
-  function setLoading(message){body.innerHTML='';const row=document.createElement('tr'),cell=document.createElement('td'),indicator=document.createElement('div');cell.colSpan=10;cell.className='location-type-empty api-loading-cell';indicator.className='api-loading';indicator.textContent=message;cell.appendChild(indicator);row.appendChild(cell);body.appendChild(row)}
+  function setLoading(message){body.innerHTML='';const row=document.createElement('tr'),cell=document.createElement('td'),indicator=document.createElement('div');cell.colSpan=9;cell.className='location-type-empty api-loading-cell';indicator.className='api-loading';indicator.textContent=message;cell.appendChild(indicator);row.appendChild(cell);body.appendChild(row)}
 
   function renderRows(){
     body.innerHTML='';
@@ -56,8 +56,6 @@
       if(String(item.id)===String(selectedId))row.classList.add('selected');
       setTextCell(row,item.typeCode);setTextCell(row,item.typeName);setTextCell(row,item.capacity);
       setTextCell(row,item.compatibleCarrierTypes);setTextCell(row,item.statusSource);setTextCell(row,item.mutexRule);
-      const statusCell=document.createElement('td'),status=document.createElement('span'),enabled=Number(item.status)===1;
-      status.className='status-tag state-'+(enabled?'enabled':'disabled');status.textContent=enabled?'启用':'停用';statusCell.appendChild(status);row.appendChild(statusCell);
       setTextCell(row,item.remark);setTextCell(row,item.updateTime||item.createTime);
       const operationCell=document.createElement('td'),actions=document.createElement('div');actions.className='location-type-actions';
       const rowEdit=document.createElement('button');rowEdit.type='button';rowEdit.className='location-type-row-btn';rowEdit.textContent='编辑';
@@ -83,7 +81,6 @@
     listController?.abort();listController=new AbortController();setLoading('正在加载库位类型…');
     const params=new URLSearchParams();
     if(codeFilter.value.trim())params.set('typeCode',codeFilter.value.trim());
-    if(statusFilter.value!=='')params.set('status',statusFilter.value);
     try{
       const query=params.toString();
       const response=await fetch(endpoint+(query?'?'+query:''),{headers:{Accept:'application/json'},signal:listController.signal});
@@ -96,13 +93,13 @@
   }
 
   function fillForm(item){
+    editingStatus=Number(item.status)===0?0:1;
     document.getElementById('formCode').value=item.typeCode||'';
     document.getElementById('formName').value=item.typeName||'';
     document.getElementById('formCapacity').value=item.capacity??1;
     document.getElementById('formCompatibleCarrierTypes').value=item.compatibleCarrierTypes||'';
     document.getElementById('formStatusSource').value=item.statusSource||'';
     document.getElementById('formMutexRule').value=item.mutexRule||'';
-    document.getElementById('formStatus').value=Number(item.status)===0?'0':'1';
     document.getElementById('formRemark').value=item.remark||'';
   }
 
@@ -128,7 +125,7 @@
       compatibleCarrierTypes:document.getElementById('formCompatibleCarrierTypes').value.trim(),
       statusSource:document.getElementById('formStatusSource').value.trim(),
       mutexRule:document.getElementById('formMutexRule').value.trim(),
-      status:Number(document.getElementById('formStatus').value),
+      status:editingStatus,
       remark:document.getElementById('formRemark').value.trim()
     };
   }
@@ -164,9 +161,8 @@
   addButton.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();openAddForm()},true);
   form.addEventListener('submit',event=>{event.preventDefault();event.stopImmediatePropagation();saveLocationType()},true);
   document.getElementById('locationTypeQuery').addEventListener('click',loadLocationTypes);
-  document.getElementById('locationTypeReset').addEventListener('click',()=>{codeFilter.value='';statusFilter.value='';loadLocationTypes()});
+  document.getElementById('locationTypeReset').addEventListener('click',()=>{codeFilter.value='';loadLocationTypes()});
   codeFilter.addEventListener('keydown',event=>{if(event.key==='Enter')loadLocationTypes()});
-  statusFilter.addEventListener('change',loadLocationTypes);
 
   window.__locationTypeApi={endpoint,items:locationTypes,reload:loadLocationTypes,openAdd:openAddForm,openEdit:openEditForm};
   setLoading('正在加载库位类型…');loadLocationTypes();

@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="assets/styles/tokens.css">
   <link rel="stylesheet" href="assets/styles/base.css">
   <link rel="stylesheet" href="assets/styles/components.css">
+  <link rel="stylesheet" href="assets/styles/tables.css">
   <script type="module" src="assets/components/register.js" blocking="render"></script>
   
 </head>
@@ -16,7 +17,7 @@
   <agv-app-shell active-route="carrier-list.html" section-title="库位与载具" user-name="陈工"><div class="agv-legacy-hooks" hidden><aside id="sidebar"></aside><div id="scrim"></div><button id="menuBtn" type="button"></button><button id="statusInfoBtn" type="button"></button><button id="statusBtn" type="button"></button><button id="alertInfoBtn" type="button"></button><button id="alertBtn" type="button"></button></div>
     <agv-page-header class="page-head"><div><h1>库位与载具</h1><p>维护库位所属空间地图、到达坐标、操作点位、兼容载具与占用一致性</p></div></agv-page-header>
     <div class="page-canvas"><section class="page-panel"><div class="tabs-row"><agv-tabs class="tabs" role="tablist"><a class="tab-btn" role="tab" aria-selected="false" href="storage-and-carriers.html">库位</a><button class="tab-btn active" role="tab" aria-selected="true">载具</button><i class="tab-divider"></i><a class="tab-btn" role="tab" aria-selected="false" href="storage-type-list.html">库位类型</a><i class="tab-divider"></i><a class="tab-btn" role="tab" aria-selected="false" href="carrier-type-list.html">载具类型</a></agv-tabs></div>
-      <div class="content"><div class="rule-banner">点击“查看位置”可同时查看载具基础信息、所在库位信息及立库、AGV 或机台内部的具体位置示意。</div><div class="list-head"><div class="list-heading"><h2>载具记录</h2><p>载具位置由扫码、任务动作结果、PLC 和库位状态共同更新</p></div><div class="list-tools"><button class="action-btn" id="addCarrier"><svg class="icon"><use href="assets/icons.svg#i-plus"/></svg>新增载具</button></div></div>
+      <div class="content agv-list-page"><div class="rule-banner">点击“查看位置”可同时查看载具基础信息、所在库位信息及立库、AGV 或机台内部的具体位置示意。</div><div class="list-head"><div class="list-heading"><h2>载具记录</h2><p>载具位置由扫码、任务动作结果、PLC 和库位状态共同更新</p></div><div class="list-tools"><button class="action-btn" id="addCarrier"><svg class="icon"><use href="assets/icons.svg#i-plus"/></svg>新增载具</button></div></div>
         <div class="table-wrap"><table aria-label="载具记录"><thead><tr><th>唯一编号</th><th>条码</th><th>载具类型</th><th>当前位置</th><th>状态</th><th>操作</th></tr></thead><tbody id="carrierBody"></tbody></table></div>
       </div></section></div>
   </agv-app-shell>
