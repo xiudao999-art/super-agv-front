@@ -112,7 +112,7 @@ import { createFlow, getFlowPage, getWorkflowTemplates } from './assets/data/wor
       flowPageState.pageNum=Number(page.pageNum)||pageNum;flowPageState.pageSize=Number(page.pageSize)||flowPageState.pageSize;flowPageState.total=Number(page.total)||0;
       renderFlowRows(Array.isArray(page.records)?page.records:[]);renderFlowPagination();
       flowTotal.textContent='共计 '+flowPageState.total+' 条数据';
-      flowListDescription.textContent='后端实时数据 · 当前第 '+flowPageState.pageNum+' 页';
+      if(flowListDescription)flowListDescription.textContent='后端实时数据 · 当前第 '+flowPageState.pageNum+' 页';
     }catch(error){
       console.error('加载流程列表失败',error);
       flowTableBody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--red)">流程列表加载失败</td></tr>';showToast('流程列表加载失败：'+error.message);
