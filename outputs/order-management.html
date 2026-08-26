@@ -20,7 +20,7 @@
       <section class="orders-panel">
         <div class="tabs-row"><agv-tabs class="tabs" role="tablist"><button class="tab-btn active" role="tab" aria-selected="true">订单列表</button><button class="tab-btn" id="taskDetailTab" role="tab" aria-selected="false" aria-disabled="true" disabled>订单任务详情</button></agv-tabs></div>
         <div class="list-content">
-          <div class="list-heading"><div><h2>订单列表</h2><p>点击“详情”或“查看任务”进入该订单的任务与动作执行链</p></div><button class="create-order-btn" id="createOrderBtn" type="button"><svg class="icon"><use href="assets/icons.svg#i-plus"/></svg>新建</button></div>
+          <div class="list-heading"><div><h2>订单列表</h2><p>点击“详情”查看订单公共信息，点击“查看任务”进入任务与动作执行链</p></div><button class="create-order-btn" id="createOrderBtn" type="button"><svg class="icon"><use href="assets/icons.svg#i-plus"/></svg>新建</button></div>
           <div class="filters" data-agv-list-filters>
             <label class="field-shell"><span>状态选择</span><select id="statusFilter" aria-label="订单状态"><option value="">全部状态</option><option value="QUEUED">排队中</option><option value="RUNNING">执行中</option><option value="SUCCEEDED">已完成</option><option value="FAILED">失败</option><option value="CANCELLED">已取消</option></select></label>
             <label class="field-shell"><span>查询订单</span><input id="orderQuery" type="search" placeholder="订单号/系统订单号" aria-label="查询订单" /></label>
@@ -58,6 +58,27 @@
         </div>
         <div class="modal-actions create-order-actions"><button class="modal-close" id="cancelCreateOrder" type="button">取消</button><button class="create-order-submit modal-primary" id="createOrderSubmit" type="submit" disabled>创建订单</button></div>
       </form>
+    </section>
+  </div>
+
+  <div class="modal-overlay" id="orderDetailModal" hidden>
+    <section class="order-detail-modal" role="dialog" aria-modal="true" aria-labelledby="orderDetailTitle" aria-describedby="orderDetailNotice" tabindex="-1">
+      <header class="order-detail-header"><h2 id="orderDetailTitle">订单详情</h2><button class="order-detail-x" id="orderDetailCloseX" type="button" aria-label="关闭订单详情">×</button></header>
+      <div class="order-detail-body">
+        <div class="order-detail-grid">
+          <article class="order-detail-item"><span>订单号</span><strong id="detailOrderNo">-</strong></article>
+          <article class="order-detail-item"><span>订单状态</span><div id="detailOrderStatus"></div></article>
+          <article class="order-detail-item"><span>系统订单号</span><strong id="detailSystemOrderNo">-</strong></article>
+          <article class="order-detail-item"><span>优先级</span><strong id="detailPriority">-</strong></article>
+          <article class="order-detail-item"><span>订单来源</span><strong id="detailSource">-</strong></article>
+          <article class="order-detail-item"><span>任务数量 / 完成进度</span><strong id="detailTaskProgress">-</strong></article>
+          <article class="order-detail-item"><span>下发时间</span><strong id="detailIssuedAt">-</strong></article>
+          <article class="order-detail-item"><span>结果回调状态</span><strong id="detailCallbackStatus">-</strong></article>
+        </div>
+        <p class="order-detail-notice" id="orderDetailNotice">订单只展示订单级公共信息。库位、载具、目标机台等可能随任务不同而变化的数据，请到“订单任务详情”逐条查看。</p>
+        <div class="order-detail-actions"><button class="order-detail-primary" id="viewOrderTasks" type="button">查看订单任务详情</button><button class="order-detail-secondary" id="requestOrderCancel" type="button">请求上游取消</button></div>
+      </div>
+      <footer class="order-detail-footer"><button class="modal-close" id="orderDetailClose" type="button">关闭</button></footer>
     </section>
   </div>
 

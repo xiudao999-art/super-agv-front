@@ -34,6 +34,12 @@ import { createOrder as requestCreateOrder, getFlows, getOrders, orderCreateEndp
   const createFeedback=document.getElementById('createOrderFeedback');
   const createSubmit=document.getElementById('createOrderSubmit');
   const createCancel=document.getElementById('cancelCreateOrder');
+  const detailModal=document.getElementById('orderDetailModal');
+  const detailTitle=document.getElementById('orderDetailTitle');
+  const detailCloseX=document.getElementById('orderDetailCloseX');
+  const detailClose=document.getElementById('orderDetailClose');
+  const viewOrderTasks=document.getElementById('viewOrderTasks');
+  const requestOrderCancel=document.getElementById('requestOrderCancel');
   if(!body||!statusFilter||!orderQuery||!pageSizeSelect||!pageNumbers||!pageSummary||!prevPage||!nextPage)return;
 
   let currentPage=1;
@@ -46,6 +52,8 @@ import { createOrder as requestCreateOrder, getFlows, getOrders, orderCreateEndp
   let availableFlows=null;
   let flowLoading=false;
   let creating=false;
+  let selectedOrder=null;
+  let detailTrigger=null;
 
   const statusMeta={
     QUEUED:{label:'排队中',className:'queued'},
@@ -199,10 +207,43 @@ import { createOrder as requestCreateOrder, getFlows, getOrders, orderCreateEndp
     return new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(date).replaceAll('/','-');
   }
 
-  function openOrder(item){
+  function openOrderTasks(item){
     const orderNo=item.upstreamOrderNo||item.systemOrderNo||item.id;
     const params=new URLSearchParams({id:String(item.id),order:String(orderNo)});
     location.href='order-task-detail.html?'+params.toString();
+  }
+
+  function callbackStatusText(item){
+    const explicit=item.resultCallbackStatusDescription||item.callbackStatusDescription||item.resultCallbackStatus||item.callbackStatus;
+    if(explicit)return String(explicit);
+    if(item.status==='SUCCEEDED')return'任务已全部完成';
+    if(item.status==='FAILED')return'任务执行失败，等待处理';
+    if(item.status==='CANCELLED')return'订单已取消';
+    return'等待任务全部完成';
+  }
+
+  function openOrderDetail(item,trigger){
+    if(!detailModal)return;
+    selectedOrder=item;detailTrigger=trigger||document.activeElement;
+    const orderNo=item.upstreamOrderNo||item.systemOrderNo||item.id||'-';
+    const meta=statusMeta[item.status]||{label:item.status||'-',className:'cancelled'};
+    detailTitle.textContent='订单详情 · '+orderNo;
+    document.getElementById('detailOrderNo').textContent=item.upstreamOrderNo||'-';
+    document.getElementById('detailSystemOrderNo').textContent=item.systemOrderNo||'-';
+    document.getElementById('detailPriority').textContent=formatPriority(item.priority);
+    document.getElementById('detailSource').textContent=item.source||'-';
+    const taskCount=Number(item.taskCount)||0,completedCount=Number(item.completedTaskCount)||0;
+    document.getElementById('detailTaskProgress').textContent=taskCount+'个 / '+completedCount+'/'+taskCount;
+    document.getElementById('detailIssuedAt').textContent=formatTime(item.issuedAt);
+    document.getElementById('detailCallbackStatus').textContent=callbackStatusText(item);
+    const statusHost=document.getElementById('detailOrderStatus'),status=document.createElement('span');
+    status.className='status-tag status-'+meta.className;status.textContent=meta.label;statusHost.replaceChildren(status);
+    detailModal.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>{detailModal.classList.add('open');detailCloseX?.focus()});
+  }
+
+  function closeOrderDetail(){
+    if(!detailModal||detailModal.hidden)return;
+    detailModal.classList.remove('open');document.body.style.overflow='';setTimeout(()=>{detailModal.hidden=true;detailTrigger?.focus();detailTrigger=null;selectedOrder=null},200);
   }
 
   function renderRows(){
@@ -235,8 +276,8 @@ import { createOrder as requestCreateOrder, getFlows, getOrders, orderCreateEndp
       tasks.type='button';tasks.className='row-btn row-icon-button tasks';tasks.setAttribute('aria-label','查看任务');tasks.title='查看任务';tasks.innerHTML='<img src="assets/list-icons/document.svg" alt="">';
       const remove=document.createElement('button');
       remove.type='button';remove.className='row-btn delete';remove.textContent='删除';remove.setAttribute('aria-label','删除订单');
-      detail.addEventListener('click',()=>openOrder(item));
-      tasks.addEventListener('click',()=>openOrder(item));
+      detail.addEventListener('click',()=>openOrderDetail(item,detail));
+      tasks.addEventListener('click',()=>openOrderTasks(item));
       remove.addEventListener('click',()=>showMessage('订单删除功能待接入：'+(item.upstreamOrderNo||item.systemOrderNo||item.id)));
       actions.append(detail,tasks,remove);operationCell.appendChild(actions);row.appendChild(operationCell);body.appendChild(row);
     });
@@ -341,10 +382,15 @@ import { createOrder as requestCreateOrder, getFlows, getOrders, orderCreateEndp
   createCancel?.addEventListener('click',closeCreateModal);
   createModal?.addEventListener('click',event=>{if(event.target===createModal)closeCreateModal()});
   createForm?.addEventListener('submit',submitCreateOrder);
+  detailCloseX?.addEventListener('click',closeOrderDetail);
+  detailClose?.addEventListener('click',closeOrderDetail);
+  detailModal?.addEventListener('click',event=>{if(event.target===detailModal)closeOrderDetail()});
+  viewOrderTasks?.addEventListener('click',()=>{if(selectedOrder)openOrderTasks(selectedOrder)});
+  requestOrderCancel?.addEventListener('click',()=>{if(selectedOrder)showMessage('请求上游取消功能待接入：'+(selectedOrder.upstreamOrderNo||selectedOrder.systemOrderNo||selectedOrder.id))});
   taskCountInput?.addEventListener('input',()=>{if(taskCountInput.value!=='')renderTaskRows()});
   taskCountInput?.addEventListener('change',renderTaskRows);
-  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!createModal?.hidden)closeCreateModal()});
-  window.__orderApi={endpoint,syncEndpoint,createEndpoint,records,total,reload:loadOrders,sync:syncOrders,openCreate:openCreateModal};
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'){if(!detailModal?.hidden)closeOrderDetail();else if(!createModal?.hidden)closeCreateModal()}});
+  window.__orderApi={endpoint,syncEndpoint,createEndpoint,records,total,reload:loadOrders,sync:syncOrders,openCreate:openCreateModal,openDetail:openOrderDetail};
   renderTaskRows();
   loadOrders();
 })();
