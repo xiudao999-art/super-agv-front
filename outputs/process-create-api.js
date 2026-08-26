@@ -51,6 +51,8 @@ import { createFlow, getFlowPage, getWorkflowTemplates } from './assets/data/wor
     return cell;
   }
 
+  function openFlowEditor(record){modalTitle.textContent='编辑流程 · '+(record.flowNumber||record.id);openModal('processModal')}
+
   function renderFlowRows(records){
     flowTableBody.innerHTML='';
     if(!records.length){
@@ -67,7 +69,7 @@ import { createFlow, getFlowPage, getWorkflowTemplates } from './assets/data/wor
       appendTextCell(row,record.templateName||('- · 模板 ID '+record.templateId));
       appendTextCell(row,record.templateNodeCount??0);
       appendTextCell(row,formatDateTime(record.updatedAt));
-      appendTextCell(row,'—');
+      const actionCell=appendTextCell(row,'');const actions=document.createElement('div');actions.className='row-actions';const editButton=document.createElement('button');editButton.type='button';editButton.className='row-btn row-icon-button edit';editButton.setAttribute('aria-label','编辑流程');editButton.title='编辑流程';editButton.innerHTML='<img src="assets/list-icons/file-detail.svg" alt="">';editButton.addEventListener('click',()=>openFlowEditor(record));const menuEdit=document.createElement('button');menuEdit.type='button';menuEdit.className='row-btn';menuEdit.textContent='编辑流程';menuEdit.addEventListener('click',()=>openFlowEditor(record));const moreMenu=document.createElement('agv-action-menu');moreMenu.dataset.agvActionMenuTrigger='icon';moreMenu.dataset.agvActionMenuPlacement='top';actions.append(editButton,menuEdit,moreMenu);moreMenu.actions=[menuEdit];actionCell.appendChild(actions);
       flowTableBody.appendChild(row);
     });
     if(flowFilter?.value)flowFilter.dispatchEvent(new Event('input'));

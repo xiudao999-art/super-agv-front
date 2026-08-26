@@ -12,3 +12,9 @@
 @media(max-width:1000px){.list-head{align-items:flex-start;flex-direction:column}.tools{width:100%;overflow-x:auto}.pager-row{align-items:flex-start;flex-direction:column}}@media(max-width:760px){.page-head{padding:14px}.page-head h1{font-size:18px}.page-head p{font-size:12px}.page-canvas{padding:12px}.tabs-row{padding:12px;overflow-x:auto}.content{padding:16px 12px}.tool-btn{flex:0 0 auto}.form-grid{grid-template-columns:1fr}.form-field.wide{grid-column:auto}.alert-drawer{width:100vw}.recovery-process-grid{grid-template-columns:1fr}}
 @media(max-width:1100px){.recovery-process-grid{grid-template-columns:1fr}}
 @media(max-width:1200px){.editor-fields{grid-template-columns:1fr}.editor-layout{min-width:1190px}.editor-shell{overflow-x:auto}}
+
+
+/* Figma action column · flow templates */
+.content .row-actions{align-items:center;gap:8px}.content .row-icon-button{display:inline-flex;width:16px;min-width:16px;height:16px;min-height:16px;align-items:center;justify-content:center;padding:0;border:0;border-radius:0;background:transparent}.content .row-icon-button img{display:block;width:16px;height:16px}.content .row-icon-button:hover{filter:brightness(.88)}
+
+.content agv-action-menu[data-agv-action-menu-trigger="icon"] .agv-action-menu__trigger{width:16px;min-width:16px;height:16px;min-height:16px;padding:0;border:0;border-radius:0;background:transparent}.content .agv-action-menu__icon{display:block;width:16px;height:16px}.content agv-action-menu[data-agv-action-menu-trigger="icon"] .agv-action-menu__panel{min-width:88px}

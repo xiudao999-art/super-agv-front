@@ -35,6 +35,7 @@
     location.href='process-template-editor.html?id='+encodeURIComponent(templateId);
   }
 
+
   async function deployTemplate(template,button){
     if(!window.confirm('确认发布模板“'+template.templateName+'”吗？发布后将部署到 Flowable。'))return;
     const originalLabel=button.textContent;button.disabled=true;button.textContent='发布中…';
@@ -69,9 +70,9 @@
       textCell(row,template.applicableObject||'-');
       const statusCell=textCell(row,'');const status=document.createElement('span');status.className='status-tag '+(template.status==='ENABLED'?'valid':'draft');status.textContent=(template.version?'V'+template.version+' · ':'')+(template.statusDescription||(template.status==='ENABLED'?'已启用':'草稿'));status.title='更新时间：'+formatDateTime(template.updatedAt);statusCell.appendChild(status);
       const actionCell=textCell(row,'');const actions=document.createElement('div');actions.className='row-actions';
+      const editButton=document.createElement('button');editButton.type='button';editButton.className='row-btn row-icon-button edit';editButton.setAttribute('aria-label','编辑模板');editButton.title='编辑模板';editButton.innerHTML='<img src="assets/list-icons/file-detail.svg" alt="">';editButton.addEventListener('click',event=>{event.stopPropagation();openEditor(template.id)});
       const deployButton=document.createElement('button');deployButton.type='button';deployButton.className='row-btn';deployButton.textContent=template.status==='ENABLED'?'重新发布':'发布';deployButton.addEventListener('click',event=>{event.stopPropagation();deployTemplate(template,deployButton)});
-      const editButton=document.createElement('button');editButton.type='button';editButton.className='row-btn edit';editButton.textContent='编辑';editButton.addEventListener('click',event=>{event.stopPropagation();openEditor(template.id)});
-      actions.append(deployButton,editButton);actionCell.appendChild(actions);tableBody.appendChild(row);
+      const moreMenu=document.createElement('agv-action-menu');moreMenu.dataset.agvActionMenuTrigger='icon';moreMenu.dataset.agvActionMenuPlacement='top';actions.append(editButton,deployButton,moreMenu);moreMenu.actions=[deployButton];actionCell.appendChild(actions);tableBody.appendChild(row);
     });
     if(filterInput?.value)filterInput.dispatchEvent(new Event('input'));
   }
