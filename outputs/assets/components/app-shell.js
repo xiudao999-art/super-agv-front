@@ -57,7 +57,8 @@ export class AgvAppShell extends HTMLElement {
 
   connectedCallback() {
     const current = this.getAttribute('active-route') || location.pathname.split('/').pop() || 'robot-dispatch-dashboard.html';
-    const title = this.getAttribute('section-title') || document.querySelector('.page-head h1, agv-page-header h1')?.textContent?.trim() || '运行总览';
+    const configMenuItem = navGroups.find(group => group.label === '配置中心')?.items.find(item => item.href === current);
+    const title = configMenuItem?.label || this.getAttribute('section-title') || document.querySelector('.page-head h1, agv-page-header h1')?.textContent?.trim() || '运行总览';
     const user = this.getAttribute('user-name') || '陈工';
     const nav = navGroups.map(group => `
       <div class="nav-group">
@@ -126,6 +127,16 @@ export class AgvAppShell extends HTMLElement {
         </header>
         <slot></slot>
       </main>`;
+
+    if (configMenuItem) {
+      requestAnimationFrame(() => {
+        const pageHeader = this.querySelector('agv-page-header.page-head');
+        const pageTitle = pageHeader?.querySelector('h1');
+        if (pageTitle) pageTitle.textContent = configMenuItem.label;
+        pageHeader?.querySelector('p')?.remove();
+        document.title = `复合机器人调度系统 · ${configMenuItem.label}`;
+      });
+    }
 
     const sidebar = this.shadowRoot.querySelector('.sidebar');
     const scrim = this.shadowRoot.querySelector('.scrim');
