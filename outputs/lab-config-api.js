@@ -93,12 +93,13 @@
   function setMutationState(){
     const editable=canMutate();
     ['addNode','addConnection','addStation','addPoint'].forEach(id=>{const button=document.getElementById(id);if(button)button.disabled=!editable});
+    if(page==='passage-rules.html')document.getElementById('addNode').disabled=false;
     document.querySelectorAll('[data-config-mutation]').forEach(button=>button.disabled=!editable);
   }
 
   function renderContext(message){
     document.getElementById('labApiBar')?.remove();
-    if(page==='stations-and-points.html'){setMutationState();return}
+    if(['passage-rules.html','stations-and-points.html'].includes(page)){setMutationState();return}
     const bar=document.createElement('div');bar.className='lab-api-bar';bar.id='labApiBar';
     const meta=document.createElement('div');meta.className='lab-api-meta';
     const title=document.createElement('strong');title.textContent=detail?((detail.labName||detail.spaceName||labName||'实验室')+' / '+(detail.map?.name||'未命名地图')):'实验室配置';
@@ -200,7 +201,8 @@
   }
 
   async function saveEntity(collection,id,payload){
-    if(!canMutate())throw new Error('已发布配置为只读，请先创建草稿');
+    const canCreatePassageNode=page==='passage-rules.html'&&collection==='nodes'&&id==null;
+    if(!canMutate()&&!canCreatePassageNode)throw new Error('已发布配置为只读，请先创建草稿');
     const endpoint='/api/lab-configs/'+configId+'/'+collection+(id!=null?'/'+encodeURIComponent(id):'');
     await request(endpoint,{method:id!=null?'PUT':'POST',body:JSON.stringify(payload)});notify(id!=null?'配置项已更新':'配置项已新增');
   }
