@@ -333,7 +333,7 @@
       grid-template-columns: minmax(0, 1129fr) minmax(363px, 363fr);
       gap: 20px;
       margin-top: 20px;
-      align-items: stretch;
+      align-items: start;
     }
     .task-card {
       min-width: 0;
@@ -358,15 +358,15 @@
     .step.active .step-label { font-weight: 700; }
     .map-art {
       position: relative;
-      flex: 1;
+      flex: 0 0 auto;
       min-height: 0;
       overflow: hidden;
       width: 100%;
-      aspect-ratio: auto;
+      aspect-ratio: 1024 / 551;
       border: 1px solid rgba(8,24,41,.06);
       border-radius: 10px;
       background-color: #f7f7f5;
-      background-image: url('assets/overview/lab-map.png');
+      background-image: var(--map-image, url('assets/overview/lab-map.png'));
       background-repeat: no-repeat;
       background-size: 100% 100%;
       background-position: center;
@@ -466,6 +466,66 @@
       box-shadow: 0 6px 18px rgba(33,130,209,.25);
     }
     .map-action:hover { background: #176fb5; transform: translateY(-1px); }
+    .map-art.lab-map-loading { background-image: none !important; }
+    .lab-map-loading::before,
+    .lab-map-error::before {
+      content: attr(data-map-state);
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      color: #69737d;
+      background: #f7f9fa;
+      font-size: 13px;
+      text-align: center;
+    }
+    .lab-map-error::before { color: #e1473f; background: #fff8f7; }
+    .lab-map-node { cursor: pointer; pointer-events: all; filter: drop-shadow(0 2px 3px rgba(12,29,47,.22)); }
+    .lab-map-node:hover,
+    .lab-map-node:focus { filter: drop-shadow(0 0 5px rgba(33,130,209,.6)); outline: 0; }
+    .lab-map-link {
+      fill: none;
+      stroke: #27558b;
+      stroke-width: 2.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+      opacity: .92;
+    }
+    .lab-map-label,
+    .lab-map-origin-label,
+    .lab-map-axis-label {
+      fill: #102133;
+      paint-order: stroke;
+      stroke: #fff;
+      stroke-width: 4px;
+      stroke-linejoin: round;
+      font-size: 13px;
+      font-weight: 700;
+      pointer-events: none;
+    }
+    .lab-map-point { fill: #7b4bb7; stroke: #fff; stroke-width: 2.2; vector-effect: non-scaling-stroke; }
+    .lab-map-origin-line { fill: none; stroke: #566574; stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+    .lab-map-origin-arrow { fill: #566574; stroke: none; }
+    .lab-map-origin-label { font-size: 12px; }
+    .lab-map-axis-label { fill: #566574; font-size: 11px; }
+    .lab-map-status {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 2;
+      max-width: calc(100% - 20px);
+      padding: 7px 10px;
+      border: 1px solid rgba(12,29,47,.09);
+      border-radius: 7px;
+      color: #354454;
+      background: rgba(255,255,255,.92);
+      font-size: 10px;
+      line-height: 1.45;
+      backdrop-filter: blur(5px);
+    }
 
     .side-panel { padding: 20px; }
     .side-panel + .side-panel { margin-top: 20px; }
@@ -1231,7 +1291,7 @@
       }
     });
   </script>
-  <script src="dashboard-overview-api.js"></script>
-  <script src="dashboard-lab-map-api.js"></script>
+  <script type="module" src="dashboard-overview-api.js"></script>
+  <script type="module" src="dashboard-lab-map-api.js"></script>
 </body>
 </html>

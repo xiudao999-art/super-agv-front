@@ -22,6 +22,8 @@ import { getLaboratory, getLaboratoryConfig, resolveDashboardAssetUrl } from './
   if(!mapArt||!routeLayer)return;
 
   const SVG_NS='http://www.w3.org/2000/svg';
+  const MAP_COORDINATE_WIDTH=1024;
+  const MAP_COORDINATE_HEIGHT=551;
 
 
   let currentLab=null,currentConfig=null,currentDetail=null;
@@ -50,8 +52,7 @@ import { getLaboratory, getLaboratoryConfig, resolveDashboardAssetUrl } from './
   }
 
   function createProjector(){
-    const width=1024,height=551,clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
-    return item=>({x:clamp(item.x,0,width),y:height-clamp(item.y,0,height)});
+    return item=>({x:item.x,y:MAP_COORDINATE_HEIGHT-item.y});
   }
 
   function pointLabel(item){
@@ -59,7 +60,7 @@ import { getLaboratory, getLaboratoryConfig, resolveDashboardAssetUrl } from './
   }
 
   function addInteractiveNode(group,item,position,index){
-    const wrapper=svg('g',{class:'lab-map-node',tabindex:'0',role:'button','aria-label':pointLabel(item),'data-map-label':pointLabel(item)}),shape=svg('path',{class:'lab-map-point',d:'M '+position.x+' '+(position.y-9)+' L '+(position.x+9)+' '+position.y+' L '+position.x+' '+(position.y+9)+' L '+(position.x-9)+' '+position.y+' Z'});
+    const wrapper=svg('g',{class:'lab-map-node',tabindex:'0',role:'button','aria-label':pointLabel(item),'data-map-label':pointLabel(item),'data-point-id':item.id,'data-point-x':item.x,'data-point-y':item.y}),shape=svg('path',{class:'lab-map-point',d:'M '+position.x+' '+(position.y-9)+' L '+(position.x+9)+' '+position.y+' L '+position.x+' '+(position.y+9)+' L '+(position.x-9)+' '+position.y+' Z'});
     const title=svg('title');title.textContent=pointLabel(item);wrapper.append(title,shape);
     if(index<24){const label=svg('text',{class:'lab-map-label',x:position.x+11,y:position.y-10});label.textContent='ID '+item.id;wrapper.appendChild(label)}
     const announcePoint=()=>announce(pointLabel(item));wrapper.addEventListener('click',announcePoint);wrapper.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();announcePoint()}});group.appendChild(wrapper);
@@ -67,39 +68,37 @@ import { getLaboratory, getLaboratoryConfig, resolveDashboardAssetUrl } from './
 
   function renderLegend(){
     if(!legend)return;
-    legend.innerHTML='<span class="legend-item" style="color:#7b4bb7"><i class="legend-line"></i><span>点位</span></span><span class="legend-item legend-blue"><i class="legend-line"></i><span>先横后竖</span></span><span class="legend-item"><span>左下角 (0,0)</span></span>';
+    legend.innerHTML='<span class="legend-item" style="color:#7b4bb7"><i class="legend-line"></i><span>原始点位坐标</span></span><span class="legend-item legend-blue"><i class="legend-line"></i><span>先横后竖（单直角）</span></span><span class="legend-item"><span>左下角 (0,0) · X→右 · Y→上</span></span>';
   }
 
   function renderStatus(detail,entities){
     mapArt.querySelector('.lab-map-status')?.remove();const status=document.createElement('div');status.className='lab-map-status';
-    status.textContent=(detail.map?.name||'实验室地图')+' · '+entities.points.length+' 个点位 · 左下角为 (0,0) · 先横后竖';mapArt.appendChild(status);
+    status.textContent=(detail.map?.name||'实验室地图')+' · '+entities.points.length+' 个点位 · 原始坐标不缩放';mapArt.appendChild(status);
   }
 
   function applyMapImage(imageUrl){
     if(!imageUrl)throw new Error('配置详情未返回地图图片');
     const fullUrl=resolveDashboardAssetUrl(imageUrl,apiBaseUrl);mapArt.style.setProperty('--map-image','url("'+fullUrl.replace(/"/g,'%22')+'")');
-    const image=new Image();image.onload=()=>{if(image.naturalWidth&&image.naturalHeight)mapArt.style.aspectRatio=image.naturalWidth+' / '+image.naturalHeight};image.src=fullUrl;
   }
 
   function rightAnglePath(start,end){
-    const verticalDirection=end.y>=start.y?1:-1,arrowEndY=end.y-verticalDirection*13;
-    return'M '+start.x+' '+start.y+' H '+end.x+' V '+arrowEndY;
+    return'M '+start.x+' '+start.y+' H '+end.x+' V '+end.y;
   }
 
   function renderOrigin(){
-    const group=svg('g',{'aria-label':'地图坐标原点，左下角 0 0'}),xAxis=svg('path',{class:'lab-map-origin-line',d:'M 0 551 H 74'}),yAxis=svg('path',{class:'lab-map-origin-line',d:'M 0 551 V 477'}),label=svg('text',{class:'lab-map-origin-label',x:12,y:531});label.textContent='(0,0)';group.append(xAxis,yAxis,label);routeLayer.appendChild(group);
+    const group=svg('g',{'aria-label':'地图坐标原点：左下角为 0,0；X 向右；Y 向上'}),xAxis=svg('path',{class:'lab-map-origin-line',d:'M 0 '+MAP_COORDINATE_HEIGHT+' H 74'}),yAxis=svg('path',{class:'lab-map-origin-line',d:'M 0 '+MAP_COORDINATE_HEIGHT+' V '+(MAP_COORDINATE_HEIGHT-74)}),xArrow=svg('path',{class:'lab-map-origin-arrow',d:'M 74 '+MAP_COORDINATE_HEIGHT+' l -8 -5 v 10 Z'}),yArrow=svg('path',{class:'lab-map-origin-arrow',d:'M 0 '+(MAP_COORDINATE_HEIGHT-74)+' l -5 8 h 10 Z'}),label=svg('text',{class:'lab-map-origin-label',x:12,y:MAP_COORDINATE_HEIGHT-15}),xLabel=svg('text',{class:'lab-map-axis-label',x:80,y:MAP_COORDINATE_HEIGHT-7}),yLabel=svg('text',{class:'lab-map-axis-label',x:7,y:MAP_COORDINATE_HEIGHT-82});label.textContent='(0,0)';xLabel.textContent='X';yLabel.textContent='Y';group.append(xAxis,yAxis,xArrow,yArrow,label,xLabel,yLabel);routeLayer.appendChild(group);
   }
 
   function renderDetail(lab,config,detail){
-    clearState();const imageUrl=detail.map?.imageUrl||config.map?.imageUrl;if(imageUrl)applyMapImage(imageUrl);else{mapArt.style.removeProperty('--map-image');mapArt.style.removeProperty('aspect-ratio')}routeLayer.replaceChildren();routeLayer.setAttribute('viewBox','0 0 1024 551');routeLayer.setAttribute('preserveAspectRatio','none');routeLayer.setAttribute('aria-label',DEMO_MODE?'四个写死点位的静态演示图层':'后端实验室地图点位图层');
+    clearState();const imageUrl=detail.map?.imageUrl||config.map?.imageUrl;if(imageUrl)applyMapImage(imageUrl);else{mapArt.style.removeProperty('--map-image');mapArt.style.removeProperty('aspect-ratio')}routeLayer.removeAttribute('hidden');if(legend)legend.removeAttribute('hidden');routeLayer.replaceChildren();routeLayer.setAttribute('viewBox','0 0 '+MAP_COORDINATE_WIDTH+' '+MAP_COORDINATE_HEIGHT);routeLayer.setAttribute('preserveAspectRatio','none');routeLayer.setAttribute('aria-label',DEMO_MODE?'四个写死点位的静态演示图层':'后端实验室地图点位图层；左下角为原点；原始坐标不缩放');
     const title=svg('title');title.textContent=(lab.name||detail.labName||'实验室')+' 地图与点位';routeLayer.appendChild(title);
     const entities=resolveSpatialEntities(detail),project=createProjector(),positions=entities.points.map(point=>project(point));
     const defs=svg('defs'),marker=svg('marker',{id:'pointSequenceArrow',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto-start-reverse'}),arrow=svg('path',{d:'M 0 0 L 10 5 L 0 10 Z',fill:'#27558b'});marker.appendChild(arrow);defs.appendChild(marker);routeLayer.appendChild(defs);
     const linksGroup=svg('g',{'aria-label':'点位按 ID 从小到大的直角箭头路线'});
     renderOrigin();for(let index=0;index<entities.points.length-1;index+=1){const startPoint=entities.points[index],endPoint=entities.points[index+1],path=svg('path',{class:'lab-map-link',d:rightAnglePath(positions[index],positions[index+1]),'marker-end':'url(#pointSequenceArrow)'}),pathTitle=svg('title');pathTitle.textContent='点位 ID '+startPoint.id+' → ID '+endPoint.id+' · 先横后竖';path.appendChild(pathTitle);linksGroup.appendChild(path)}routeLayer.appendChild(linksGroup);
-    const markers=svg('g',{'aria-label':'按 ID 升序排列的机台点位'});entities.points.forEach((item,index)=>addInteractiveNode(markers,item,positions[index],index));routeLayer.appendChild(markers);renderLegend();renderStatus(detail,entities);
+    const markers=svg('g',{'aria-label':'按 ID 升序排列的点位'});entities.points.forEach((item,index)=>addInteractiveNode(markers,item,positions[index],index));routeLayer.appendChild(markers);renderLegend();renderStatus(detail,entities);
     if(taskTitle)taskTitle.textContent='实验室地图：'+(detail.map?.name||config.map?.name||'-');
-    if(taskMeta)taskMeta.textContent=(lab.name||detail.labName||'实验室')+' · 配置 #'+detail.id+' · '+detail.status+' · '+entities.points.length+' 个点位 · 左下角 (0,0) · 先横后竖';
+    if(taskMeta)taskMeta.textContent=(lab.name||detail.labName||'实验室')+' · 配置 #'+detail.id+' · '+detail.status+' · '+entities.points.length+' 个点位 · 左下角 (0,0) · X→右 · Y→上 · 原始坐标 · 先横后竖';
     const oldAction=mapArt.querySelector('.map-action');if(oldAction)oldAction.hidden=true;
   }
 
@@ -107,9 +106,9 @@ import { getLaboratory, getLaboratoryConfig, resolveDashboardAssetUrl } from './
     if(DEMO_MODE){currentLab=DEMO_LAB;currentConfig=DEMO_CONFIG;currentDetail=DEMO_DETAIL;renderDetail(DEMO_LAB,DEMO_CONFIG,DEMO_DETAIL);return}
     showState('正在加载唯一实验室和地图点位…',false);
     try{
-      const labResult=await getLaboratory({baseUrl:apiBaseUrl}),lab=labResult.data;if(!lab)throw new Error('未找到唯一实验室');
+      const labResult=await getLaboratory({baseUrl:apiBaseUrl,timeout:30000}),lab=labResult.data;if(!lab)throw new Error('未找到唯一实验室');
       const config=lab.published||lab.draft,configId=configIdOf(config);if(!configId)throw new Error('唯一实验室暂无可用 configId');
-      const detailResult=await getLaboratoryConfig(configId,{baseUrl:apiBaseUrl}),detail=detailResult.data;if(!detail)throw new Error('配置详情为空');
+      const detailResult=await getLaboratoryConfig(configId,{baseUrl:apiBaseUrl,timeout:30000}),detail=detailResult.data;if(!detail)throw new Error('配置详情为空');
       currentLab=lab;currentConfig=config;currentDetail=detail;renderDetail(lab,config,detail);
     }catch(error){console.error('加载运行总览实验室地图失败',error);showState('地图加载失败：'+error.message,true);if(taskMeta)taskMeta.textContent='请检查唯一实验室和配置详情接口'}
   }

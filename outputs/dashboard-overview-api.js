@@ -145,7 +145,7 @@ import { dashboardOverviewEndpoint, getDashboardOverview } from './assets/data/d
     const activeController=controller;
     setLoading();
     try{
-      const result=await getDashboardOverview({baseUrl:apiBaseUrl,signal:activeController.signal});
+      const result=await getDashboardOverview({baseUrl:apiBaseUrl,signal:activeController.signal,timeout:30000});
       if(!result.data)throw new Error('接口未返回运行总览数据');
       currentData=result.data;render(currentData);window.__dashboardOverviewApi.data=currentData;
     }catch(error){
