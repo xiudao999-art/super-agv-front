@@ -939,3 +939,32 @@ body:has(.editor-shell) .flow-line-delete path {
 }
 
 body:has(.editor-shell) .flow-line-delete:hover circle { fill: #c8322b; }
+
+body:has(.editor-shell) .subflow-lines { pointer-events: none; }
+
+body:has(.editor-shell) .subflow-path {
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+body:has(.editor-shell) .subflow-path:hover,
+body:has(.editor-shell) .subflow-path.selected {
+  stroke: #e1473f;
+  stroke-width: 4;
+  filter: drop-shadow(0 0 4px rgba(225, 71, 63, 0.42));
+}
+
+body:has(.editor-shell) .subflow-preview {
+  fill: none;
+  stroke: #28bd6b;
+  stroke-width: 2.5;
+  stroke-dasharray: 7 5;
+  pointer-events: none;
+}
+
+body:has(.editor-shell) .subflow-node .node-handle {
+  background: #28bd6b;
+  box-shadow: 0 0 0 1px #75dca3;
+}
+
+body:has(.editor-shell) .subflow-canvas.connecting { cursor: crosshair; }

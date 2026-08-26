@@ -90,12 +90,12 @@
   }
 
   function parseBpmn(bpmnXml,nodeProperties){
-    if(!bpmnXml)return{nodes:[],connections:[],subflows:{}};
+    if(!bpmnXml)return{nodes:[],connections:[],subflows:{},subflowConnections:{}};
     const xml=new DOMParser().parseFromString(bpmnXml,'application/xml');
     const parserError=xml.querySelector('parsererror');
     if(parserError)throw new Error('模板 BPMN XML 无法解析');
     const process=[...xml.getElementsByTagNameNS('*','process')][0];
-    if(!process)return{nodes:[],connections:[],subflows:{}};
+    if(!process)return{nodes:[],connections:[],subflows:{},subflowConnections:{}};
     const nodeTags=new Set(['startEvent','endEvent','receiveTask','serviceTask','userTask','manualTask','task','subProcess','callActivity']);
     const nodeElements=[...process.children].filter(element=>nodeTags.has(element.localName));
     const nodes=nodeElements.map((element,index)=>{
@@ -129,7 +129,7 @@
         targetRef:element.getAttribute('targetRef')
       }))
       .filter(connection=>connection.from!==undefined&&connection.to!==undefined);
-    const subflows={};
+    const subflows={},subflowConnections={};
     nodeElements.filter(element=>element.localName==='subProcess').forEach(element=>{
       const parentKey=element.getAttribute('id');
       if(!parentKey)return;
@@ -148,9 +148,16 @@
             actionType:properties.actionType
           };
         });
-      if(children.length)subflows[parentKey]=children;
+      if(children.length){
+        subflows[parentKey]=children;
+        const childIds=new Set(children.map(child=>child.id));
+        subflowConnections[parentKey]=[...element.children]
+          .filter(child=>child.localName==='sequenceFlow')
+          .map((flow,index)=>({id:index+1,from:flow.getAttribute('sourceRef'),to:flow.getAttribute('targetRef')}))
+          .filter(connection=>childIds.has(connection.from)&&childIds.has(connection.to));
+      }
     });
-    return{nodes,connections,subflows};
+    return{nodes,connections,subflows,subflowConnections};
   }
 
   function restoreSubflows(rawSubflows,nodes){
@@ -179,6 +186,26 @@
     nextSubNodeIdV2=Math.max(1,largestSubNodeId+1);
   }
 
+  function restoreSubflowConnections(rawConnections,nodes){
+    subflowConnectionsV2.clear();
+    const nodeByBpmnId=new Map(nodes.map(node=>[node.bpmnNodeId,node.id]));
+    let largestConnectionId=0;
+    Object.entries(rawConnections||{}).forEach(([parentKey,connections])=>{
+      if(!Array.isArray(connections))return;
+      const numericParentId=Number(parentKey);
+      const parentId=nodeByBpmnId.get(parentKey)||(Number.isFinite(numericParentId)&&nodes.some(node=>node.id===numericParentId)?numericParentId:null);
+      if(parentId===null||parentId===undefined)return;
+      const childIds=new Set((subflowDataV2.get(parentId)||[]).map(child=>child.id));
+      const normalized=connections.map((connection,index)=>{
+        const id=finiteNumber(connection.id,index+1);
+        largestConnectionId=Math.max(largestConnectionId,id);
+        return {...connection,id,from:String(connection.from||''),to:String(connection.to||'')};
+      }).filter(connection=>connection.from!==connection.to&&childIds.has(connection.from)&&childIds.has(connection.to));
+      subflowConnectionsV2.set(parentId,normalized);
+    });
+    nextSubConnectionIdV2=Math.max(1,largestConnectionId+1);
+  }
+
   function restoreTemplate(detail){
     const editorData=parseEditorData(detail.editorData);
     const nodeProperties=editorData.nodeProperties&&typeof editorData.nodeProperties==='object'?editorData.nodeProperties:{};
@@ -195,12 +222,15 @@
     editorConnectionsV2=restored.connections;
     const storedSubflows=editorData.subflows&&Object.keys(editorData.subflows).length?editorData.subflows:restored.subflows;
     restoreSubflows(storedSubflows,editorNodesV2);
+    const storedSubflowConnections=editorData.subflowConnections&&typeof editorData.subflowConnections==='object'?editorData.subflowConnections:(restored.subflowConnections||Object.fromEntries(Object.entries(storedSubflows||{}).map(([parentKey,children])=>[parentKey,Array.isArray(children)?children.slice(0,-1).map((child,index)=>({id:index+1,from:String(child.id),to:String(children[index+1].id)})):[]])));
+    restoreSubflowConnections(storedSubflowConnections,editorNodesV2);
     nextNodeIdV2=Math.max(0,...editorNodesV2.map(node=>node.id))+1;
     nextConnectionIdV2=Math.max(0,...editorConnectionsV2.map(connection=>connection.id))+1;
     selectedNodeIdV2=editorNodesV2[0]?.id??null;
     selectedConnectionIdV2=null;
     subflowParentIdV2=null;
     selectedSubNodeIdV2=null;
+    selectedSubConnectionIdV2=null;
     subSelectionActiveV2=false;
 
     if(templateNumberInputV2)templateNumberInputV2.value=detail.templateNumber||'';

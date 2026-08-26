@@ -14,7 +14,7 @@ const navGroups = [
   { label: '运维与数据', items: [
     { href: 'current-anomalies.html', label: '异常与恢复', icon: 'shield' },
     { href: 'system-logs.html', label: '系统日志', icon: 'log' },
-    { href: 'lab-capacity.html', label: '实验室产能', icon: 'chart' }
+    { href: 'lab-capacity.html', label: 'AGV产能', icon: 'chart' }
   ] }
 ];
 
