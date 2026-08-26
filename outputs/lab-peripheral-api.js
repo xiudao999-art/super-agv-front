@@ -3,9 +3,7 @@
 
   const resources = [
     { code: 'D-01', type: '自动门', space: '空间 A / 总览地图 V3.2', coordinate: 'X 18.400 / Y 3.200 / θ 90.0°', navPoint: 'DOOR-A-01', status: '在线', remark: '任务到达前自动预约开门' },
-    { code: 'E-01', type: '电梯', space: '空间 A ↔ 空间 B', coordinate: 'A：32.100 / 8.200 / 0°\nB：4.300 / 8.100 / 180°', navPoint: 'E-A ↔ E-B', status: '在线', remark: '连接 A、B 两个作业空间' },
-    { code: 'CHG-01', type: '充电桩', space: '空间 B / 总览地图 V3.2', coordinate: 'X 7.600 / Y 2.400 / θ 180.0°', navPoint: 'CHG-B-01', status: '可用', remark: '低电量任务默认充电点' },
-    { code: 'CHG-02', type: '备用充电桩', space: '空间 A / 总览地图 V3.2', coordinate: 'X 3.200 / Y 2.150 / θ 90.0°', navPoint: 'CHG-A-02', status: '备用', remark: '主充电桩不可用时启用' }
+    { code: 'E-01', type: '电梯', space: '空间 A ↔ 空间 B', coordinate: 'A：32.100 / 8.200 / 0°\nB：4.300 / 8.100 / 180°', navPoint: 'E-A ↔ E-B', status: '在线', remark: '连接 A、B 两个作业空间' }
   ];
 
   const rows = document.getElementById('resourceRows');

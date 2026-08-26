@@ -89,14 +89,17 @@
   }
 
   function isDraft(){return String(detail?.status||'').toUpperCase()==='DRAFT'}
+  function canMutate(){return page==='stations-and-points.html'||isDraft()}
   function setMutationState(){
-    const editable=isDraft();
+    const editable=canMutate();
     ['addNode','addConnection','addStation','addPoint'].forEach(id=>{const button=document.getElementById(id);if(button)button.disabled=!editable});
+    if(page==='passage-rules.html')document.getElementById('addNode').disabled=false;
     document.querySelectorAll('[data-config-mutation]').forEach(button=>button.disabled=!editable);
   }
 
   function renderContext(message){
     document.getElementById('labApiBar')?.remove();
+    if(['passage-rules.html','stations-and-points.html'].includes(page)){setMutationState();return}
     const bar=document.createElement('div');bar.className='lab-api-bar';bar.id='labApiBar';
     const meta=document.createElement('div');meta.className='lab-api-meta';
     const title=document.createElement('strong');title.textContent=detail?((detail.labName||detail.spaceName||labName||'实验室')+' / '+(detail.map?.name||'未命名地图')):'实验室配置';
@@ -198,13 +201,14 @@
   }
 
   async function saveEntity(collection,id,payload){
-    if(!isDraft())throw new Error('已发布配置为只读，请先创建草稿');
+    const canCreatePassageNode=page==='passage-rules.html'&&collection==='nodes'&&id==null;
+    if(!canMutate()&&!canCreatePassageNode)throw new Error('已发布配置为只读，请先创建草稿');
     const endpoint='/api/lab-configs/'+configId+'/'+collection+(id!=null?'/'+encodeURIComponent(id):'');
     await request(endpoint,{method:id!=null?'PUT':'POST',body:JSON.stringify(payload)});notify(id!=null?'配置项已更新':'配置项已新增');
   }
 
   async function removeEntity(collection,id,label){
-    if(!isDraft())return notify('已发布配置为只读，请先创建草稿');
+    if(!canMutate())return notify('已发布配置为只读，请先创建草稿');
     if(!window.confirm('确认删除“'+label+'”吗？'))return;
     try{await request('/api/lab-configs/'+configId+'/'+collection+'/'+encodeURIComponent(id),{method:'DELETE'});notify('配置项已删除');await load()}catch(error){console.error('删除实验室配置项失败',error);notify('删除失败：'+error.message)}
   }

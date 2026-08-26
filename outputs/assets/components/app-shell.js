@@ -2,13 +2,15 @@ const navGroups = [
   { items: [{ href: 'robot-dispatch-dashboard.html', label: '运行总览', icon: 'grid' }] },
   { label: '运行调度', items: [
     { href: 'order-management.html', label: '订单管理', icon: 'clipboard' },
-    { href: 'storage-and-carriers.html', label: '库位与载具', icon: 'sliders' }
+    { href: 'storage-and-carriers.html', label: '库位与载具', icon: 'sliders' },
+    { href: 'device-debug.html', label: '设备调试', icon: 'wrench' }
   ] },
   { label: '配置中心', items: [
     { href: 'robots-and-devices.html', label: '机器人与设备', icon: 'panel' },
     { href: 'laboratory-configuration.html', label: '地图信息', icon: 'map' },
     { href: 'stations-and-points.html', label: '机台与点位', icon: 'panel' },
     { href: 'peripheral-resources.html', label: '外围资源', icon: 'sliders' },
+    { href: 'charging-and-battery.html', label: '充电桩与电池配置', icon: 'battery' },
     { href: 'process-list.html', label: '流程与动作', icon: 'flow' }
   ] },
   { label: '运维与数据', items: [
@@ -17,6 +19,7 @@ const navGroups = [
     { href: 'lab-capacity.html', label: 'AGV产能', icon: 'chart' }
   ] },
   { label: '系统管理', items: [
+    { href: 'user-management.html', label: '用户管理', icon: 'users' },
     { href: 'role-permissions.html', label: '角色权限管理', icon: 'users' }
   ] }
 ];
@@ -32,6 +35,8 @@ const iconPaths = {
   log: '<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V4Z"/><path d="M7 8h7M7 12h7M7 16h5"/>',
   chart: '<path d="M4 20V10h5v10M9 20V4h6v16M15 20v-7h5v7M2 20h20"/>',
   users: '<circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 13a5 5 0 0 1 4 5"/>',
+  wrench: '<path d="M14.7 6.3a4 4 0 0 0-5-5l2.2 2.2-2.4 2.4-2.2-2.2a4 4 0 0 0 5 5l6.5 6.5a2.1 2.1 0 1 1-3 3l-6.5-6.5Z"/><path d="m5 19 3.7-3.7"/>',
+  battery: '<rect x="3" y="6" width="16" height="12" rx="2"/><path d="M21 10v4M7 10v4M5 12h4"/>',
   document: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
   alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/>',
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>'
@@ -109,8 +114,8 @@ export class AgvAppShell extends HTMLElement {
         * { box-sizing:border-box; }
         .icon { width:18px; height:18px; flex:0 0 auto; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
         .sidebar { position:fixed; inset:0 auto 0 0; z-index:30; width:var(--agv-sidebar-width,220px); display:flex; flex-direction:column; padding:18px 10px 14px; overflow:hidden; background:#fff; border-right:1px solid var(--agv-line-soft,#e9edf1); transition:transform .2s ease; }
-        .brand { height:38px; display:flex; align-items:center; gap:10px; padding:0 9px; margin-bottom:20px; color:var(--agv-blue,#1677c8); font-size:15px; font-weight:750; white-space:nowrap; }
-        .robot-logo { width:29px; height:29px; flex:0 0 auto; }
+        .brand { height:44px; display:flex; align-items:center; padding:0 8px; margin-bottom:18px; text-decoration:none; }
+        .brand-logo { display:block; width:100%; height:auto; max-height:40px; object-fit:contain; object-position:left center; }
         nav { flex:1; min-height:0; overflow-y:auto; }
         .nav-group { margin:12px 0 19px; }
         .nav-group:first-child { margin-top:0; }
@@ -153,7 +158,7 @@ export class AgvAppShell extends HTMLElement {
         @media (prefers-reduced-motion:reduce) { .sidebar,.top-action { transition:none; } }
       </style>
       <aside class="sidebar" aria-label="主导航">
-        <div class="brand"><svg class="robot-logo" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M14 3a2 2 0 1 1 4 0v2h2.5A5.5 5.5 0 0 1 26 10.5V12h1a3 3 0 1 1 0 6h-1v1.5a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 6 19.5V18H5a3 3 0 1 1 0-6h1v-1.5A5.5 5.5 0 0 1 11.5 5H14V3Zm-3 10v5h3v-5h-3Zm7 0v5h3v-5h-3Z"/></svg><span>复合机器人调度系统</span></div>
+        <a class="brand" href="robot-dispatch-dashboard.html" aria-label="返回运行总览"><img class="brand-logo" src="assets/logo.svg" alt="昆灵科技"></a>
         <nav>${nav}</nav>
         <div class="version" aria-label="系统版本">v2.3</div>
       </aside>
