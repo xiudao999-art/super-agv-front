@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>复合机器人调度系统 · 实验室产能</title>
+  <title>复合机器人调度系统 · AGV产能</title>
   <link rel="stylesheet" href="assets/styles/pages/lab-capacity.css">
   <link rel="stylesheet" href="assets/styles/tokens.css">
   <link rel="stylesheet" href="assets/styles/base.css">
@@ -11,9 +11,9 @@
   <script type="module" src="assets/components/register.js" blocking="render"></script>
 </head>
 <body>
-  <agv-app-shell active-route="lab-capacity.html" section-title="实验室产能" user-name="陈工">
+  <agv-app-shell active-route="lab-capacity.html" section-title="AGV产能" user-name="陈工">
     <div class="agv-legacy-hooks" hidden><aside id="sidebar"></aside><div id="scrim"></div><button id="menuBtn" type="button"></button><button id="statusInfoBtn" type="button"></button><button id="statusBtn" type="button"></button><button id="alertInfoBtn" type="button"></button><button id="alertBtn" type="button"></button></div>
-    <agv-page-header class="page-head"><div><h1>实验室产能</h1><p>分析任务量、机台等待、路径耗时和异常影响</p></div></agv-page-header>
+    <agv-page-header class="page-head"><div><h1>AGV产能</h1><p>分析任务量、机台等待、路径耗时和异常影响</p></div></agv-page-header>
     <main class="page-canvas capacity-page">
       <section class="capacity-filter-card"><div class="capacity-filter-copy"><h2>统计条件</h2><p>默认查询近 7 天，切换时间范围后页面指标和趋势图同步刷新</p></div><label class="field-shell capacity-range-field"><span>时间范围</span><select id="capacityRange"><option>近7天</option><option>近30天</option><option>今日</option></select></label></section>
       <section class="capacity-kpis" aria-label="产能指标">

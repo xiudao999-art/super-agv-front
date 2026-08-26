@@ -6,13 +6,18 @@ const navGroups = [
   ] },
   { label: '配置中心', items: [
     { href: 'robots-and-devices.html', label: '机器人与设备', icon: 'panel' },
-    { href: 'laboratory-configuration.html', label: '实验室配置', icon: 'map' },
+    { href: 'laboratory-configuration.html', label: '地图信息', icon: 'map' },
+    { href: 'stations-and-points.html', label: '机台与点位', icon: 'panel' },
+    { href: 'peripheral-resources.html', label: '外围资源', icon: 'sliders' },
     { href: 'process-list.html', label: '流程与动作', icon: 'flow' }
   ] },
   { label: '运维与数据', items: [
     { href: 'current-anomalies.html', label: '异常与恢复', icon: 'shield' },
     { href: 'system-logs.html', label: '系统日志', icon: 'log' },
-    { href: 'lab-capacity.html', label: '实验室产能', icon: 'chart' }
+    { href: 'lab-capacity.html', label: 'AGV产能', icon: 'chart' }
+  ] },
+  { label: '系统管理', items: [
+    { href: 'role-permissions.html', label: '角色权限管理', icon: 'users' }
   ] }
 ];
 
@@ -26,6 +31,7 @@ const iconPaths = {
   shield: '<path d="M12 3 4 6v5c0 5 3.4 8.3 8 10 4.6-1.7 8-5 8-10V6l-8-3Z"/><path d="M12 8v4M12 16h.01"/>',
   log: '<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V4Z"/><path d="M7 8h7M7 12h7M7 16h5"/>',
   chart: '<path d="M4 20V10h5v10M9 20V4h6v16M15 20v-7h5v7M2 20h20"/>',
+  users: '<circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 13a5 5 0 0 1 4 5"/>',
   document: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
   alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/>',
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>'
@@ -39,12 +45,43 @@ function activeHref(current, itemHref) {
   if (current === itemHref) return true;
   const groups = {
     'storage-and-carriers.html': ['carrier-list.html', 'storage-type-list.html', 'carrier-type-list.html'],
-    'laboratory-configuration.html': ['passage-rules.html', 'stations-and-points.html', 'peripheral-resources.html'],
+    'laboratory-configuration.html': ['passage-rules.html'],
     'process-list.html': ['process-templates.html', 'process-template-editor.html'],
     'current-anomalies.html': ['alarm-records.html', 'task-recovery-status.html'],
     'order-management.html': ['order-task-detail.html']
   };
   return groups[itemHref]?.includes(current) || false;
+}
+
+function removeLaboratoryWording() {
+  const root = document.body;
+  if (!root) return;
+  const strip = value => String(value || '').replace(/实验室\s*/g, '');
+  const removableSubtitles = new Set([
+    '一期固定一台复合机器人，可由底盘、机械臂、视觉、PLC 和夹具等模组组成',
+    '当前项目只使用一张地图，无需选择或多选',
+    '点击编辑可维护空间内地图信息，并通过导航点查看地图内已标记的目标位置。',
+    '坐标值与坐标系必须成对保存，发布前校验地图版本和到达关系',
+    '外围资源坐标用于路径连接、资源预约和到位校验',
+    '当前共 4 个流程；点击流程行查看详情，点击“编辑”在弹窗中维护流程基本信息'
+  ]);
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    if (node.parentElement?.closest('script, style, template, noscript')) continue;
+    if (node.nodeValue.includes('实验室')) node.nodeValue = strip(node.nodeValue);
+  }
+  root.querySelectorAll('[title], [placeholder], [aria-label]').forEach(element => {
+    ['title', 'placeholder', 'aria-label'].forEach(attribute => {
+      const value = element.getAttribute(attribute);
+      if (value?.includes('实验室')) element.setAttribute(attribute, strip(value));
+    });
+  });
+  root.querySelectorAll('p').forEach(paragraph => {
+    if (removableSubtitles.has(strip(paragraph.textContent).trim())) paragraph.remove();
+  });
+  root.querySelectorAll('.api-scope-note').forEach(note => note.remove());
+  if (document.title.includes('实验室')) document.title = strip(document.title);
 }
 
 export class AgvAppShell extends HTMLElement {
@@ -55,7 +92,10 @@ export class AgvAppShell extends HTMLElement {
 
   connectedCallback() {
     const current = this.getAttribute('active-route') || location.pathname.split('/').pop() || 'robot-dispatch-dashboard.html';
-    const title = this.getAttribute('section-title') || document.querySelector('.page-head h1, agv-page-header h1')?.textContent?.trim() || '运行总览';
+    const configGroup = navGroups.find(group => group.label === '配置中心');
+    const configMenuItem = configGroup?.items.find(item => item.href === current);
+    const isConfigPage = configGroup?.items.some(item => activeHref(current, item.href));
+    const title = configMenuItem?.label || this.getAttribute('section-title') || document.querySelector('.page-head h1, agv-page-header h1')?.textContent?.trim() || '运行总览';
     const user = this.getAttribute('user-name') || '陈工';
     const nav = navGroups.map(group => `
       <div class="nav-group">
@@ -68,9 +108,10 @@ export class AgvAppShell extends HTMLElement {
         :host { display:block; min-height:100dvh; color:var(--agv-ink,#122235); background:var(--agv-canvas,#f3f6f8); }
         * { box-sizing:border-box; }
         .icon { width:18px; height:18px; flex:0 0 auto; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-        .sidebar { position:fixed; inset:0 auto 0 0; z-index:30; width:var(--agv-sidebar-width,220px); padding:18px 10px 22px; overflow:auto; background:#fff; border-right:1px solid var(--agv-line-soft,#e9edf1); transition:transform .2s ease; }
+        .sidebar { position:fixed; inset:0 auto 0 0; z-index:30; width:var(--agv-sidebar-width,220px); display:flex; flex-direction:column; padding:18px 10px 14px; overflow:hidden; background:#fff; border-right:1px solid var(--agv-line-soft,#e9edf1); transition:transform .2s ease; }
         .brand { height:38px; display:flex; align-items:center; gap:10px; padding:0 9px; margin-bottom:20px; color:var(--agv-blue,#1677c8); font-size:15px; font-weight:750; white-space:nowrap; }
         .robot-logo { width:29px; height:29px; flex:0 0 auto; }
+        nav { flex:1; min-height:0; overflow-y:auto; }
         .nav-group { margin:12px 0 19px; }
         .nav-group:first-child { margin-top:0; }
         .nav-label { margin:0 10px 8px; color:var(--agv-text-muted,#768392); font-size:12px; line-height:24px; }
@@ -78,6 +119,7 @@ export class AgvAppShell extends HTMLElement {
         .nav-item + .nav-item { margin-top:2px; }
         .nav-item:hover { background:#f4f7f9; }
         .nav-item.active { color:var(--agv-blue,#1677c8); background:var(--agv-blue-soft,#eaf4fd); font-weight:700; }
+        .version { flex:0 0 auto; margin:4px 8px 0; padding-top:12px; border-top:1px solid var(--agv-line-soft,#e9edf1); color:var(--agv-text-muted,#768392); font-size:12px; line-height:20px; text-align:center; }
         .shell { min-height:100dvh; margin-left:var(--agv-sidebar-width,220px); }
         .topbar { position:sticky; top:0; z-index:20; height:var(--agv-topbar-height,56px); display:flex; align-items:center; justify-content:space-between; padding:0 20px; background:rgba(255,255,255,.96); border-bottom:1px solid var(--agv-line-soft,#e9edf1); backdrop-filter:blur(12px); }
         .top-title,.top-actions,.top-action,.user-chip { display:flex; align-items:center; }
@@ -89,7 +131,8 @@ export class AgvAppShell extends HTMLElement {
         .top-action:hover { border-color:#c7d0d8; background:#f9fbfc; }
         .top-action:active { transform:translateY(1px); }
         .top-action .icon { width:16px; height:16px; color:var(--agv-text-muted,#768392); }
-        .user-chip { gap:8px; margin-left:2px; font-size:13px; font-weight:650; }
+        .user-chip { gap:8px; margin-left:2px; color:inherit; font-size:13px; font-weight:650; text-decoration:none; }
+        .user-chip:hover { color:var(--agv-blue,#1677c8); }
         .avatar { width:32px; height:32px; display:grid; place-items:center; border-radius:50%; color:#fff; background:var(--agv-blue,#1677c8); }
         .avatar svg { width:18px; height:18px; fill:currentColor; }
         .menu-btn { display:none; }
@@ -112,24 +155,52 @@ export class AgvAppShell extends HTMLElement {
       <aside class="sidebar" aria-label="主导航">
         <div class="brand"><svg class="robot-logo" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M14 3a2 2 0 1 1 4 0v2h2.5A5.5 5.5 0 0 1 26 10.5V12h1a3 3 0 1 1 0 6h-1v1.5a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 6 19.5V18H5a3 3 0 1 1 0-6h1v-1.5A5.5 5.5 0 0 1 11.5 5H14V3Zm-3 10v5h3v-5h-3Zm7 0v5h3v-5h-3Z"/></svg><span>复合机器人调度系统</span></div>
         <nav>${nav}</nav>
+        <div class="version" aria-label="系统版本">v2.3</div>
       </aside>
       <div class="scrim"></div>
       <main class="shell">
         <header class="topbar">
           <div class="top-title"><button class="menu-btn" type="button" aria-label="打开导航菜单">${icon('menu')}</button><span class="title-icon">${icon('panel')}</span><span>${title}</span></div>
-          <div class="top-actions"><button class="top-action status" type="button">${icon('document')}<span>状态说明</span></button><button class="top-action alert" type="button">${icon('alert')}<span>异常提醒</span></button><div class="user-chip"><span class="avatar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0Z"/></svg></span><span>${user}</span></div></div>
+          <div class="top-actions"><button class="top-action status" type="button">${icon('document')}<span>状态说明</span></button><button class="top-action alert" type="button">${icon('alert')}<span>异常提醒</span></button><a class="user-chip" href="login.html" title="退出并返回登录页"><span class="avatar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0Z"/></svg></span><span>${user}</span></a></div>
         </header>
         <slot></slot>
       </main>`;
 
+    if (configMenuItem) {
+      requestAnimationFrame(() => {
+        const pageHeader = this.querySelector('agv-page-header.page-head');
+        const pageTitle = pageHeader?.querySelector('h1');
+        if (pageTitle) pageTitle.textContent = configMenuItem.label;
+        pageHeader?.querySelector('p')?.remove();
+        document.title = `复合机器人调度系统 · ${configMenuItem.label}`;
+      });
+    }
+
+    if (isConfigPage) {
+      removeLaboratoryWording();
+      this.configWordingObserver = new MutationObserver(removeLaboratoryWording);
+      this.configWordingObserver.observe(document.body, {
+        subtree: true,
+        childList: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ['title', 'placeholder', 'aria-label']
+      });
+    }
+
     const sidebar = this.shadowRoot.querySelector('.sidebar');
     const scrim = this.shadowRoot.querySelector('.scrim');
     const setOpen = open => { sidebar.classList.toggle('open', open); scrim.classList.toggle('show', open); };
+    requestAnimationFrame(() => this.shadowRoot.querySelector('.nav-item.active')?.scrollIntoView({ block: 'nearest' }));
     this.shadowRoot.querySelector('.menu-btn').addEventListener('click', () => setOpen(!sidebar.classList.contains('open')));
     scrim.addEventListener('click', () => setOpen(false));
     this.shadowRoot.querySelector('.status').addEventListener('click', () => this.forwardAction(['statusInfoBtn', 'statusBtn'], 'statusModal'));
     this.shadowRoot.querySelector('.alert').addEventListener('click', () => this.forwardAction(['alertInfoBtn', 'alertBtn'], 'alertDrawer'));
     this.shadowRoot.querySelectorAll('.nav-item').forEach(link => link.addEventListener('click', () => setOpen(false)));
+  }
+
+  disconnectedCallback() {
+    this.configWordingObserver?.disconnect();
   }
 
   forwardAction(ids, fallbackLayer) {

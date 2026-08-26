@@ -16,3 +16,4 @@
 
 /* Controller-rendered states */
 .api-scope-note{margin-bottom:16px;padding:12px 14px;border:1px solid #f1dfaa;border-radius:9px;color:#80601b;background:#fffaf0;font-size:12px;line-height:1.55}.api-scope-note strong{display:block;margin-bottom:3px;color:#6c5014}.api-unavailable td{text-align:center;color:var(--muted)}
+.tabs-row{display:none}
