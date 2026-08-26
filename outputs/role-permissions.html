@@ -23,7 +23,7 @@
         <article><span class="summary-icon blue"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 13a5 5 0 0 1 4 5"/></svg></span><div><strong id="roleCount">4</strong><span>角色总数</span></div></article>
         <article><span class="summary-icon cyan"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg></span><div><strong>12</strong><span>已分配用户</span></div></article>
         <article><span class="summary-icon green"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span><div><strong>4</strong><span>启用角色</span></div></article>
-        <article><span class="summary-icon orange"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v5c0 5 3.4 8.3 8 10 4.6-1.7 8-5 8-10V6l-8-3Z"/></svg></span><div><strong>14</strong><span>权限项</span></div></article>
+        <article><span class="summary-icon orange"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v5c0 5 3.4 8.3 8 10 4.6-1.7 8-5 8-10V6l-8-3Z"/></svg></span><div><strong>15</strong><span>权限项</span></div></article>
       </section>
 
       <section class="permission-workspace">
@@ -62,7 +62,7 @@
             </section>
             <section class="permission-group">
               <header><span class="group-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 13a5 5 0 0 1 4 5"/></svg></span><div><h4>系统管理</h4><p>角色与用户安全配置</p></div></header>
-              <div class="permission-options"><label><input type="checkbox" value="role-view"><span>查看角色</span></label><label><input type="checkbox" value="role-edit"><span>编辑权限</span></label><label><input type="checkbox" value="user-assign"><span>分配用户</span></label></div>
+              <div class="permission-options"><label><input type="checkbox" value="user-management"><span>用户管理</span></label><label><input type="checkbox" value="role-view"><span>查看角色</span></label><label><input type="checkbox" value="role-edit"><span>编辑权限</span></label><label><input type="checkbox" value="user-assign"><span>分配用户</span></label></div>
             </section>
           </div>
           <footer class="permission-actions"><span id="permissionCount">已选择 0 / 14 项权限</span><div><button class="secondary-btn" id="resetPermission" type="button">重置</button><button class="primary-btn save-btn" id="savePermission" type="button">保存权限</button></div></footer>
@@ -85,7 +85,7 @@
   <div class="toast" id="toast" role="status"></div>
 
   <script>
-    const allPermissions = ['dashboard','orders','storage','robots','map','stations','peripheral','process','anomaly','logs','capacity','role-view','role-edit','user-assign'];
+    const allPermissions = ['dashboard','orders','storage','robots','map','stations','peripheral','process','anomaly','logs','capacity','user-management','role-view','role-edit','user-assign'];
     const roleData = {
       admin: { name: '系统管理员', code: 'SUPER_ADMIN', description: '拥有系统全部功能及管理权限', avatar: '管', color: 'navy', permissions: [...allPermissions], enabled: true },
       dispatcher: { name: '调度管理员', code: 'DISPATCHER', description: '可管理订单、流程及现场调度', avatar: '调', color: 'blue', permissions: ['dashboard','orders','storage','robots','map','stations','peripheral','process','anomaly','capacity'], enabled: true },

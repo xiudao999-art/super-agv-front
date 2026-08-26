@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f3f6f8">
+  <title>复合机器人调度系统 · 用户管理</title>
+  <link rel="stylesheet" href="assets/styles/tokens.css">
+  <link rel="stylesheet" href="assets/styles/base.css">
+  <link rel="stylesheet" href="assets/styles/components.css">
+  <link rel="stylesheet" href="assets/styles/pages/user-management.css">
+  <script type="module" src="assets/components/register.js" blocking="render"></script>
+</head>
+<body>
+  <agv-app-shell active-route="user-management.html" section-title="用户管理" user-name="陈工">
+    <div class="agv-legacy-hooks" hidden>
+      <button id="statusInfoBtn" type="button"></button>
+      <button id="statusBtn" type="button"></button>
+      <button id="alertInfoBtn" type="button"></button>
+      <button id="alertBtn" type="button"></button>
+    </div>
+
+    <agv-page-header class="page-head">
+      <div><h1>用户管理</h1><p>维护系统用户、所属部门、角色及账号状态</p></div>
+      <button class="primary-btn" id="addUser" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>新增用户</span></button>
+    </agv-page-header>
+
+    <main class="page-canvas user-page">
+      <section class="user-summary" aria-label="用户统计">
+        <article><span class="summary-icon blue"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 13a5 5 0 0 1 4 5"/></svg></span><div><strong id="summaryTotal">8</strong><span>用户总数</span></div></article>
+        <article><span class="summary-icon green"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span><div><strong id="summaryEnabled">7</strong><span>启用账号</span></div></article>
+        <article><span class="summary-icon orange"><svg viewBox="0 0 24 24"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></span><div><strong id="summaryDisabled">1</strong><span>停用账号</span></div></article>
+        <article><span class="summary-icon cyan"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg></span><div><strong>4</strong><span>已配置角色</span></div></article>
+      </section>
+
+      <section class="user-panel">
+        <header class="filter-bar">
+          <label class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="userKeyword" placeholder="搜索账号、姓名或部门"></label>
+          <label class="filter-field"><span>角色</span><select id="roleFilter"><option value="">全部角色</option><option>系统管理员</option><option>调度管理员</option><option>运维工程师</option><option>只读访客</option></select></label>
+          <label class="filter-field"><span>状态</span><select id="statusFilter"><option value="">全部状态</option><option value="启用">启用</option><option value="停用">停用</option></select></label>
+          <div class="filter-actions"><button class="secondary-btn" id="resetFilter" type="button">重置</button><button class="primary-btn compact" id="searchUsers" type="button">查询</button></div>
+        </header>
+
+        <div class="table-wrap">
+          <table aria-label="用户列表">
+            <thead><tr><th>用户</th><th>账号</th><th>所属部门</th><th>角色</th><th>账号来源</th><th>状态</th><th>最近登录</th><th>操作</th></tr></thead>
+            <tbody id="userBody"></tbody>
+          </table>
+        </div>
+        <footer class="table-footer"><span id="userTotal">共 8 条数据</span><div class="pagination"><button type="button" disabled>‹</button><button class="active" type="button">1</button><button type="button" disabled>›</button></div></footer>
+      </section>
+    </main>
+  </agv-app-shell>
+
+  <div class="modal-overlay" id="userModal" hidden>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="userModalTitle">
+      <div class="modal-title-row"><div><h2 id="userModalTitle">新增用户</h2><p>设置用户基本信息、角色及账号状态</p></div><button class="modal-x" type="button" data-close="userModal" aria-label="关闭">×</button></div>
+      <form id="userForm" class="form-grid">
+        <input id="editingAccount" type="hidden">
+        <label class="form-field"><span>登录账号</span><input id="accountInput" placeholder="请输入登录账号" required></label>
+        <label class="form-field"><span>用户姓名</span><input id="nameInput" placeholder="请输入用户姓名" required></label>
+        <label class="form-field"><span>所属部门</span><input id="departmentInput" placeholder="例如：现场实施" required></label>
+        <label class="form-field"><span>账号来源</span><select id="sourceInput"><option>本地账号</option><option>LDAP</option></select></label>
+        <label class="form-field"><span>分配角色</span><select id="roleInput"><option>系统管理员</option><option>调度管理员</option><option>运维工程师</option><option>只读访客</option></select></label>
+        <label class="form-field"><span>账号状态</span><select id="statusInput"><option>启用</option><option>停用</option></select></label>
+        <div class="modal-actions wide"><button class="modal-close" type="button" data-close="userModal">取消</button><button class="modal-primary" type="submit">保存</button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-overlay" id="resetPasswordModal" hidden>
+    <section class="modal-card small-modal" role="dialog" aria-modal="true" aria-labelledby="resetPasswordTitle">
+      <div class="modal-title-row"><div><h2 id="resetPasswordTitle">重置密码</h2><p id="resetPasswordDescription">将为该账号生成新的临时密码</p></div><button class="modal-x" type="button" data-close="resetPasswordModal" aria-label="关闭">×</button></div>
+      <div class="reset-note"><strong>临时密码将在重置后显示一次</strong><p>用户首次登录时需要修改密码，原密码将立即失效。</p></div>
+      <div class="modal-actions"><button class="modal-close" type="button" data-close="resetPasswordModal">取消</button><button class="modal-primary" id="confirmResetPassword" type="button">确认重置</button></div>
+    </section>
+  </div>
+
+  <div class="modal-overlay" id="statusModal" hidden><section class="modal-card small-modal" role="dialog" aria-modal="true"><h2>系统运行状态</h2><div class="reset-note"><strong class="success-text">系统运行正常</strong><p>用户服务、角色权限和登录认证服务连接正常。</p></div><div class="modal-actions"><button class="modal-close" type="button" data-close="statusModal">关闭</button></div></section></div>
+  <div class="alert-overlay" id="alertDrawer" hidden><aside class="alert-drawer" role="dialog" aria-modal="true"><header><h2>异常提醒</h2><p>当前无用户安全异常</p></header><div class="alert-empty">暂无异常登录或账号风险提醒</div><footer><a href="current-anomalies.html">进入异常与恢复</a></footer></aside></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="user-management.js"></script>
+</body>
+</html>

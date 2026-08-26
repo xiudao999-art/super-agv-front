@@ -18,6 +18,7 @@ const navGroups = [
     { href: 'lab-capacity.html', label: 'AGV产能', icon: 'chart' }
   ] },
   { label: '系统管理', items: [
+    { href: 'user-management.html', label: '用户管理', icon: 'users' },
     { href: 'role-permissions.html', label: '角色权限管理', icon: 'users' }
   ] }
 ];
