@@ -26,9 +26,8 @@ tbody tr:hover td { background:#f8fbfd; }
 .brand-cell small { margin-top:4px; color:var(--agv-text-muted); font-size:10px; }
 .status-tag { display:inline-flex; align-items:center; gap:6px; min-height:25px; padding:3px 9px; border-radius:999px; font-size:10px; font-weight:700; }
 .status-tag::before { width:5px; height:5px; border-radius:50%; background:currentColor; content:""; }
-.status-tag.available,.status-tag.healthy { color:var(--agv-green); background:#eaf8f1; }
-.status-tag.standby { color:#b96d00; background:#fff2dc; }
-.status-tag.offline,.status-tag.warning { color:var(--agv-red); background:#fff0ef; }
+.status-tag.enabled { color:var(--agv-green); border-color:#cce9da; background:#effaf4; }
+.status-tag.disabled { color:#7b8792; border-color:#dfe4e8; background:#f5f7f8; }
 .row-actions { display:flex; gap:6px; }
 .row-btn { min-height:29px; padding:0 10px; border:1px solid var(--agv-line); border-radius:6px; color:var(--agv-text-secondary); background:#fff; font-size:10px; cursor:pointer; }
 .row-btn:hover { border-color:var(--agv-blue); color:var(--agv-blue); }

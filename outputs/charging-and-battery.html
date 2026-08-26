@@ -42,7 +42,7 @@
 
         <div class="table-wrap" id="batteryPanel" role="tabpanel" hidden>
           <table aria-label="电池配置列表">
-            <thead><tr><th>配置编号</th><th>电池品牌</th><th>电池型号</th><th>电池类型</th><th>额定电压 / 容量</th><th>低电量阈值</th><th>恢复任务阈值</th><th>健康状态</th><th>操作</th></tr></thead>
+            <thead><tr><th>配置编号</th><th>电池品牌</th><th>电池型号</th><th>电池类型</th><th>额定电压 / 容量</th><th>低电量阈值</th><th>恢复任务阈值</th><th>状态</th><th>操作</th></tr></thead>
             <tbody id="batteryRows"></tbody>
           </table>
         </div>
@@ -58,8 +58,8 @@
     </section>
   </div>
 
-  <div class="modal-overlay" id="statusModal" hidden><section class="modal-card small-modal" role="dialog" aria-modal="true"><h2>系统运行状态</h2><div class="status-note"><strong>充电配置运行正常</strong><p>充电桩通信服务与电池策略配置可用。</p></div><div class="modal-actions"><button class="modal-close" type="button" data-close="statusModal">关闭</button></div></section></div>
-  <div class="alert-overlay" id="alertDrawer" hidden><aside class="alert-drawer" role="dialog" aria-modal="true"><header><h2>异常提醒</h2><p>当前无充电设备异常</p></header><div class="alert-empty">暂无充电桩离线或电池健康异常</div><footer><a href="current-anomalies.html">进入异常与恢复</a></footer></aside></div>
+  <div class="modal-overlay" id="statusModal" hidden><section class="modal-card small-modal" role="dialog" aria-modal="true"><h2>系统运行状态</h2><div class="status-note"><strong>充电配置运行正常</strong><p>充电桩通信服务与电池策略配置连接正常。</p></div><div class="modal-actions"><button class="modal-close" type="button" data-close="statusModal">关闭</button></div></section></div>
+  <div class="alert-overlay" id="alertDrawer" hidden><aside class="alert-drawer" role="dialog" aria-modal="true"><header><h2>异常提醒</h2><p>当前无充电设备异常</p></header><div class="alert-empty">暂无充电桩或电池配置异常</div><footer><a href="current-anomalies.html">进入异常与恢复</a></footer></aside></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="charging-and-battery.js"></script>
 </body>

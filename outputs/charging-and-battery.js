@@ -2,12 +2,12 @@
   'use strict';
 
   const piles = [
-    { code: 'CHG-01', brand: 'HIKROBOT', model: 'CR-2400', space: '空间 B / 总览地图 V3.2', protocol: 'Modbus TCP', power: '2.4 kW', navPoint: 'CHG-B-01', status: '可用' },
-    { code: 'CHG-02', brand: 'STANDARD ROBOTS', model: 'SR-CHG-24', space: '空间 A / 总览地图 V3.2', protocol: 'REST API', power: '2.0 kW', navPoint: 'CHG-A-02', status: '备用' }
+    { code: 'CHG-01', brand: 'HIKROBOT', model: 'CR-2400', space: '空间 B / 总览地图 V3.2', protocol: 'Modbus TCP', power: '2.4 kW', navPoint: 'CHG-B-01', status: '启用' },
+    { code: 'CHG-02', brand: 'STANDARD ROBOTS', model: 'SR-CHG-24', space: '空间 A / 总览地图 V3.2', protocol: 'REST API', power: '2.0 kW', navPoint: 'CHG-A-02', status: '禁用' }
   ];
   const batteries = [
-    { code: 'BAT-01', brand: 'CATL', model: 'LFP-48-100', type: '磷酸铁锂', specification: '48 V / 100 Ah', lowThreshold: '20%', resumeThreshold: '80%', status: '健康' },
-    { code: 'BAT-02', brand: 'EVE', model: 'LF105', type: '磷酸铁锂', specification: '48 V / 105 Ah', lowThreshold: '25%', resumeThreshold: '85%', status: '健康' }
+    { code: 'BAT-01', brand: 'CATL', model: 'LFP-48-100', type: '磷酸铁锂', specification: '48 V / 100 Ah', lowThreshold: '20%', resumeThreshold: '80%', status: '启用' },
+    { code: 'BAT-02', brand: 'EVE', model: 'LF105', type: '磷酸铁锂', specification: '48 V / 105 Ah', lowThreshold: '25%', resumeThreshold: '85%', status: '禁用' }
   ];
 
   const state = { activeTab: 'piles', editingIndex: -1 };
@@ -27,11 +27,7 @@
   }
 
   function statusClass(status) {
-    if (status === '备用') return 'standby';
-    if (status === '离线' || status === '需维护') return 'offline';
-    if (status === '预警') return 'warning';
-    if (status === '健康') return 'healthy';
-    return 'available';
+    return status === '禁用' ? 'disabled' : 'enabled';
   }
 
   function appendStatus(row, status) {
@@ -139,7 +135,7 @@
       field('型号', 'configModel', item?.model), field('通信协议', 'configProtocol', item?.protocol || 'Modbus TCP', ['Modbus TCP', 'REST API', 'OPC UA']),
       field('所属空间（地图）', 'configSpace', item?.space || '空间 A / 总览地图 V3.2', null, true),
       field('额定功率', 'configPower', item?.power || '2.4 kW'), field('关联导航点', 'configNavPoint', item?.navPoint),
-      field('状态', 'configStatus', item?.status || '可用', ['可用', '备用', '离线', '需维护']),
+      field('状态', 'configStatus', item?.status || '启用', ['启用', '禁用']),
       '<div class="modal-actions wide"><button class="modal-close" type="button" data-close="configModal">取消</button><button class="modal-primary" type="submit">保存</button></div>'
     ].join('');
   }
@@ -151,7 +147,7 @@
       field('额定电压 / 容量', 'configSpecification', item?.specification || '48 V / 100 Ah'),
       field('低电量阈值', 'configLowThreshold', item?.lowThreshold || '20%'),
       field('恢复任务阈值', 'configResumeThreshold', item?.resumeThreshold || '80%'),
-      field('健康状态', 'configStatus', item?.status || '健康', ['健康', '预警', '需维护']),
+      field('状态', 'configStatus', item?.status || '启用', ['启用', '禁用']),
       '<div class="modal-actions wide"><button class="modal-close" type="button" data-close="configModal">取消</button><button class="modal-primary" type="submit">保存</button></div>'
     ].join('');
   }
@@ -201,7 +197,7 @@
     setTimeout(() => {
       button.disabled = false;
       button.innerHTML = content;
-      showToast('连接测试完成：' + piles.filter(item => item.status !== '离线').length + ' 个充电桩连接正常');
+      showToast('连接测试完成：' + piles.filter(item => item.status === '启用').length + ' 个充电桩连接正常');
     }, 700);
   });
   document.addEventListener('click', event => {
