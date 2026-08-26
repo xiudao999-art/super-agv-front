@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  const DIRECT_API_BASE_URL='http://192.168.20.187:8081';
+  const DIRECT_API_BASE_URL='http://121.196.164.163:8081';
   const apiBaseUrl=typeof window.CARRIER_TYPE_API_BASE_URL==='string'
     ?window.CARRIER_TYPE_API_BASE_URL
     :(location.protocol==='file:'?DIRECT_API_BASE_URL:'');

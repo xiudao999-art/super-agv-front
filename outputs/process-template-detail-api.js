@@ -269,7 +269,7 @@
       detailLoaded=false;
       console.error('加载模板详情失败',error);
       templateSaveStatusV2.textContent='加载失败';
-      showToast(error.name==='AbortError'?'加载详情超时，请检查 192.168.20.187':'加载详情失败：'+error.message);
+      showToast(error.name==='AbortError'?'加载详情超时，请检查 121.196.164.163':'加载详情失败：'+error.message);
       throw error;
     }finally{
       clearTimeout(timeoutId);
