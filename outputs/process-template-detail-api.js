@@ -7,6 +7,7 @@
   const endpoint=WORKFLOW_TEMPLATE_ENDPOINT+'/'+encodeURIComponent(templateId);
   const editorTitle=document.querySelector('.editor-meta-head h2');
   const originalSaveLabel=saveTemplateButtonV2?.textContent||'保存模板';
+  let detailLoaded=false;
 
   function parseApiResponse(response){
     return response.text().then(text=>{
@@ -217,6 +218,7 @@
   }
 
   async function loadTemplateDetail(){
+    detailLoaded=false;
     templateSaveStatusV2.textContent='加载中';
     if(editorTitle)editorTitle.textContent='编辑模板 · '+templateId;
     if(saveTemplateButtonV2){saveTemplateButtonV2.disabled=true;saveTemplateButtonV2.textContent='加载中…'}
@@ -228,20 +230,23 @@
       if(typeof result.code==='number'&&result.code!==0&&result.code!==200)throw new Error(result.message||('业务错误 '+result.code));
       const detail=result.data||result;
       restoreTemplate(detail);
-      templateSaveStatusV2.textContent=detail.deployedVersion?'已启用':'已加载';
+      detailLoaded=true;
+      if(editorTitle)editorTitle.textContent='编辑模板 · '+(detail.templateNumber||templateId);
+      templateSaveStatusV2.textContent=detail.status==='ENABLED'||detail.deployedVersion?'已启用 · 修改后转草稿':'草稿';
       showToast('模板详情已加载 · '+(detail.templateNumber||templateId));
       return detail;
     }catch(error){
+      detailLoaded=false;
       console.error('加载模板详情失败',error);
       templateSaveStatusV2.textContent='加载失败';
       showToast(error.name==='AbortError'?'加载详情超时，请检查 192.168.20.187':'加载详情失败：'+error.message);
       throw error;
     }finally{
       clearTimeout(timeoutId);
-      if(saveTemplateButtonV2){saveTemplateButtonV2.disabled=false;saveTemplateButtonV2.textContent=originalSaveLabel}
+      if(saveTemplateButtonV2){saveTemplateButtonV2.disabled=!detailLoaded;saveTemplateButtonV2.textContent=detailLoaded?originalSaveLabel:'详情加载失败'}
     }
   }
 
-  window.__workflowTemplateDetailApi={templateId,endpoint,reload:loadTemplateDetail};
+  window.__workflowTemplateDetailApi={templateId,endpoint,get loaded(){return detailLoaded},reload:loadTemplateDetail};
   loadTemplateDetail().catch(()=>{});
 })();

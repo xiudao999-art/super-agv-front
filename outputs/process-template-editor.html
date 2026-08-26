@@ -128,13 +128,26 @@ renderSubflowV2();
 const WORKFLOW_DIRECT_API_BASE_URL='http://192.168.20.187:8081';
 const WORKFLOW_API_BASE_URL=typeof window.WORKFLOW_API_BASE_URL==='string'?window.WORKFLOW_API_BASE_URL:(location.protocol==='file:'?WORKFLOW_DIRECT_API_BASE_URL:'');
 const WORKFLOW_TEMPLATE_ENDPOINT=(WORKFLOW_API_BASE_URL?WORKFLOW_API_BASE_URL.replace(/\/$/,''):'')+'/api/workflow-templates';
+const WORKFLOW_TEMPLATE_UPDATE_ENDPOINT=WORKFLOW_TEMPLATE_ENDPOINT+'/update';
+const workflowTemplateIdParamV2=new URLSearchParams(location.search).get('id')?.trim()||'';
+const workflowTemplateEditIdV2=workflowTemplateIdParamV2?Number(workflowTemplateIdParamV2):null;
+const isWorkflowTemplateEditModeV2=Boolean(workflowTemplateIdParamV2);
 const editorMetaInputsV2=document.querySelectorAll('.editor-meta .editor-field input');
 const templateNumberInputV2=editorMetaInputsV2[0];
 const templateNameInputV2=editorMetaInputsV2[1];
 const applicableObjectInputV2=document.querySelector('.editor-meta .editor-field select');
 const templateSaveStatusV2=document.querySelector('.editor-meta-head .status-tag');
 const saveTemplateButtonV2=document.getElementById('saveTemplate');
+const editorModeTitleV2=document.querySelector('.editor-meta-head h2');
 if(templateNumberInputV2)templateNumberInputV2.readOnly=true;
+if(isWorkflowTemplateEditModeV2){
+  if(editorModeTitleV2)editorModeTitleV2.textContent='编辑模板 · '+workflowTemplateIdParamV2;
+  if(templateSaveStatusV2)templateSaveStatusV2.textContent='加载中';
+  if(saveTemplateButtonV2)saveTemplateButtonV2.textContent='保存修改';
+}else{
+  if(editorModeTitleV2)editorModeTitleV2.textContent='新建模板';
+  if(templateSaveStatusV2)templateSaveStatusV2.textContent='新增';
+}
 
 function escapeXmlV2(value){return String(value??'').replace(/[<>&"']/g,character=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[character]))}
 function bpmnIdV2(prefix,value){return prefix+'_'+String(value).replace(/[^a-zA-Z0-9_.-]/g,'_')}
@@ -212,6 +225,7 @@ function buildEditorDataV2(){
 function validateWorkflowV2(templateName,applicableObject){
   if(!templateName)throw new Error('请填写模板名称');
   if(!applicableObject)throw new Error('请选择适用对象');
+  if(isWorkflowTemplateEditModeV2&&!Number.isSafeInteger(workflowTemplateEditIdV2))throw new Error('模板 ID 无效，无法保存修改');
   const startCount=terminalNodeCountV2('开始'),endCount=terminalNodeCountV2('结束');
   if(startCount===0)throw new Error('流程图缺少开始节点');
   if(startCount>1)throw new Error('同一个流程只能有一个开始节点');
@@ -225,16 +239,18 @@ function validateWorkflowV2(templateName,applicableObject){
 let isSavingWorkflowTemplateV2=false;
 async function saveWorkflowTemplateV2(){
   if(isSavingWorkflowTemplateV2)return;
+  if(isWorkflowTemplateEditModeV2&&!window.__workflowTemplateDetailApi?.loaded)return showToast('模板详情尚未加载完成，暂不能保存修改');
   const templateName=templateNameInputV2?.value.trim()||'';
   const applicableObject=applicableObjectInputV2?.value||'';
   try{validateWorkflowV2(templateName,applicableObject)}catch(error){showToast(error.message);return}
   isSavingWorkflowTemplateV2=true;
-  const payload={templateName,applicableObject,bpmnXml:buildBpmnXmlV2(templateName),editorData:buildEditorDataV2()};
+  const payload={...(isWorkflowTemplateEditModeV2?{id:workflowTemplateEditIdV2}:{}),templateName,applicableObject,bpmnXml:buildBpmnXmlV2(templateName),editorData:buildEditorDataV2()};
+  const saveEndpoint=isWorkflowTemplateEditModeV2?WORKFLOW_TEMPLATE_UPDATE_ENDPOINT:WORKFLOW_TEMPLATE_ENDPOINT;
   const originalLabel=saveTemplateButtonV2.textContent;
   const controller=new AbortController(),timeoutId=setTimeout(()=>controller.abort(),15000);
-  saveTemplateButtonV2.disabled=true;saveTemplateButtonV2.textContent='保存中…';templateSaveStatusV2.textContent='保存中';
+  saveTemplateButtonV2.disabled=true;saveTemplateButtonV2.textContent=isWorkflowTemplateEditModeV2?'更新中…':'保存中…';templateSaveStatusV2.textContent=isWorkflowTemplateEditModeV2?'更新中':'保存中';
   try{
-    const response=await fetch(WORKFLOW_TEMPLATE_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(payload),signal:controller.signal});
+    const response=await fetch(saveEndpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(payload),signal:controller.signal});
     const responseText=await response.text();
     let result={};
     if(responseText){try{result=JSON.parse(responseText)}catch(error){result={message:responseText}}}
@@ -242,21 +258,21 @@ async function saveWorkflowTemplateV2(){
     if(typeof result.code==='number'&&result.code!==0&&result.code!==200)throw new Error(result.message||('业务错误 '+result.code));
     const savedTemplate=result.data||result;
     if(savedTemplate.templateNumber&&templateNumberInputV2)templateNumberInputV2.value=savedTemplate.templateNumber;
-    templateSaveStatusV2.textContent='已保存';
-    showToast('流程模板已保存'+(savedTemplate.templateNumber?' · '+savedTemplate.templateNumber:''));
+    templateSaveStatusV2.textContent=isWorkflowTemplateEditModeV2?'已更新':'已保存';
+    showToast((isWorkflowTemplateEditModeV2?'流程模板已更新':'流程模板已保存')+(savedTemplate.templateNumber?' · '+savedTemplate.templateNumber:''));
     window.__lastSavedWorkflowTemplate=savedTemplate;
-    saveTemplateButtonV2.textContent='保存成功，正在返回…';
+    saveTemplateButtonV2.textContent=(isWorkflowTemplateEditModeV2?'更新成功':'保存成功')+'，正在返回…';
     setTimeout(()=>{location.href='process-templates.html'},600);
   }catch(error){
-    console.error('保存流程模板失败',error);
+    console.error(isWorkflowTemplateEditModeV2?'更新流程模板失败':'保存流程模板失败',error);
     isSavingWorkflowTemplateV2=false;
-    templateSaveStatusV2.textContent='保存失败';
-    showToast(error.name==='AbortError'?'连接后端超时，请检查 192.168.20.187':'保存失败：'+error.message);
+    templateSaveStatusV2.textContent=isWorkflowTemplateEditModeV2?'更新失败':'保存失败';
+    showToast(error.name==='AbortError'?'连接后端超时，请检查 192.168.20.187':(isWorkflowTemplateEditModeV2?'更新失败：':'保存失败：')+error.message);
   }finally{
     clearTimeout(timeoutId);
     if(!isSavingWorkflowTemplateV2){saveTemplateButtonV2.disabled=false;saveTemplateButtonV2.textContent=originalLabel}
   }
 }
 saveTemplateButtonV2.addEventListener('click',saveWorkflowTemplateV2);
-window.__workflowTemplateApi={endpoint:WORKFLOW_TEMPLATE_ENDPOINT,get saving(){return isSavingWorkflowTemplateV2},buildPayload(){const templateName=templateNameInputV2?.value.trim()||'',applicableObject=applicableObjectInputV2?.value||'';return {templateName,applicableObject,bpmnXml:buildBpmnXmlV2(templateName),editorData:buildEditorDataV2()}}};
+window.__workflowTemplateApi={endpoint:isWorkflowTemplateEditModeV2?WORKFLOW_TEMPLATE_UPDATE_ENDPOINT:WORKFLOW_TEMPLATE_ENDPOINT,createEndpoint:WORKFLOW_TEMPLATE_ENDPOINT,updateEndpoint:WORKFLOW_TEMPLATE_UPDATE_ENDPOINT,mode:isWorkflowTemplateEditModeV2?'edit':'create',templateId:workflowTemplateEditIdV2,get saving(){return isSavingWorkflowTemplateV2},buildPayload(){const templateName=templateNameInputV2?.value.trim()||'',applicableObject=applicableObjectInputV2?.value||'';return {...(isWorkflowTemplateEditModeV2?{id:workflowTemplateEditIdV2}:{}),templateName,applicableObject,bpmnXml:buildBpmnXmlV2(templateName),editorData:buildEditorDataV2()}}};
 </script><script src="process-action-api.js"></script><script src="process-template-detail-api.js"></script></body></html>
