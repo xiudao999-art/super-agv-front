@@ -53,6 +53,25 @@ function activeHref(current, itemHref) {
   return groups[itemHref]?.includes(current) || false;
 }
 
+function removeLaboratoryWording() {
+  const root = document.body;
+  if (!root) return;
+  const strip = value => String(value || '').replace(/实验室\s*/g, '');
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    if (node.parentElement?.closest('script, style, template, noscript')) continue;
+    if (node.nodeValue.includes('实验室')) node.nodeValue = strip(node.nodeValue);
+  }
+  root.querySelectorAll('[title], [placeholder], [aria-label]').forEach(element => {
+    ['title', 'placeholder', 'aria-label'].forEach(attribute => {
+      const value = element.getAttribute(attribute);
+      if (value?.includes('实验室')) element.setAttribute(attribute, strip(value));
+    });
+  });
+  if (document.title.includes('实验室')) document.title = strip(document.title);
+}
+
 export class AgvAppShell extends HTMLElement {
   constructor() {
     super();
@@ -61,7 +80,9 @@ export class AgvAppShell extends HTMLElement {
 
   connectedCallback() {
     const current = this.getAttribute('active-route') || location.pathname.split('/').pop() || 'robot-dispatch-dashboard.html';
-    const configMenuItem = navGroups.find(group => group.label === '配置中心')?.items.find(item => item.href === current);
+    const configGroup = navGroups.find(group => group.label === '配置中心');
+    const configMenuItem = configGroup?.items.find(item => item.href === current);
+    const isConfigPage = configGroup?.items.some(item => activeHref(current, item.href));
     const title = configMenuItem?.label || this.getAttribute('section-title') || document.querySelector('.page-head h1, agv-page-header h1')?.textContent?.trim() || '运行总览';
     const user = this.getAttribute('user-name') || '陈工';
     const nav = navGroups.map(group => `
@@ -143,6 +164,18 @@ export class AgvAppShell extends HTMLElement {
       });
     }
 
+    if (isConfigPage) {
+      removeLaboratoryWording();
+      this.configWordingObserver = new MutationObserver(removeLaboratoryWording);
+      this.configWordingObserver.observe(document.body, {
+        subtree: true,
+        childList: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ['title', 'placeholder', 'aria-label']
+      });
+    }
+
     const sidebar = this.shadowRoot.querySelector('.sidebar');
     const scrim = this.shadowRoot.querySelector('.scrim');
     const setOpen = open => { sidebar.classList.toggle('open', open); scrim.classList.toggle('show', open); };
@@ -152,6 +185,10 @@ export class AgvAppShell extends HTMLElement {
     this.shadowRoot.querySelector('.status').addEventListener('click', () => this.forwardAction(['statusInfoBtn', 'statusBtn'], 'statusModal'));
     this.shadowRoot.querySelector('.alert').addEventListener('click', () => this.forwardAction(['alertInfoBtn', 'alertBtn'], 'alertDrawer'));
     this.shadowRoot.querySelectorAll('.nav-item').forEach(link => link.addEventListener('click', () => setOpen(false)));
+  }
+
+  disconnectedCallback() {
+    this.configWordingObserver?.disconnect();
   }
 
   forwardAction(ids, fallbackLayer) {
