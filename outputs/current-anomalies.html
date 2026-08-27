@@ -86,7 +86,7 @@
         </div>
 
         <div class="route-panel" data-route-panel="direct" hidden>
-          <form id="directResumeForm">
+          <form id="directResumeForm" autocomplete="off">
             <div class="form-grid">
               <label class="form-field"><span>继续位置</span><select id="resumePosition" required><option value="">请选择安全继续位置</option><option>当前检查点</option><option>下一动作节点</option><option>下一流程节点</option><option>跳过当前订单</option></select></label>
               <label class="form-field"><span>现场确认人</span><input required placeholder="请输入确认人姓名"></label>
@@ -97,7 +97,7 @@
         </div>
 
         <div class="route-panel" data-route-panel="manual" hidden>
-          <form id="manualRecoveryForm">
+          <form id="manualRecoveryForm" autocomplete="off">
             <div class="form-grid">
               <label class="form-field"><span>处置方式</span><select required><option value="">请选择处置方式</option><option>执行临时人工动作</option><option>启动异常处理流程</option><option>转管理员审批</option><option>保持锁定并等待现场确认</option></select></label>
               <label class="form-field"><span>现场负责人</span><input required placeholder="请输入现场负责人"></label>
@@ -111,7 +111,7 @@
         <ol class="suggestion-list" id="suggestionList"></ol>
 
         <div class="route-panel" id="resultPanel" hidden>
-          <form id="anomalyResultForm">
+          <form id="anomalyResultForm" autocomplete="off">
             <div class="form-grid">
               <label class="form-field"><span>处理结果</span><select id="resultStatus" required><option value="">请选择处理结果</option><option value="已恢复">已恢复</option><option value="已关闭">已关闭</option></select></label>
               <label class="form-field"><span>结果确认人</span><input required placeholder="请输入确认人姓名"></label>
