@@ -36,7 +36,7 @@
 
         <div class="debug-card-body">
           <section id="hardwarePanel" role="tabpanel">
-            <div class="debug-callout">硬件模组调试只调用 AGV-01 上选定的一个模组。底盘支持地图方向控制，机械臂支持关节与坐标系点动，相机和夹具按独立控制参数运行。</div>
+            <div class="debug-callout">硬件模组调试只调用 <strong data-selected-agv>AGV-01</strong> 上选定的一个模组。底盘支持地图方向控制，机械臂支持关节与坐标系点动，相机和夹具按独立控制参数运行。</div>
 
             <div class="debug-modebar" id="debugModeBar">
               <div>
@@ -61,12 +61,25 @@
                 <div><h2>底盘地图与方向控制</h2><p>方向控制叠加在当前地图上，操作后同步刷新 AGV 位置和空间坐标</p></div>
                 <div class="inline-actions"><span class="status-chip info">地图 V3.2</span><span class="status-chip success">实时定位</span></div>
               </div>
+              <div class="module-agv-selector">
+                <label><span>选择调试 AGV</span><select data-agv-select aria-label="选择底盘调试 AGV"><option>AGV-01</option><option>AGV-02</option><option>AGV-03</option><option>AGV-04</option><option>AGV-05</option><option>AGV-06</option><option>AGV-07</option><option>AGV-08</option><option>AGV-09</option><option disabled>AGV-10（离线）</option></select></label>
+                <div><strong data-selected-agv>AGV-01</strong><small>在线 · 切换后同步当前底盘和地图位置</small></div>
+              </div>
+              <section class="recovery-panel" aria-label="底盘异常快捷处理">
+                <div class="recovery-head"><div><h3>常见异常快捷处理</h3><p>覆盖通信中断、任务暂停、可恢复告警和运动异常 · 调试模式下可用</p></div><span>底盘</span></div>
+                <div class="recovery-actions">
+                  <button class="recovery-action debug-control" type="button" data-recovery-module="底盘" data-recovery-action="刷新底盘状态" data-recovery-issue="位置、任务状态或告警信息未及时刷新" disabled><strong>刷新底盘状态</strong><small>重新读取位置、任务和主次告警</small></button>
+                  <button class="recovery-action debug-control" type="button" data-recovery-module="底盘" data-recovery-action="重连底盘通信" data-recovery-issue="网络波动、心跳超时或设备短时离线" disabled><strong>重连底盘通信</strong><small>重新建立通信并校验心跳</small></button>
+                  <button class="recovery-action debug-control" type="button" data-recovery-module="底盘" data-recovery-action="清除可恢复告警" data-recovery-issue="障碍解除后仍保留可恢复异常状态" data-recovery-confirm="true" disabled><strong>清除可恢复告警</strong><small>确认现场安全后清除异常状态</small></button>
+                  <button class="recovery-action danger debug-control" type="button" data-recovery-module="底盘" data-recovery-action="停止底盘运动" data-recovery-issue="路径偏离、避障异常或运动状态不符合预期" disabled><strong>停止底盘运动</strong><small>立即停止当前点动或调试运动</small></button>
+                </div>
+              </section>
               <div class="debug-map-layout">
                 <div class="debug-map">
                   <img src="assets/overview/lab-map.png" alt="AGV 调试地图">
-                  <span class="debug-robot" id="debugRobot" aria-label="AGV-01 当前点位"></span>
+                  <span class="debug-robot" id="debugRobot" data-label="AGV-01" aria-label="AGV-01 当前点位"></span>
                   <div class="map-controls">
-                    <strong>AGV-01 方向控制</strong>
+                    <strong data-agv-map-title>AGV-01 方向控制</strong>
                     <small>进入调试模式后启用点动</small>
                     <div class="dpad">
                       <button class="forward debug-control" type="button" data-chassis-jog="forward" aria-label="向前" disabled>↑</button>
@@ -88,7 +101,7 @@
                   <div class="coordinate-card"><span>空间 Y</span><strong id="mapYValue">3.200 m</strong></div>
                   <div class="coordinate-card"><span>朝向 θ</span><strong id="mapYawValue">90.0°</strong></div>
                   <div class="coordinate-card"><span>定位点</span><strong>DOOR-A-01</strong></div>
-                  <div class="device-info-card"><span>底盘设备</span><strong>CHASSIS-01</strong><small>HIKROBOT · 在线</small></div>
+                  <div class="device-info-card"><span>底盘设备</span><strong data-device-prefix="CHASSIS">CHASSIS-01</strong><small>HIKROBOT · 在线</small></div>
                   <button class="debug-button debug-control" type="button" data-debug-action="读取实时位置" disabled>重新读取实时位置</button>
                 </aside>
               </div>
@@ -99,8 +112,21 @@
                 <div><h2>机械臂调试</h2><p>设备信息、运动速度和点动控制均来自当前机械臂配置</p></div>
                 <span class="status-chip info" data-control-state-chip>点动已锁定</span>
               </div>
+              <div class="module-agv-selector">
+                <label><span>选择调试 AGV</span><select data-agv-select aria-label="选择机械臂调试 AGV"><option>AGV-01</option><option>AGV-02</option><option>AGV-03</option><option>AGV-04</option><option>AGV-05</option><option>AGV-06</option><option>AGV-07</option><option>AGV-08</option><option>AGV-09</option><option disabled>AGV-10（离线）</option></select></label>
+                <div><strong data-selected-agv>AGV-01</strong><small>在线 · 仅控制所选 AGV 的机械臂</small></div>
+              </div>
+              <section class="recovery-panel" aria-label="机械臂异常快捷处理">
+                <div class="recovery-head"><div><h3>常见异常快捷处理</h3><p>覆盖关节错误、保护停止、暂停和使能丢失 · 调试模式下可用</p></div><span>机械臂</span></div>
+                <div class="recovery-actions">
+                  <button class="recovery-action debug-control" type="button" data-recovery-module="机械臂" data-recovery-action="读取机械臂错误码" data-recovery-issue="关节、通信或安全回路状态不明确" disabled><strong>读取错误码</strong><small>读取机器人、关节和安全状态</small></button>
+                  <button class="recovery-action danger debug-control" type="button" data-recovery-module="机械臂" data-recovery-action="停止机械臂运动" data-recovery-issue="运动轨迹或姿态异常，需要立即停止" disabled><strong>停止机械臂</strong><small>停止当前点动或运行指令</small></button>
+                  <button class="recovery-action debug-control" type="button" data-recovery-module="机械臂" data-recovery-action="清除可恢复告警" data-recovery-issue="碰撞物或外部保护条件已经解除" data-recovery-confirm="true" disabled><strong>清除可恢复告警</strong><small>不绕过急停、光栅等外部安全条件</small></button>
+                  <button class="recovery-action debug-control" type="button" data-recovery-module="机械臂" data-recovery-action="尝试恢复使能" data-recovery-issue="控制器在线但机械臂处于暂停或未使能状态" data-recovery-confirm="true" disabled><strong>尝试恢复使能</strong><small>恢复到可运行待命状态</small></button>
+                </div>
+              </section>
               <div class="device-info-grid">
-                <div class="device-info-card"><span>设备名称</span><strong>协作机械臂 ARM-01</strong><small>DOBOT CR10</small></div>
+                <div class="device-info-card"><span>设备名称</span><strong data-device-prefix="ARM">协作机械臂 ARM-01</strong><small>DOBOT CR10</small></div>
                 <div class="device-info-card"><span>IP 地址</span><strong>192.168.20.22</strong><small>控制端口 5000</small></div>
                 <div class="device-info-card"><span>连接状态</span><strong class="success-text">在线</strong><small>通信正常</small></div>
               </div>
@@ -119,7 +145,20 @@
             </section>
 
             <section class="module-panel" data-module-panel="camera" hidden>
-              <div class="panel-title"><div><h2>相机调试</h2><p>执行单次采集、条码识别、目标定位和偏移测量</p></div><span class="status-chip success">CAMERA-01 在线</span></div>
+              <div class="panel-title"><div><h2>相机调试</h2><p>执行单次采集、条码识别、目标定位和偏移测量</p></div><span class="status-chip success"><span data-device-prefix="CAMERA">CAMERA-01</span>&nbsp;在线</span></div>
+              <div class="module-agv-selector">
+                <label><span>选择调试 AGV</span><select data-agv-select aria-label="选择相机调试 AGV"><option>AGV-01</option><option>AGV-02</option><option>AGV-03</option><option>AGV-04</option><option>AGV-05</option><option>AGV-06</option><option>AGV-07</option><option>AGV-08</option><option>AGV-09</option><option disabled>AGV-10（离线）</option></select></label>
+                <div><strong data-selected-agv>AGV-01</strong><small>在线 · 使用当前 AGV 的相机方案与标定参数</small></div>
+              </div>
+              <section class="recovery-panel" aria-label="相机异常快捷处理">
+                <div class="recovery-head"><div><h3>常见异常快捷处理</h3><p>覆盖未回复、拍照失败、成像异常和标定参数不同步 · 调试模式下可用</p></div><span>相机</span></div>
+                <div class="recovery-actions">
+                  <button class="recovery-action debug-control" type="button" data-recovery-module="相机" data-recovery-action="读取相机诊断状态" data-recovery-issue="相机未回复、拍照状态或当前方案不明确" disabled><strong>读取诊断状态</strong><small>读取连接、方案、曝光和最近结果</small></button>
+                  <button class="recovery-action debug-control" type="button" data-recovery-module="相机" data-recovery-action="重连相机" data-recovery-issue="设备未回复或相机连接短时中断" disabled><strong>重连相机</strong><small>重新登录并检查当前方案</small></button>
+                  <button class="recovery-action debug-control" type="button" data-recovery-module="相机" data-recovery-action="重新采集图像" data-recovery-issue="拍照失败、图像模糊或亮度异常" disabled><strong>重新采集图像</strong><small>沿用当前参数执行单次采集</small></button>
+                  <button class="recovery-action debug-control" type="button" data-recovery-module="相机" data-recovery-action="重新加载标定参数" data-recovery-issue="切换电脑或方案后标定参数不同步" data-recovery-confirm="true" disabled><strong>加载标定参数</strong><small>加载所选 AGV 已发布的相机方案</small></button>
+                </div>
+              </section>
               <div class="quick-actions">
                 <button class="quick-action active" type="button" data-camera-action="单次拍照"><strong>单次拍照</strong><small>获取当前视野图像</small></button>
                 <button class="quick-action" type="button" data-camera-action="条码识别"><strong>条码识别</strong><small>读取载具或样本编码</small></button>
@@ -132,8 +171,21 @@
 
             <section class="module-panel" data-module-panel="gripper" hidden>
               <div class="panel-title"><div><h2>夹具调试</h2><p>滑杆用于快速设置目标开度、夹持力和运动速度</p></div><span class="status-chip warning" id="gripperStateChip">待初始化</span></div>
+              <div class="module-agv-selector">
+                <label><span>选择调试 AGV</span><select data-agv-select aria-label="选择夹具调试 AGV"><option>AGV-01</option><option>AGV-02</option><option>AGV-03</option><option>AGV-04</option><option>AGV-05</option><option>AGV-06</option><option>AGV-07</option><option>AGV-08</option><option>AGV-09</option><option disabled>AGV-10（离线）</option></select></label>
+                <div><strong data-selected-agv>AGV-01</strong><small>在线 · 仅控制所选 AGV 的末端夹具</small></div>
+              </div>
+              <section class="recovery-panel" aria-label="夹具异常快捷处理">
+                <div class="recovery-head"><div><h3>常见异常快捷处理</h3><p>覆盖初始化失败、夹持不到位、力反馈异常和掉落告警 · 调试模式下可用</p></div><span>夹具</span></div>
+                <div class="recovery-actions">
+                  <button class="recovery-action debug-control" type="button" data-recovery-module="夹具" data-recovery-action="读取夹持状态" data-recovery-issue="开度、夹持力或到位反馈不明确" disabled><strong>读取夹持状态</strong><small>读取开度、力反馈和到位信号</small></button>
+                  <button class="recovery-action debug-control" type="button" data-recovery-module="夹具" data-recovery-action="重新初始化夹具" data-recovery-issue="上电后未初始化或初始化状态丢失" data-recovery-confirm="true" disabled><strong>重新初始化</strong><small>回到设备定义的初始化状态</small></button>
+                  <button class="recovery-action debug-control" type="button" data-recovery-module="夹具" data-recovery-action="打开至安全位" data-recovery-issue="夹持不到位、物料卡住或掉落告警" data-recovery-confirm="true" disabled><strong>打开至安全位</strong><small>确认承托物料后释放夹具</small></button>
+                  <button class="recovery-action danger debug-control" type="button" data-recovery-module="夹具" data-recovery-action="停止夹具动作" data-recovery-issue="开合超时、力反馈异常或运动受阻" disabled><strong>停止夹具动作</strong><small>立即停止当前开合动作</small></button>
+                </div>
+              </section>
               <div class="device-info-grid">
-                <div class="device-info-card"><span>设备名称</span><strong>电动夹具 GRIPPER-DH-01</strong><small>DH · EG-20</small></div>
+                <div class="device-info-card"><span>设备名称</span><strong data-device-prefix="GRIPPER-DH">电动夹具 GRIPPER-DH-01</strong><small>DH · EG-20</small></div>
                 <div class="device-info-card"><span>连接状态</span><strong class="success-text">在线</strong><small>Modbus TCP</small></div>
                 <div class="device-info-card"><span>当前开度</span><strong id="gripperOpeningText">72%</strong><small>实时反馈值</small></div>
               </div>
@@ -147,10 +199,14 @@
           </section>
 
           <section id="flowPanel" role="tabpanel" hidden>
-            <div class="debug-callout">AGV 流程调试读取“流程与动作”中的已有流程。可运行选中节点或整条流程，所有调试动作仅在进入设备调试模式后启用。</div>
+            <div class="debug-callout"><strong data-selected-agv>AGV-01</strong> 流程调试读取“流程与动作”中的已有流程。可运行选中节点或整条流程，所有调试动作仅在进入设备调试模式后启用。</div>
             <div class="debug-modebar">
               <div><strong id="flowModeTitle">当前处于生产模式</strong><small>流程执行控制已锁定。</small></div>
               <span class="status-chip success" id="flowModeChip">生产模式</span>
+            </div>
+            <div class="flow-agv-selector">
+              <label><span>选择调试 AGV（必选）</span><select data-agv-select aria-label="选择流程调试 AGV"><option>AGV-01</option><option>AGV-02</option><option>AGV-03</option><option>AGV-04</option><option>AGV-05</option><option>AGV-06</option><option>AGV-07</option><option>AGV-08</option><option>AGV-09</option><option disabled>AGV-10（离线）</option></select></label>
+              <div><strong data-selected-agv>AGV-01</strong><small>在线 · 选定后再选择该 AGV 要调试的流程</small></div>
             </div>
             <div class="flow-toolbar">
               <label>已有流程（必选）<select id="debugFlowSelect"><option value="sample">FLOW-001 · 样本入库流程</option><option value="charge">FLOW-002 · AGV 自动回充流程</option></select></label>
@@ -174,6 +230,7 @@
   </agv-app-shell>
 
   <div class="modal-overlay" id="statusModal" hidden><section class="modal-card" role="dialog" aria-modal="true"><h2>系统运行状态</h2><div class="status-list"><article class="status-item"><strong class="success-text">绿色 · 系统正常</strong><p>核心服务、数据库、任务引擎和机器人连接正常。</p></article><article class="status-item"><strong>黄色 · 受限运行</strong><p>部分非核心设备异常，系统仍可继续部分业务。</p></article><article class="status-item"><strong>灰色 · 调试模式</strong><p>生产任务锁定，仅允许授权人员执行受控调试动作。</p></article></div><div class="modal-actions"><button class="modal-close" type="button" data-close="statusModal">关闭</button></div></section></div>
+  <div class="modal-overlay" id="recoveryModal" hidden><section class="modal-card recovery-modal" role="dialog" aria-modal="true" aria-labelledby="recoveryTitle"><div class="recovery-modal-head"><span>异常快捷处理</span><h2 id="recoveryTitle">确认执行</h2><p id="recoveryIssue"></p></div><dl class="recovery-summary"><div><dt>目标 AGV</dt><dd id="recoveryAgv">AGV-01</dd></div><div><dt>硬件模组</dt><dd id="recoveryModule">—</dd></div><div><dt>执行动作</dt><dd id="recoveryAction">—</dd></div></dl><div class="recovery-warning">执行前请确认设备周边无人、无障碍物，急停和外部安全条件未解除时系统不会强制绕过。</div><div class="modal-actions"><button class="modal-close" type="button" data-close="recoveryModal">取消</button><button class="debug-button primary" id="confirmRecoveryAction" type="button">确认执行</button></div></section></div>
   <div class="alert-overlay" id="alertDrawer" hidden><aside class="alert-drawer" role="dialog" aria-modal="true"><header class="alert-header"><h2>异常提醒</h2><p>2 条未完成</p></header><div class="alert-feed"><article class="alert-card"><strong>机械臂通信出现短时抖动</strong><p>ALM-20260817-0040 · 已确认 · ARM-01</p></article><article class="alert-card"><strong>相机最近一次标定即将过期</strong><p>ALM-20260817-0038 · 待处理 · CAMERA-01</p></article></div><footer class="alert-footer"><a class="debug-button primary" href="current-anomalies.html">进入异常与恢复</a></footer></aside></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="device-debug.js"></script>
