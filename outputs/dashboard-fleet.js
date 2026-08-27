@@ -63,17 +63,23 @@ import {
     mapVersion: document.getElementById('fleetMapVersion'),
     mapSummary: document.getElementById('fleetMapSummary'),
     mapArt: document.getElementById('fleetMapArt'),
+    mapViewport: document.getElementById('fleetMapViewport'),
+    zoomIn: document.getElementById('fleetZoomIn'),
+    zoomOut: document.getElementById('fleetZoomOut'),
+    zoomReset: document.getElementById('fleetZoomReset'),
     mapState: document.getElementById('fleetMapState'),
     pointLayer: document.getElementById('fleetPointLayer'),
     agvLayer: document.getElementById('fleetAgvLayer'),
     tooltip: document.getElementById('fleetMapTooltip'),
     legend: document.getElementById('fleetRouteLegend'),
     orderMetrics: document.getElementById('orderMetrics'),
-    agvMetrics: document.getElementById('agvMetrics')
+    agvMetrics: document.getElementById('agvMetrics'),
+    hideCompletedIssues: document.getElementById('fleetHideCompletedIssues')
   };
 
   let fleet = fallbackFleet.map(item => ({ ...item }));
   let selectedRobot = 'all';
+  const mapView = { scale: 1, x: 0, y: 0, dragging: false, pointerX: 0, pointerY: 0 };
 
   function number(value, fallback = 0) {
     const result = Number(value);
@@ -239,6 +245,28 @@ import {
     elements.tooltip.hidden = true;
   }
 
+  function applyMapTransform() {
+    const maxX = elements.mapArt.clientWidth * (mapView.scale - 1) / 2;
+    const maxY = elements.mapArt.clientHeight * (mapView.scale - 1) / 2;
+    mapView.x = Math.max(-maxX, Math.min(maxX, mapView.x));
+    mapView.y = Math.max(-maxY, Math.min(maxY, mapView.y));
+    if (mapView.scale === 1) { mapView.x = 0; mapView.y = 0; }
+    elements.mapViewport.style.transform = `translate(${mapView.x}px, ${mapView.y}px) scale(${mapView.scale})`;
+  }
+
+  function setMapZoom(nextScale) {
+    mapView.scale = Math.max(1, Math.min(3, Math.round(nextScale * 10) / 10));
+    hideTooltip();
+    applyMapTransform();
+  }
+
+  function resetMapZoom() {
+    mapView.scale = 1;
+    mapView.x = 0;
+    mapView.y = 0;
+    applyMapTransform();
+  }
+
   function showTooltip(label, anchor) {
     elements.tooltip.textContent = label;
     elements.tooltip.hidden = false;
@@ -347,10 +375,35 @@ import {
   elements.searchButton.addEventListener('click', renderFleetCards);
   elements.reset.addEventListener('click', () => { elements.search.value = ''; elements.filter.value = 'all'; renderFleetCards(); elements.search.focus(); });
   elements.mapSelect.addEventListener('change', () => { selectedRobot = elements.mapSelect.value; renderMapRoutes(); renderFleetCards(); });
+  elements.zoomIn.addEventListener('click', () => setMapZoom(mapView.scale + 0.2));
+  elements.zoomOut.addEventListener('click', () => setMapZoom(mapView.scale - 0.2));
+  elements.zoomReset.addEventListener('click', resetMapZoom);
+  elements.mapArt.addEventListener('wheel', event => { event.preventDefault(); setMapZoom(mapView.scale + (event.deltaY < 0 ? 0.2 : -0.2)); }, { passive: false });
+  elements.mapArt.addEventListener('dblclick', event => { event.preventDefault(); setMapZoom(mapView.scale + 0.4); });
+  elements.mapArt.addEventListener('pointerdown', event => {
+    if (mapView.scale <= 1 || event.button !== 0 || event.target.closest('.fleet-map-zoom')) return;
+    mapView.dragging = true; mapView.pointerX = event.clientX; mapView.pointerY = event.clientY;
+    elements.mapArt.classList.add('is-dragging'); elements.mapArt.setPointerCapture(event.pointerId);
+  });
+  elements.mapArt.addEventListener('pointermove', event => {
+    if (!mapView.dragging) return;
+    mapView.x += event.clientX - mapView.pointerX; mapView.y += event.clientY - mapView.pointerY;
+    mapView.pointerX = event.clientX; mapView.pointerY = event.clientY; hideTooltip(); applyMapTransform();
+  });
+  function stopMapDrag(event) {
+    if (!mapView.dragging) return;
+    mapView.dragging = false; elements.mapArt.classList.remove('is-dragging');
+    if (event.pointerId !== undefined && elements.mapArt.hasPointerCapture(event.pointerId)) elements.mapArt.releasePointerCapture(event.pointerId);
+  }
+  elements.mapArt.addEventListener('pointerup', stopMapDrag);
+  elements.mapArt.addEventListener('pointercancel', stopMapDrag);
+  elements.hideCompletedIssues.addEventListener('change', () => {
+    root.querySelectorAll('.fleet-issues-panel .issue-card.completed').forEach(card => card.classList.toggle('is-hidden', elements.hideCompletedIssues.checked));
+  });
   elements.cards.addEventListener('click', event => { const card = event.target.closest('[data-robot-code]'); if (card) selectRobot(card.dataset.robotCode); });
   elements.cards.addEventListener('keydown', event => { const card = event.target.closest('[data-robot-code]'); if (card && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); selectRobot(card.dataset.robotCode); } });
   root.querySelectorAll('[data-fleet-scroll]').forEach(button => button.addEventListener('click', () => elements.cards.scrollBy({ left: number(button.dataset.fleetScroll) * 580, behavior: 'smooth' })));
-  window.addEventListener('resize', hideTooltip, { passive: true });
+  window.addEventListener('resize', () => { hideTooltip(); applyMapTransform(); }, { passive: true });
   renderMetrics(null);
   renderFleetCards();
   renderMapOptions();

@@ -985,8 +985,9 @@
           </div>
         </header>
         <div class="fleet-map-art" id="fleetMapArt" role="group" aria-label="多 AGV 实时运行地图">
-          <img class="fleet-map-image" src="assets/agvmap.png" alt="多 AGV 实验室完整地图">
-          <svg class="fleet-route-layer" viewBox="0 0 1024 551" preserveAspectRatio="none" aria-label="多 AGV 路线与实验室点位图层">
+          <div class="fleet-map-viewport" id="fleetMapViewport">
+            <img class="fleet-map-image" src="assets/agvmap.png" alt="多 AGV 实验室完整地图">
+            <svg class="fleet-route-layer" viewBox="0 0 1024 551" preserveAspectRatio="none" aria-label="多 AGV 路线与实验室点位图层">
             <defs>
               <marker id="fleetArrow1" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#2188ff"/></marker>
               <marker id="fleetArrow2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#18a66a"/></marker>
@@ -996,13 +997,38 @@
             </defs>
             <g id="fleetAgvLayer" aria-label="各 AGV 独立点位与方向连线"></g>
             <g id="fleetPointLayer" aria-label="实验室点位"></g>
-          </svg>
+            </svg>
+          </div>
+          <div class="fleet-map-zoom" aria-label="地图缩放控制">
+            <button type="button" id="fleetZoomIn" aria-label="放大地图">+</button>
+            <button type="button" id="fleetZoomOut" aria-label="缩小地图">−</button>
+            <button type="button" id="fleetZoomReset" aria-label="重置地图缩放">复位</button>
+          </div>
           <div class="fleet-map-state" id="fleetMapState">地图加载中…</div>
           <div class="fleet-map-tooltip" id="fleetMapTooltip" role="tooltip" hidden></div>
           <div class="fleet-map-note">路线为各 AGV 当前任务的调度走向，地图筛选只影响显示，不改变实际任务</div>
         </div>
         <div class="fleet-route-legend" id="fleetRouteLegend" aria-label="AGV 路线图例"></div>
       </section>
+
+      <aside class="fleet-side-column" aria-label="当前任务资源与待处理事项">
+        <section class="side-panel fleet-resource-panel">
+          <h2>当前任务占用与预约资源</h2>
+          <div class="resource-list">
+            <article class="resource-card"><div class="resource-head"><strong>检测仪 B 进样位</strong><span class="mini-pill"><i class="dot"></i>预约中</span></div><div class="resource-details"><div class="detail-row"><span class="detail-label">关联任务</span><span>TRN-0031-01</span></div><div class="detail-row"><span class="detail-label">原因</span><span>等待机台许可</span></div><div class="detail-row"><span class="detail-label">释放条件</span><span>放料完成</span></div></div></article>
+            <article class="resource-card"><div class="resource-head"><strong>机器人缓存位 C01</strong><span class="mini-pill yellow"><i class="dot"></i>占用</span></div><div class="resource-details"><div class="detail-row"><span class="detail-label">关联任务</span><span>TRN-0031-01</span></div><div class="detail-row"><span class="detail-label">原因</span><span>载具在车</span></div><div class="detail-row"><span class="detail-label">释放条件</span><span>从缓存取走</span></div></div></article>
+            <article class="resource-card"><div class="resource-head"><strong>自动门 D-01</strong><span class="mini-pill green"><i class="dot"></i>已预约</span></div><div class="resource-details"><div class="detail-row"><span class="detail-label">关联任务</span><span>TRN-0035-01</span></div><div class="detail-row"><span class="detail-label">原因</span><span>等待通行</span></div><div class="detail-row"><span class="detail-label">释放条件</span><span>AGV 通过门区</span></div></div></article>
+          </div>
+        </section>
+        <section class="side-panel issues-panel fleet-issues-panel">
+          <div class="panel-heading"><h2>待处理事项</h2><label class="toggle-label">隐藏已完成<input type="checkbox" id="fleetHideCompletedIssues"><span class="toggle-ui" aria-hidden="true"></span></label></div>
+          <div class="issue-list">
+            <article class="issue-card"><div class="issue-head"><span class="issue-check" aria-hidden="true"></span><div class="issue-copy"><strong>库位状态不一致</strong><p>立库 A-第4层-07 · 建议扫码核对</p></div></div></article>
+            <article class="issue-card completed"><div class="issue-head"><span class="issue-check done" aria-hidden="true">✓</span><div class="issue-copy"><strong>库位人工确认已完成</strong><p>立库 A-第2层-03 · 已完成现场扫码</p></div></div></article>
+            <article class="issue-card"><div class="issue-head"><span class="issue-check" aria-hidden="true"></span><div class="issue-copy"><strong>机台许可等待超时</strong><p>检测仪 B · 等待操作员确认</p></div></div></article>
+          </div>
+        </section>
+      </aside>
 
       <section class="fleet-metrics-block fleet-agv-summary" aria-labelledby="agvStatsTitle">
         <div class="fleet-section-label"><h2 id="agvStatsTitle">AGV 状态统计</h2><p>车队实时在线与任务分布</p></div>
