@@ -10,21 +10,21 @@
   <link rel="stylesheet" href="assets/styles/components.css">
   <link rel="stylesheet" href="assets/styles/tables.css">
   <link rel="stylesheet" href="assets/styles/pages/exception-recovery.css">
-  <link rel="stylesheet" href="assets/styles/pages/exception-operations.css?v=20260828">
+  <link rel="stylesheet" href="assets/styles/pages/exception-operations.css?v=20260828-3">
   <script type="module" src="assets/components/register.js" blocking="render"></script>
 </head>
 <body data-exception-operations="procedures">
   <agv-app-shell active-route="emergency-stop-procedure.html" section-title="急停处置规程" user-name="陈工">
     <agv-page-header class="page-head">
-      <div><h1>急停处置规程</h1><p>本页定义须急停的异常场景与处置规程（静态规则，只读）。异常实际发生时自动生成工单，处置操作统一在「异常与恢复」中进行，工单上标注对应规则编号。</p></div>
+      <div><h1>急停处置规程</h1><p>本页定义须急停的异常场景与处置规程（规则内容只读，可启用或停用）。异常实际发生时自动生成工单，处置操作统一在「异常与恢复」中进行，工单上标注对应规则编号。</p></div>
     </agv-page-header>
     <main class="page-canvas">
       <section class="recovery-panel">
         <div class="module-content">
           <div class="table-wrap">
             <table class="data-table ops-table procedure-ops-table" aria-label="急停处置规程列表">
-              <colgroup><col class="col-rule"><col class="col-scene"><col class="col-scope"><col class="col-duty"><col class="col-ticket"></colgroup>
-              <thead><tr><th>规则编号</th><th>异常场景</th><th>急停范围</th><th>处置责任</th><th>当前关联工单</th></tr></thead>
+              <colgroup><col class="col-rule"><col class="col-scene"><col class="col-scope"><col class="col-duty"><col class="col-ticket"><col class="col-action"></colgroup>
+              <thead><tr><th>规则编号</th><th>异常场景</th><th>急停范围</th><th>处置责任</th><th>当前关联工单</th><th>操作</th></tr></thead>
               <tbody id="procedureBody"></tbody>
             </table>
           </div>
@@ -40,6 +40,6 @@
       <footer class="ops-modal-footer"><span class="footer-hint" id="procedureRole"></span><button class="modal-close" type="button" data-close-ops>关闭</button></footer>
     </section>
   </div>
-  <script src="assets/scripts/exception-operations.js?v=20260828"></script>
+  <script src="assets/scripts/exception-operations.js?v=20260828-2"></script>
 </body>
 </html>

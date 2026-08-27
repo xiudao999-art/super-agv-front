@@ -23,12 +23,25 @@
 .workorder-ops-table .status-tag.valid{color:#287b56;background:#e9f7f0}
 .procedure-ops-table{min-width:820px}
 .procedure-ops-table .col-rule{width:10%}
-.procedure-ops-table .col-scene{width:39%}
-.procedure-ops-table .col-scope{width:14%}
-.procedure-ops-table .col-duty{width:21%}
+.procedure-ops-table .col-scene{width:33%}
+.procedure-ops-table .col-scope{width:13%}
+.procedure-ops-table .col-duty{width:18%}
 .procedure-ops-table .col-ticket{width:16%}
+.procedure-ops-table .col-action{width:10%}
 .procedure-ops-table td:first-child,.procedure-ops-table td:last-child{white-space:nowrap}
+.procedure-ops-table td:nth-child(5){white-space:nowrap}
+.procedure-ops-table th:last-child,.procedure-status-cell{text-align:center}
+.procedure-ops-table th:last-child,.procedure-ops-table td:last-child{position:static!important;right:auto!important;z-index:auto!important;box-shadow:none!important}
 .procedure-ops-table .table-secondary{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:1}
 .procedure-ops-table td{height:64px}
+.procedure-switch{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:2px;border:0;border-radius:999px;color:#7b8792;background:transparent;cursor:pointer}
+.procedure-switch-track{position:relative;width:34px;height:18px;flex:0 0 34px;border-radius:999px;background:#c9d0d6;box-shadow:inset 0 0 0 1px rgba(8,24,41,.06);transition:background .18s ease}
+.procedure-switch-track::after{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(8,24,41,.24);content:"";transition:transform .18s ease}
+.procedure-switch strong{min-width:24px;color:inherit;font-size:11px;font-weight:600;line-height:18px}
+.procedure-switch.is-on{color:#218657}
+.procedure-switch.is-on .procedure-switch-track{background:#2f9d6a}
+.procedure-switch.is-on .procedure-switch-track::after{transform:translateX(16px)}
+.procedure-switch:hover{background:#f4f7f8}
+.procedure-switch:focus-visible{outline:2px solid rgba(22,119,200,.28);outline-offset:2px}
 .confirm-item{align-items:flex-start}.confirm-item input[type="checkbox"]{width:16px;height:16px;min-width:16px;min-height:16px;flex:0 0 16px;margin:1px 0 0;accent-color:#1677c8}.confirm-item>span{min-width:0;flex:1}.confirm-item .role-chip{flex:0 0 auto}
 .procedure-ticket-link{max-width:100%;box-sizing:border-box;gap:7px;min-height:28px;padding:4px 8px;overflow:hidden;border:1px solid #cfe2f2;text-overflow:ellipsis;transition:border-color .15s ease,background .15s ease}.procedure-ticket-link:hover{border-color:#7db4dd;background:#dfedf9}.procedure-ticket-link span{margin:0;color:inherit;font-size:13px}
