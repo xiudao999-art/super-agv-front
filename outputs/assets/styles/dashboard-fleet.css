@@ -88,9 +88,11 @@
   stroke-width: 2.3;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-dasharray: none;
+  stroke-dasharray: 5 13;
+  stroke-dashoffset: var(--route-dash-offset, 0);
   filter: drop-shadow(0 1px 1px rgba(255,255,255,.85));
 }
+.fleet-route:hover .fleet-route-line { stroke-width: 3.2; }
 .fleet-agv-waypoint { fill:#fff; stroke:var(--route); stroke-width:2.5; cursor:pointer; transform-box:fill-box; transform-origin:center; transition:fill .15s ease,transform .15s ease; }
 .fleet-agv-waypoint-node:is(:hover,:focus) { outline:none; }
 .fleet-agv-waypoint-node:is(:hover,:focus) .fleet-agv-waypoint { fill:var(--route); transform:scale(1.25); }

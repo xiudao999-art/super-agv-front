@@ -994,6 +994,7 @@
               <marker id="fleetArrow3" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#8a5cf5"/></marker>
               <marker id="fleetArrow4" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#f39b24"/></marker>
               <marker id="fleetArrow5" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#ec5272"/></marker>
+              <marker id="fleetArrow6" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#16a5a3"/></marker>
             </defs>
             <g id="fleetAgvLayer" aria-label="各 AGV 独立点位与方向连线"></g>
             <g id="fleetPointLayer" aria-label="实验室点位"></g>
@@ -1021,10 +1022,9 @@
           </div>
         </section>
         <section class="side-panel issues-panel fleet-issues-panel">
-          <div class="panel-heading"><h2>待处理事项</h2><label class="toggle-label">隐藏已完成<input type="checkbox" id="fleetHideCompletedIssues"><span class="toggle-ui" aria-hidden="true"></span></label></div>
+          <div class="panel-heading"><h2>待处理事项</h2></div>
           <div class="issue-list">
             <article class="issue-card"><div class="issue-head"><span class="issue-check" aria-hidden="true"></span><div class="issue-copy"><strong>库位状态不一致</strong><p>立库 A-第4层-07 · 建议扫码核对</p></div></div></article>
-            <article class="issue-card completed"><div class="issue-head"><span class="issue-check done" aria-hidden="true">✓</span><div class="issue-copy"><strong>库位人工确认已完成</strong><p>立库 A-第2层-03 · 已完成现场扫码</p></div></div></article>
             <article class="issue-card"><div class="issue-head"><span class="issue-check" aria-hidden="true"></span><div class="issue-copy"><strong>机台许可等待超时</strong><p>检测仪 B · 等待操作员确认</p></div></div></article>
           </div>
         </section>
@@ -1043,7 +1043,7 @@
       <section class="fleet-panel fleet-monitor" aria-labelledby="fleetMonitorTitle">
         <header class="fleet-panel-head monitor-head">
           <div><h2 id="fleetMonitorTitle">AGV 状态监控</h2><p>查看每台 AGV 的电量、位置、任务和目标点位</p></div>
-          <span class="fleet-badge" id="fleetResultCount">共 10 台</span>
+          <span class="fleet-badge" id="fleetResultCount">共 6 台</span>
         </header>
         <div class="fleet-filter-bar">
           <label class="fleet-search"><span aria-hidden="true">⌕</span><input id="fleetSearch" type="search" placeholder="搜索 AGV 编号" autocomplete="off"></label>
@@ -1195,10 +1195,9 @@
           </section>
 
           <section class="side-panel issues-panel">
-            <div class="panel-heading"><h2>待处理事项</h2><label class="toggle-label">隐藏已完成<input type="checkbox" id="hideCompletedIssues"><span class="toggle-ui" aria-hidden="true"></span></label></div>
+            <div class="panel-heading"><h2>待处理事项</h2></div>
             <div class="issue-list">
               <article class="issue-card"><div class="issue-head"><span class="issue-check" aria-hidden="true"></span><div class="issue-copy"><strong>库位状态不一致</strong><p>立库A-第4层-07 · 建议扫码核对</p></div></div></article>
-              <article class="issue-card completed"><div class="issue-head"><span class="issue-check done" aria-hidden="true">✓</span><div class="issue-copy"><strong>库位人工确认待处理</strong><p>立库A-第4层-07 · 等待操作员完成现场扫码</p></div></div></article>
               <article class="issue-card"><div class="issue-head"><span class="issue-check" aria-hidden="true"></span><div class="issue-copy"><strong>库位状态不一致</strong><p>立库A-第3层-02 · 建议扫码核对</p></div></div></article>
             </div>
           </section>
@@ -1284,7 +1283,6 @@
     const alertDrawer = document.getElementById('alertDrawer');
     const alertPanel = alertDrawer.querySelector('.alert-drawer');
     const alertRecoveryBtn = document.getElementById('alertRecoveryBtn');
-    const hideCompletedIssues = document.getElementById('hideCompletedIssues');
     let toastTimer;
 
     function setSidebar(open) {
@@ -1355,12 +1353,6 @@
 
     document.querySelectorAll('.js-toast').forEach(function (button) {
       button.addEventListener('click', function () { showToast(button.dataset.message || '操作成功'); });
-    });
-
-    hideCompletedIssues.addEventListener('change', function () {
-      document.querySelectorAll('.issue-card.completed').forEach(function (card) {
-        card.classList.toggle('is-hidden', hideCompletedIssues.checked);
-      });
     });
 
     document.querySelectorAll('.js-map-node').forEach(function (node) {
