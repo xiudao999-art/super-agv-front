@@ -1,6 +1,99 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>复合机器人调度系统 · 告警记录</title>
-  <link rel="stylesheet" href="assets/styles/pages/alarm-records.css">
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f6f8">
+  <title>复合机器人调度系统 · 告警记录</title>
   <link rel="stylesheet" href="assets/styles/tokens.css">
   <link rel="stylesheet" href="assets/styles/base.css">
   <link rel="stylesheet" href="assets/styles/components.css">
-  <script type="module" src="assets/components/register.js" blocking="render"></script></head><body><agv-app-shell active-route="alarm-records.html" section-title="异常与恢复" user-name="陈工"><div class="agv-legacy-hooks" hidden><aside id="sidebar"></aside><div id="scrim"></div><button id="menuBtn" type="button"></button><button id="statusInfoBtn" type="button"></button><button id="statusBtn" type="button"></button><button id="alertInfoBtn" type="button"></button><button id="alertBtn" type="button"></button></div><agv-page-header class="page-head"><div><h1>异常与恢复</h1><p>聚合异常原因、影响范围、恢复状态和人工处理建议</p></div></agv-page-header><div class="page-canvas"><section class="page-panel"><div class="recovery-tabs"><agv-tabs class="tabs"><a class="tab-btn" href="current-anomalies.html">当前异常</a><i class="tab-divider"></i><a class="tab-btn active" href="alarm-records.html">告警记录</a><i class="tab-divider"></i><a class="tab-btn" href="task-recovery-status.html">任务恢复与状态核对</a></agv-tabs></div><div class="content"><div class="list-head"><div><h2>告警记录</h2><p>默认仅展示记录列表；点击任意记录后弹窗显示关联 ID、来源、证据和恢复结果</p></div></div><label class="record-search"><span>⌕</span><input id="alarmSearch" placeholder="搜索记录"></label><div class="table-wrap alarm-record-table"><table aria-label="告警记录"><thead><tr><th>告警名称</th><th>发生时间</th><th>关联 ID</th><th>操作者 / 来源</th><th>记录状态</th><th>证据</th></tr></thead><tbody><tr class="clickable-row" data-record data-search="视觉置信度低 2026-08-16 已确认 TRACE-20260816-1028 调度服务 / 陈工 请求、状态、结果和审计链完整" data-title="视觉置信度低" data-time="2026-08-16" data-state="已确认" data-id="TRACE-20260816-1028" data-source="调度服务 / 陈工" data-evidence="请求、状态、结果和审计链完整"><td><strong>视觉置信度低</strong></td><td>2026-08-16</td><td>TRACE-20260816-1028</td><td>调度服务 / 陈工</td><td><span class="status-tag valid">已确认</span></td><td class="record-evidence">请求、状态、结果和审计链完整</td></tr><tr class="clickable-row" data-record data-search="底盘短时离线 2026-08-16 已恢复 TRACE-20260816-1017 底盘服务 / 系统 心跳恢复，任务未中断" data-title="底盘短时离线" data-time="2026-08-16" data-state="已恢复" data-id="TRACE-20260816-1017" data-source="底盘服务 / 系统" data-evidence="心跳恢复，任务未中断"><td><strong>底盘短时离线</strong></td><td>2026-08-16</td><td>TRACE-20260816-1017</td><td>底盘服务 / 系统</td><td><span class="status-tag gray-state">已恢复</span></td><td class="record-evidence">心跳恢复，任务未中断</td></tr><tr class="clickable-row" data-record data-search="机台许可超时 2026-08-16 待处理 TRACE-20260816-0958 任务引擎 / 王工 机台许可事件等待超过 30 秒" data-title="机台许可超时" data-time="2026-08-16" data-state="待处理" data-id="TRACE-20260816-0958" data-source="任务引擎 / 王工" data-evidence="机台许可事件等待超过 30 秒"><td><strong>机台许可超时</strong></td><td>2026-08-16</td><td>TRACE-20260816-0958</td><td>任务引擎 / 王工</td><td><span class="status-tag standby">待处理</span></td><td class="record-evidence">机台许可事件等待超过 30 秒</td></tr></tbody></table></div><div class="total">共计 3 条数据</div></div></section></div></agv-app-shell><div class="modal-overlay record-modal" id="alarmRecordModal" hidden><section class="modal-card"><h2 id="recordDetailTitle">告警记录详情</h2><div class="detail-grid"><article class="detail-box"><strong>关联 ID</strong><p id="recordDetailId"></p></article><article class="detail-box"><strong>发生时间</strong><p id="recordDetailTime"></p></article><article class="detail-box"><strong>操作者 / 来源</strong><p id="recordDetailSource"></p></article><article class="detail-box"><strong>记录状态</strong><p id="recordDetailState"></p></article><article class="detail-box wide"><strong>证据</strong><p id="recordDetailEvidence"></p></article><article class="detail-box wide"><strong>恢复结果</strong><p>该记录已保存请求、状态、结果与审计链，可用于后续复盘和状态核对。</p></article></div><div class="modal-actions"><button class="modal-close" data-close="alarmRecordModal">关闭</button></div></section></div><div class="modal-overlay" id="statusModal" hidden><section class="modal-card"><h2>系统运行状态</h2><div class="status-list"><article class="status-item normal"><strong>绿色·系统正常</strong><p>核心服务、数据库、任务引擎和机器人连接正常。</p></article><article class="status-item limited"><strong>黄色·受限运行</strong><p>部分非核心设备或上游接口异常，系统仍可继续部分业务。</p></article><article class="status-item abnormal"><strong>红色·系统异常</strong><p>核心能力异常，系统暂停接收和分配新任务。</p></article><article class="status-item maintenance"><strong>灰色·维护模式</strong><p>系统处于人工维护、升级或硬件调试状态。</p></article></div><div class="modal-actions"><button class="modal-close" data-close="statusModal">关闭</button></div></section></div><div class="alert-overlay" id="alertDrawer" hidden><aside class="alert-drawer"><header class="alert-header"><h2>异常提醒</h2><p>3条未完成·1条严重</p></header><div class="alert-feed"><article class="alert-card"><strong>机台允许进样事件等待超过流程配置的30秒</strong><p>ALM-20260817-0042 · 待处理</p></article><article class="alert-card"><strong>系统记录为空，但库位传感器检测有物</strong><p>ALM-20260817-0041 · 处理中</p></article></div><footer class="alert-footer"><button class="alert-primary" id="recoveryBtn">进入异常与恢复</button></footer></aside></div><div class="toast" id="toast"></div><script>const toast=document.getElementById('toast');let toastTimer;function showToast(message){toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2200)}function openModal(id){const modal=document.getElementById(id);if(!modal)return;modal.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>modal.classList.add('open'))}function closeModal(id){const modal=document.getElementById(id);if(!modal)return;modal.classList.remove('open');document.body.style.overflow='';setTimeout(()=>modal.hidden=true,200)}document.querySelectorAll('[data-close]').forEach(button=>button.addEventListener('click',()=>closeModal(button.dataset.close)));document.querySelectorAll('.modal-overlay').forEach(modal=>modal.addEventListener('click',event=>{if(event.target===modal)closeModal(modal.id)}));document.getElementById('statusInfoBtn')?.addEventListener('click',()=>openModal('statusModal'));const drawer=document.getElementById('alertDrawer');document.getElementById('alertInfoBtn')?.addEventListener('click',()=>{drawer.hidden=false;requestAnimationFrame(()=>drawer.classList.add('open'))});drawer?.addEventListener('click',event=>{if(event.target===drawer){drawer.classList.remove('open');setTimeout(()=>drawer.hidden=true,220)}});document.getElementById('recoveryBtn')?.addEventListener('click',()=>location.href='current-anomalies.html');document.querySelectorAll('.demo-link').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();showToast(link.dataset.page+'模块将使用独立 HTML 页面')}));const sidebar=document.getElementById('sidebar'),scrim=document.getElementById('scrim');document.getElementById('menuBtn')?.addEventListener('click',()=>{sidebar.classList.toggle('open');scrim.classList.toggle('show')});scrim?.addEventListener('click',()=>{sidebar.classList.remove('open');scrim.classList.remove('show')});document.getElementById('alarmSearch').addEventListener('input',event=>{const keyword=event.target.value.trim().toLowerCase();document.querySelectorAll('[data-record]').forEach(record=>record.hidden=keyword&&!record.dataset.search.toLowerCase().includes(keyword))});document.querySelectorAll('[data-record]').forEach(record=>record.addEventListener('click',()=>{document.getElementById('recordDetailTitle').textContent=record.dataset.title+' · 详情';document.getElementById('recordDetailId').textContent=record.dataset.id;document.getElementById('recordDetailTime').textContent=record.dataset.time;document.getElementById('recordDetailSource').textContent=record.dataset.source;document.getElementById('recordDetailState').textContent=record.dataset.state;document.getElementById('recordDetailEvidence').textContent=record.dataset.evidence;openModal('alarmRecordModal')}));</script></body></html>
+  <link rel="stylesheet" href="assets/styles/tables.css">
+  <link rel="stylesheet" href="assets/styles/pages/exception-recovery.css">
+  <script type="module" src="assets/components/register.js" blocking="render"></script>
+</head>
+<body data-recovery-page="alarms">
+  <agv-app-shell active-route="alarm-records.html" section-title="异常与恢复" user-name="陈工">
+    <div class="agv-legacy-hooks" hidden>
+      <aside id="sidebar"></aside><div id="scrim"></div><button id="menuBtn" type="button"></button>
+      <button id="statusInfoBtn" type="button"></button><button id="statusBtn" type="button"></button>
+      <button id="alertInfoBtn" type="button"></button><button id="alertBtn" type="button"></button>
+    </div>
+
+    <agv-page-header class="page-head">
+      <div><h1>异常与恢复</h1><p>查询告警等级、确认、解除和通知历史</p></div>
+    </agv-page-header>
+
+    <main class="page-canvas">
+      <section class="recovery-panel">
+        <nav class="module-tabs" aria-label="异常与恢复模块导航">
+          <a class="module-tab" href="current-anomalies.html">当前异常</a>
+          <a class="module-tab active" href="alarm-records.html" aria-current="page">告警记录</a>
+          <a class="module-tab" href="task-recovery-status.html">任务恢复与状态核对</a>
+        </nav>
+        <div class="module-content">
+          <header class="list-heading">
+            <div><h2>告警记录</h2><p>记录只用于查询与复盘；点击行查看关联订单、处理建议和现场证据</p></div>
+          </header>
+
+          <form class="filters" id="alarmFilters" onsubmit="return false">
+            <label class="field-shell"><span>开始时间</span><input id="alarmStart" type="datetime-local" aria-label="开始时间"></label>
+            <label class="field-shell"><span>结束时间</span><input id="alarmEnd" type="datetime-local" aria-label="结束时间"></label>
+            <label class="field-shell"><span>告警等级</span><select id="alarmLevel"><option value="">全部等级</option><option>严重</option><option>警告</option><option>提示</option></select></label>
+            <label class="field-shell"><span>处理状态</span><select id="alarmStatus"><option value="">全部状态</option><option>待处理</option><option>处理中</option><option>已确认</option><option>已恢复</option><option>已关闭</option></select></label>
+            <label class="field-shell"><span>告警类型</span><select id="alarmType"><option value="">全部类型</option><option>任务执行</option><option>库位一致性</option><option>设备通信</option><option>外围资源</option><option>机器人安全</option></select></label>
+            <label class="field-shell"><span>来源模块</span><select id="alarmSource"><option value="">全部来源</option><option>任务引擎</option><option>库位服务</option><option>机器人连接服务</option><option>自动门适配器</option><option>底盘安全服务</option></select></label>
+            <label class="field-shell"><span>关键词</span><input id="alarmKeyword" type="search" placeholder="编号 / 对象 / 订单 / AGV"></label>
+            <div class="filter-actions"><button class="filter-btn" id="resetAlarms" type="button"><img class="filter-action-icon" src="assets/list-icons/refresh.svg" alt="">重置</button><button class="filter-btn primary" id="searchAlarms" type="button"><img class="filter-action-icon" src="assets/list-icons/search.svg" alt="">搜索</button></div>
+          </form>
+
+          <div class="table-wrap alarm-table-wrap">
+            <table class="data-table alarm-table" aria-label="告警记录列表">
+              <colgroup>
+                <col style="width:156px"><col style="width:154px"><col style="width:80px"><col style="width:92px"><col style="width:100px">
+                <col style="width:260px"><col style="width:118px"><col style="width:160px"><col style="width:84px"><col style="width:82px">
+              </colgroup>
+              <thead><tr><th>告警编号</th><th>发生时间</th><th>等级</th><th>状态</th><th>类型</th><th>告警内容</th><th>来源模块</th><th>异常对象</th><th>AGV</th><th>负责人</th></tr></thead>
+              <tbody id="alarmBody"></tbody>
+            </table>
+          </div>
+          <footer class="table-footer"><span id="alarmRecordSummary">共 0 条告警记录</span><div class="page-controls"><button class="page-button active" type="button">1</button></div></footer>
+        </div>
+      </section>
+    </main>
+  </agv-app-shell>
+
+  <div class="modal-overlay" id="alarmRecordModal" hidden>
+    <section class="record-modal" role="dialog" aria-modal="true" aria-labelledby="recordModalTitle">
+      <header class="modal-header">
+        <div><h2 id="recordModalTitle">告警记录详情</h2><p id="recordModalSubtitle"></p></div>
+        <button class="modal-x" type="button" data-close="alarmRecordModal" aria-label="关闭">×</button>
+      </header>
+      <div class="modal-body">
+        <article class="exception-summary" id="recordSummary">
+          <div id="recordLevel"></div>
+          <div><h3 id="recordMessage"></h3><p id="recordCode"></p></div>
+        </article>
+        <div class="section-title"><h3>记录信息</h3><span>该页面不修改原始告警记录</span></div>
+        <div class="detail-grid">
+          <article class="detail-item"><span class="detail-label">处理状态</span><div id="recordStatus"></div></article>
+          <article class="detail-item"><span class="detail-label">来源模块</span><strong class="detail-value" id="recordSource"></strong></article>
+          <article class="detail-item"><span class="detail-label">负责人</span><strong class="detail-value" id="recordOwner"></strong></article>
+          <article class="detail-item"><span class="detail-label">异常对象</span><strong class="detail-value" id="recordObject"></strong></article>
+          <article class="detail-item wide"><span class="detail-label">关联订单 / 任务 / AGV</span><strong class="detail-value" id="recordAssociation"></strong></article>
+          <article class="detail-item wide"><span class="detail-label">首次发生 — 最后更新</span><strong class="detail-value" id="recordPeriod"></strong></article>
+          <article class="detail-item"><span class="detail-label">累计次数</span><strong class="detail-value" id="recordCount"></strong></article>
+          <article class="detail-item full"><span class="detail-label">影响范围</span><strong class="detail-value" id="recordImpact"></strong></article>
+          <article class="detail-item full"><span class="detail-label">处理建议</span><strong class="detail-value" id="recordSuggestion"></strong></article>
+          <article class="detail-item full"><span class="detail-label">现场与系统证据</span><strong class="detail-value" id="recordEvidence"></strong></article>
+        </div>
+        <p class="readonly-note">告警历史为只读记录。需要继续处置的异常请前往“当前异常”，状态不一致或系统重启后的核对请前往“任务恢复与状态核对”。</p>
+        <div class="modal-actions"><button class="modal-close" type="button" data-close="alarmRecordModal">关闭</button></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="assets/scripts/exception-recovery.js"></script>
+</body>
+</html>
