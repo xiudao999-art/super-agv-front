@@ -22,10 +22,6 @@
           <h2>进入排程的互斥资源</h2>
           <div class="resource-tags"><span>取料位/放料位</span><span>窄通道/交叉口</span><span>自动门</span><span>电梯</span><span>共享充电桩</span><span>单容量机台交互位</span><span class="muted">普通动作不排程</span></div>
         </article>
-        <article class="overview-card priority-card">
-          <h2>默认冲突优先级</h2>
-          <ol class="priority-steps" id="conflictPrioritySteps"><li><b>1</b><span>紧急任务</span></li><li><b>2</b><span>正在占用</span></li><li><b>3</b><span>任务优先级</span></li><li><b>4</b><span>先申请</span></li><li><b>5</b><span>AGV 编号</span></li></ol>
-        </article>
       </section>
 
       <section class="schedule-filters" aria-label="冲突排程筛选">
@@ -44,12 +40,11 @@
               <div class="order-table-head"><label><input id="selectAllOrders" type="checkbox"><span>全选</span></label><span>订单 / 执行 AGV</span><span>主要冲突资源</span><span>业务优先级</span></div>
               <div class="order-rows" id="orderRows"></div>
             </div>
-            <aside class="priority-queue" aria-label="订单与冲突优先级">
+            <aside class="priority-queue" aria-label="已选订单排程顺序">
               <header><div><h3>已选订单优先级</h3><p>拖拽或使用上下按钮调整，序号越小越先占用资源</p></div><strong id="selectedOrderCount">0 个</strong></header>
               <div class="priority-content">
                 <div class="priority-empty" id="priorityEmpty"><span>尚未选择订单</span><small>从左侧勾选需要参与重新排程的订单</small></div>
                 <ol class="priority-list" id="priorityList"></ol>
-                <section class="conflict-priority-editor" aria-labelledby="conflictPriorityTitle"><header><div><h3 id="conflictPriorityTitle">冲突优先级</h3><p>当前规则从上到下依次判定，可独立调整</p></div><span>5 条规则</span></header><ol class="conflict-priority-list" id="conflictPriorityList"></ol></section>
               </div>
               <footer><button class="schedule-btn" id="clearSelectedOrders" type="button" disabled>清空</button><button class="schedule-btn primary" id="rescheduleOrders" type="button" disabled>按当前顺序重新排程</button></footer>
             </aside>
@@ -78,7 +73,7 @@
     </main>
   </agv-app-shell>
 
-  <div class="modal-overlay" id="statusModal" hidden><section class="modal-card"><h2>系统运行状态</h2><div class="status-list"><article class="status-item normal"><strong>绿色 · 系统正常</strong><p>核心服务、数据库、调度引擎和机器人连接正常。</p></article><article class="status-item limited"><strong>黄色 · 受限运行</strong><p>部分互斥资源正在排队，任务按冲突优先级执行。</p></article><article class="status-item abnormal"><strong>红色 · 系统异常</strong><p>关键资源异常阻塞，相关 AGV 任务暂停执行。</p></article></div><div class="modal-actions"><button class="modal-close" data-close="statusModal">关闭</button></div></section></div>
+  <div class="modal-overlay" id="statusModal" hidden><section class="modal-card"><h2>系统运行状态</h2><div class="status-list"><article class="status-item normal"><strong>绿色 · 系统正常</strong><p>核心服务、数据库、调度引擎和机器人连接正常。</p></article><article class="status-item limited"><strong>黄色 · 受限运行</strong><p>部分互斥资源正在排队，任务按当前订单顺序执行。</p></article><article class="status-item abnormal"><strong>红色 · 系统异常</strong><p>关键资源异常阻塞，相关 AGV 任务暂停执行。</p></article></div><div class="modal-actions"><button class="modal-close" data-close="statusModal">关闭</button></div></section></div>
   <div class="drawer-overlay" id="alertDrawer" hidden><aside class="drawer"><header><h2>异常提醒</h2><p>2 条资源冲突 · 1 条异常阻塞</p></header><div class="alert-feed"><article class="alert-card"><strong>电梯-01W 通信离线</strong><p>AGV-05 · 异常阻塞 · 09:28</p></article><article class="alert-card"><strong>自动门-01 等待占用资源释放</strong><p>AGV-01 · 排队 · 09:12</p></article></div><footer><a href="current-anomalies.html">进入异常与恢复</a></footer></aside></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 

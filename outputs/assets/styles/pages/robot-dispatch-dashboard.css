@@ -6,8 +6,8 @@
       
       
       
-      --ref-image:url('../../../facility-map-clean.png');
-      --map-image: url('../../images/robot-dispatch-dashboard-5ec322e40aca.png');
+      --ref-image:url('../../agvmap.png');
+      --map-image: url('../../agvmap.png');
       color-scheme: light;
       font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif;}
 

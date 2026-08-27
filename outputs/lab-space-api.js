@@ -5,6 +5,7 @@ import { labRequest, uploadLabMap } from './assets/data/lab-data.js';
 
 
   const DIRECT_API_BASE_URL='http://121.196.164.163:8081';
+  const UNIFIED_MAP_IMAGE='assets/agvmap.png';
   const apiBaseUrl=location.protocol==='file:'?DIRECT_API_BASE_URL:'';
   const apiUrl=path=>(apiBaseUrl?apiBaseUrl.replace(/\/$/,''):'')+path;
   const tableBody=document.querySelector('.content .table-wrap tbody');
@@ -62,16 +63,15 @@ import { labRequest, uploadLabMap } from './assets/data/lab-data.js';
   async function uploadMapImage(file,signal){validateImageFile(file);const result=await uploadLabMap(file,{baseUrl:apiBaseUrl,signal,timeout:30000}),imageUrl=result.data?.imageUrl;if(!imageUrl)throw new Error('上传接口未返回 imageUrl');mapImageInput.value=imageUrl;mapUploadStatus.textContent='上传成功：'+imageUrl;return imageUrl}
 
   function addDetail(label,value,wide){const item=document.createElement('article');item.className='detail-item'+(wide?' wide':'');const caption=document.createElement('span');caption.textContent=label;const content=document.createElement('strong');content.textContent=value??'-';if(label==='地图图片')content.className='map-url';item.append(caption,content);mapDetails.appendChild(item)}
-  function resolveMapImageUrl(value){const path=String(value||'').trim();if(!path)return'';if(/^(?:https?:|data:|blob:)/i.test(path))return path;return apiUrl(path.startsWith('/')?path:'/'+path)}
   function renderMapPreview(map,visible){
     mapModal?.classList.toggle('map-preview-open',Boolean(visible));
     if(!mapPreview||!mapPreviewImage||!mapPreviewEmpty)return;
     mapPreview.hidden=!visible;
     if(!visible){mapPreviewImage.removeAttribute('src');mapPreviewImage.hidden=true;mapPreviewEmpty.hidden=true;return}
-    const imageUrl=resolveMapImageUrl(map?.imageUrl);
+    const imageUrl=UNIFIED_MAP_IMAGE;
     mapPreviewName.textContent=map?.name||'未命名地图';
     mapPreviewVersion.textContent=map?.version?'版本 '+map.version:'未设置版本';
-    mapPreviewImage.alt=(map?.name||'地图')+'预览图';
+    mapPreviewImage.alt=(map?.name||'地图')+'预览图，与运行总览地图一致';
     mapPreviewImage.hidden=!imageUrl;
     mapPreviewEmpty.hidden=Boolean(imageUrl);
     mapPreviewEmptyTitle.textContent=imageUrl?'地图图片加载失败':'暂无地图图片';

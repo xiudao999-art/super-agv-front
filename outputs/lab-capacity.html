@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="assets/styles/tokens.css">
   <link rel="stylesheet" href="assets/styles/base.css">
   <link rel="stylesheet" href="assets/styles/components.css">
+  <style>.camera-feed-frame img{width:100%;height:100%;display:block;object-fit:cover;background:#07131d}</style>
   <script type="module" src="assets/components/register.js" blocking="render"></script>
 </head>
 <body>
@@ -26,6 +27,38 @@
         <article class="bar-panel"><div class="capacity-card-head"><h2>节点属性</h2><span class="tag info">单位：单</span></div><div class="bar-chart"><div class="y-axis"><span style="bottom:0%">0</span><span style="bottom:10%">10</span><span style="bottom:20%">20</span><span style="bottom:30%">30</span><span style="bottom:40%">40</span><span style="bottom:50%">50</span><span style="bottom:60%">60</span><span style="bottom:70%">70</span><span style="bottom:80%">80</span><span style="bottom:90%">90</span><span style="bottom:100%">100</span></div><div class="plot" id="capacityPlot"><i class="bar" style="--height:34%" title="34 单"></i><i class="bar" style="--height:59%" title="59 单"></i><i class="bar" style="--height:58%" title="58 单"></i><i class="bar" style="--height:70%" title="70 单"></i><i class="bar" style="--height:70%" title="70 单"></i><i class="bar" style="--height:89%" title="89 单"></i><i class="bar" style="--height:59%" title="59 单"></i></div><div class="x-axis"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div></div></article>
         <aside class="duration-panel"><div class="capacity-card-head"><h2>耗时构成</h2><span class="tag info">近7天</span></div><div class="duration-list"><article class="duration-item"><div class="duration-item-head"><span>机台等待</span><strong>50秒</strong></div><div class="duration-progress"><i style="--progress:32%"></i><b>32%</b></div></article><article class="duration-item"><div class="duration-item-head"><span>机台等待</span><strong>50秒</strong></div><div class="duration-progress"><i style="--progress:18%"></i><b>进度18%</b></div></article><article class="duration-item"><div class="duration-item-head"><span>取放与扫码</span><strong>1分24秒</strong></div><p>42%</p><div class="duration-progress"><i style="--progress:42%"></i><b>进度42%</b></div></article><article class="duration-item"><div class="duration-item-head"><span>异常与恢复</span><strong>24秒</strong></div><div class="duration-progress"><i style="--progress:42%"></i><b>进度42%</b></div></article></div></aside>
       </section>
+      <section class="camera-monitor-panel" aria-labelledby="cameraMonitorTitle">
+        <header class="camera-monitor-head">
+          <div><h2 id="cameraMonitorTitle">实时摄像机画面</h2><p>显示已在“外围资源”中挂载的摄像机检测画面</p></div>
+          <label class="camera-select-field"><span>摄像机</span><select id="capacityCameraSelect" aria-label="选择已挂载摄像机"></select></label>
+        </header>
+        <div class="camera-monitor-grid">
+          <article class="camera-feed-card">
+            <div class="camera-feed-frame" id="cameraFeedFrame">
+              <img id="capacityCameraImage" src="assets/camera-detection.png" alt="摄像机实时检测画面">
+              <div class="camera-scan-line" aria-hidden="true"></div>
+              <div class="camera-feed-osd"><span class="camera-live-dot"></span><strong>LIVE</strong><span id="cameraFeedCode">CAM-01</span><time id="cameraFeedTime"></time></div>
+              <div class="camera-feed-empty" id="cameraFeedEmpty" hidden><strong>暂无已挂载摄像机</strong><span>请先在外围资源中新增摄像机</span></div>
+            </div>
+            <footer class="camera-feed-footer"><span><i class="camera-live-dot"></i><b id="cameraLiveStatus">在线</b></span><span id="cameraFrameRate">25 FPS</span><span id="cameraResolution">1920×1080</span></footer>
+          </article>
+          <aside class="camera-detail-card">
+            <div class="camera-detail-head"><span>当前设备</span><strong id="cameraDeviceName">检测工位摄像机</strong></div>
+            <dl class="camera-detail-list">
+              <div><dt>资源编号</dt><dd id="cameraMountCode">CAM-01</dd></div>
+              <div><dt>网络地址</dt><dd id="cameraNetwork">192.168.20.31:554</dd></div>
+              <div><dt>码流协议</dt><dd id="cameraStream">RTSP</dd></div>
+              <div><dt>所属空间</dt><dd id="cameraSpace">空间 A / 总览地图 V3.2</dd></div>
+            </dl>
+            <div class="camera-result-head"><h3>实时检测</h3><span>正常</span></div>
+            <div class="camera-result-list">
+              <article><i></i><div><strong>成年实验鼠已识别</strong><span>当前画面 1 个目标</span></div></article>
+              <article><i></i><div><strong>新生幼鼠多目标识别</strong><span>检测框已标记</span></div></article>
+              <article><i></i><div><strong>检测区域无遮挡</strong><span>刚刚更新</span></div></article>
+            </div>
+          </aside>
+        </div>
+      </section>
     </main>
   </agv-app-shell>
   <div class="modal-overlay" id="statusModal" hidden><section class="modal-card"><h2>系统运行状态</h2><div class="status-list"><article class="status-item normal"><strong>绿色 · 系统正常</strong><p>核心服务、数据库、任务引擎和机器人连接正常。</p></article><article class="status-item limited"><strong>黄色 · 受限运行</strong><p>部分非核心设备或上游接口异常，系统仍可继续部分业务。</p></article><article class="status-item abnormal"><strong>红色 · 系统异常</strong><p>核心能力异常，系统暂停接收和分配新任务。</p></article></div><div class="modal-actions"><button class="modal-close" data-close="statusModal">关闭</button></div></section></div>
@@ -39,6 +72,42 @@
     document.getElementById('statusBtn').addEventListener('click',()=>openLayer('statusModal'));document.getElementById('alertBtn').addEventListener('click',()=>openLayer('alertDrawer'));document.querySelectorAll('[data-close]').forEach(button=>button.addEventListener('click',()=>closeLayer(button.dataset.close)));document.querySelectorAll('.modal-overlay,.drawer-overlay').forEach(layer=>layer.addEventListener('click',event=>{if(event.target===layer)closeLayer(layer.id)}));
     const sidebar=document.getElementById('sidebar'),scrim=document.getElementById('scrim');document.getElementById('menuBtn').addEventListener('click',()=>{sidebar.classList.toggle('open');scrim.classList.toggle('show')});scrim.addEventListener('click',()=>{sidebar.classList.remove('open');scrim.classList.remove('show')});
     document.getElementById('capacityRange').addEventListener('change',event=>{const range=event.target.value,values=range==='今日'?[22,38,30,42,49,61,55]:range==='近30天'?[72,84,78,91,86,96,90]:[34,59,58,70,70,89,59];document.querySelectorAll('#capacityPlot .bar').forEach((bar,index)=>{bar.style.setProperty('--height',values[index]+'%');bar.title=values[index]+' 单'});document.getElementById('capacityOrders').textContent=range==='今日'?'76':range==='近30天'?'2,184':'512';showToast('已切换统计范围：'+range)});
+
+    const CAMERA_STORAGE_KEY='agv.peripheral.resources.v1';
+    const fallbackCamera={code:'CAM-01',name:'检测工位摄像机',type:'摄像机',space:'空间 A / 总览地图 V3.2',status:'在线',camera:{ip:'192.168.20.31',port:'554',protocol:'RTSP',streamUrl:'rtsp://192.168.20.31:554/stream1',resolution:'1920×1080',frameRate:'25',previewUrl:'assets/camera-detection.png'}};
+    const cameraSelect=document.getElementById('capacityCameraSelect');
+    const cameraImage=document.getElementById('capacityCameraImage');
+    const cameraFeedFrame=document.getElementById('cameraFeedFrame');
+    let mountedCameras=[];
+
+    function readMountedCameras(){
+      try{const stored=JSON.parse(localStorage.getItem(CAMERA_STORAGE_KEY));if(Array.isArray(stored))return stored.filter(item=>item.type==='摄像机')}catch(error){console.warn('摄像机挂载数据读取失败',error)}
+      return [fallbackCamera];
+    }
+    function updateCameraClock(){document.getElementById('cameraFeedTime').textContent=new Intl.DateTimeFormat('zh-CN',{hour12:false,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(new Date())}
+    function setText(id,value){document.getElementById(id).textContent=value||'--'}
+    function updateCamera(camera){
+      const empty=!camera;
+      document.getElementById('cameraFeedEmpty').hidden=!empty;
+      cameraFeedFrame.classList.toggle('camera-feed-offline',empty);
+      cameraImage.hidden=empty;
+      if(empty){cameraImage.removeAttribute('src');setText('cameraLiveStatus','未挂载');['cameraFeedCode','cameraDeviceName','cameraMountCode','cameraNetwork','cameraStream','cameraSpace','cameraFrameRate','cameraResolution'].forEach(id=>setText(id,'--'));return}
+      const config=camera.camera||{};
+      const previewUrl=config.previewUrl||'assets/camera-detection.png';
+      cameraImage.src=/\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(previewUrl)?previewUrl:'assets/camera-detection.png';
+      setText('cameraFeedCode',camera.code);setText('cameraDeviceName',camera.name||camera.code);setText('cameraMountCode',camera.code);
+      setText('cameraNetwork',[config.ip,config.port].filter(Boolean).join(':'));setText('cameraStream',config.protocol);setText('cameraSpace',camera.space);
+      setText('cameraFrameRate',config.frameRate?config.frameRate+' FPS':'--');setText('cameraResolution',config.resolution);setText('cameraLiveStatus',camera.status||'在线');
+      cameraFeedFrame.classList.toggle('camera-feed-offline',camera.status==='离线');
+    }
+    function renderMountedCameras(){
+      mountedCameras=readMountedCameras();cameraSelect.replaceChildren();
+      if(!mountedCameras.length){const option=document.createElement('option');option.textContent='暂无已挂载摄像机';option.value='';cameraSelect.appendChild(option);cameraSelect.disabled=true;updateCamera(null);return}
+      cameraSelect.disabled=false;mountedCameras.forEach((camera,index)=>{const option=document.createElement('option');option.value=String(index);option.textContent=(camera.name||camera.code)+' · '+camera.code;cameraSelect.appendChild(option)});updateCamera(mountedCameras[0]);
+    }
+    cameraSelect.addEventListener('change',()=>updateCamera(mountedCameras[Number(cameraSelect.value)]));
+    window.addEventListener('storage',event=>{if(event.key===CAMERA_STORAGE_KEY)renderMountedCameras()});
+    updateCameraClock();setInterval(updateCameraClock,1000);renderMountedCameras();
   </script>
 </body>
 </html>

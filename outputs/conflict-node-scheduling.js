@@ -9,13 +9,6 @@
     { id: 'ORD-20260826-005', agv: 'AGV-05', name: '反应样本投料', route: '缓存区 → 投料工作站', resource: '投料工作站 / 电梯-01W', priority: '普通', tone: 'normal' },
     { id: 'ORD-20260826-006', agv: 'AGV-06', name: '待检样本转运', route: '东区 → 西区', resource: '窄通道C01 / 自动门-01', priority: '低', tone: 'low' }
   ];
-  const conflictRules = [
-    { id: 'urgent', label: '紧急任务', description: '紧急任务优先获得冲突资源' },
-    { id: 'occupying', label: '正在占用', description: '保障已进入资源区域的任务' },
-    { id: 'task-priority', label: '任务优先级', description: '比较订单设置的业务优先级' },
-    { id: 'applied-first', label: '先申请', description: '申请资源时间更早的任务优先' },
-    { id: 'agv-number', label: 'AGV 编号', description: '其余条件相同时按编号判定' }
-  ];
   const defaultStart = '2026-08-26T09:00';
   const defaultEnd = '2026-08-26T09:40';
   const maxRangeDuration = 12 * 60 * 60 * 1000;
@@ -27,8 +20,6 @@
   const nowLine = document.querySelector('.now-line');
   const orderRows = document.getElementById('orderRows');
   const priorityList = document.getElementById('priorityList');
-  const conflictPriorityList = document.getElementById('conflictPriorityList');
-  const conflictPrioritySteps = document.getElementById('conflictPrioritySteps');
   const priorityEmpty = document.getElementById('priorityEmpty');
   const selectedOrderCount = document.getElementById('selectedOrderCount');
   const selectAllOrders = document.getElementById('selectAllOrders');
@@ -39,9 +30,7 @@
   const toggleOrderSchedule = document.getElementById('toggleOrderSchedule');
   const orderScheduleBody = document.getElementById('orderScheduleBody');
   let selectedOrderIds = [];
-  let conflictPriorityIds = conflictRules.map(function (rule) { return rule.id; });
   let draggingOrderId = '';
-  let draggingConflictId = '';
   let toastTimer;
   let currentAxisStart = new Date(defaultStart);
   let currentAxisEnd = new Date(defaultEnd);
@@ -71,10 +60,6 @@
     return orders.find(function (order) { return order.id === id; });
   }
 
-  function conflictRuleById(id) {
-    return conflictRules.find(function (rule) { return rule.id === id; });
-  }
-
   function moveIcon(direction) {
     const path = direction === 'up' ? 'M6 14l6-6 6 6' : 'M6 10l6 6 6-6';
     return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + path + '"/></svg>';
@@ -83,13 +68,11 @@
   function renderOrderRows() {
     orderRows.innerHTML = orders.map(function (order) {
       const checked = selectedOrderIds.includes(order.id);
-      const rank = selectedOrderIds.indexOf(order.id) + 1;
       return '<label class="order-row' + (checked ? ' selected' : '') + '" data-order-id="' + order.id + '">' +
         '<input type="checkbox" value="' + order.id + '"' + (checked ? ' checked' : '') + ' aria-label="选择订单 ' + order.id + '">' +
         '<span class="order-main"><strong>' + order.id + '</strong><small>' + order.agv + ' · ' + order.name + ' · ' + order.route + '</small></span>' +
         '<span class="order-resource">' + order.resource + '</span>' +
         '<span class="order-priority ' + order.tone + '">' + order.priority + '</span>' +
-        (checked ? '<b class="selected-rank">P' + rank + '</b>' : '') +
       '</label>';
     }).join('');
     selectAllOrders.checked = selectedOrderIds.length === orders.length;
@@ -117,21 +100,6 @@
     renderOrderRows();
   }
 
-  function renderConflictPriority() {
-    conflictPriorityList.innerHTML = conflictPriorityIds.map(function (id, index) {
-      const rule = conflictRuleById(id);
-      return '<li draggable="true" data-conflict-id="' + id + '">' +
-        '<span class="drag-handle" title="拖拽调整顺序">⠿</span>' +
-        '<b>' + (index + 1) + '</b>' +
-        '<span><strong>' + rule.label + '</strong><small>' + rule.description + '</small></span>' +
-        '<div class="priority-move-actions"><button type="button" data-move-conflict="up" aria-label="上移冲突规则 ' + rule.label + '"' + (index === 0 ? ' disabled' : '') + '>' + moveIcon('up') + '</button><button type="button" data-move-conflict="down" aria-label="下移冲突规则 ' + rule.label + '"' + (index === conflictPriorityIds.length - 1 ? ' disabled' : '') + '>' + moveIcon('down') + '</button></div>' +
-      '</li>';
-    }).join('');
-    conflictPrioritySteps.innerHTML = conflictPriorityIds.map(function (id, index) {
-      return '<li><b>' + (index + 1) + '</b><span>' + conflictRuleById(id).label + '</span></li>';
-    }).join('');
-  }
-
   function setOrderSelected(id, selected) {
     if (selected && !selectedOrderIds.includes(id)) selectedOrderIds.push(id);
     if (!selected) selectedOrderIds = selectedOrderIds.filter(function (item) { return item !== id; });
@@ -148,18 +116,6 @@
     nextIds[index] = swapped;
     selectedOrderIds = nextIds;
     renderPriorityQueue();
-  }
-
-  function moveConflictRule(id, direction) {
-    const index = conflictPriorityIds.indexOf(id);
-    const nextIndex = direction === 'up' ? index - 1 : index + 1;
-    if (index < 0 || nextIndex < 0 || nextIndex >= conflictPriorityIds.length) return;
-    const nextIds = conflictPriorityIds.slice();
-    const swapped = nextIds[nextIndex];
-    nextIds[nextIndex] = id;
-    nextIds[index] = swapped;
-    conflictPriorityIds = nextIds;
-    renderConflictPriority();
   }
 
   function resetTimelineOrder() {
@@ -198,9 +154,8 @@
     });
     scheduleState.textContent = '已重新排程 · ' + selectedOrderIds.length + ' 个订单';
     scheduleState.className = 'schedule-state done';
-    const conflictSummary = conflictPriorityIds.slice(0, 3).map(function (id) { return conflictRuleById(id).label; }).join(' → ');
-    timelineResult.textContent = '订单顺序：' + selectedOrderIds.map(function (id, index) { return 'P' + (index + 1) + ' ' + orderById(id).agv; }).join(' → ') + '；冲突判定：' + conflictSummary + (conflictPriorityIds.length > 3 ? '…' : '');
-    scheduleState.title = '冲突规则：' + conflictPriorityIds.map(function (id) { return conflictRuleById(id).label; }).join(' → ');
+    timelineResult.textContent = '订单排程顺序：' + selectedOrderIds.map(function (id) { return orderById(id).agv; }).join(' → ');
+    scheduleState.removeAttribute('title');
     showToast('已按当前优先级重新生成 AGV 时序');
   }
 
@@ -331,46 +286,6 @@
     renderPriorityQueue();
   });
 
-  conflictPriorityList.addEventListener('click', function (event) {
-    const button = event.target.closest('[data-move-conflict]');
-    const item = event.target.closest('[data-conflict-id]');
-    if (!button || !item) return;
-    moveConflictRule(item.dataset.conflictId, button.dataset.moveConflict);
-  });
-  conflictPriorityList.addEventListener('dragstart', function (event) {
-    const item = event.target.closest('[data-conflict-id]');
-    if (!item) return;
-    draggingConflictId = item.dataset.conflictId;
-    item.classList.add('dragging');
-    event.dataTransfer.effectAllowed = 'move';
-  });
-  conflictPriorityList.addEventListener('dragend', function () {
-    draggingConflictId = '';
-    conflictPriorityList.querySelectorAll('.dragging,.drag-over').forEach(function (item) { item.classList.remove('dragging', 'drag-over'); });
-  });
-  conflictPriorityList.addEventListener('dragover', function (event) {
-    event.preventDefault();
-    conflictPriorityList.querySelectorAll('.drag-over').forEach(function (item) { item.classList.remove('drag-over'); });
-    const target = event.target.closest('[data-conflict-id]');
-    if (target && target.dataset.conflictId !== draggingConflictId) target.classList.add('drag-over');
-  });
-  conflictPriorityList.addEventListener('drop', function (event) {
-    event.preventDefault();
-    const target = event.target.closest('[data-conflict-id]');
-    if (!target || !draggingConflictId || target.dataset.conflictId === draggingConflictId) return;
-    const fromIndex = conflictPriorityIds.indexOf(draggingConflictId);
-    const targetIndex = conflictPriorityIds.indexOf(target.dataset.conflictId);
-    const targetRect = target.getBoundingClientRect();
-    const insertAfter = event.clientY > targetRect.top + targetRect.height / 2;
-    const nextIds = conflictPriorityIds.slice();
-    nextIds.splice(fromIndex, 1);
-    let insertIndex = targetIndex + (insertAfter ? 1 : 0);
-    if (fromIndex < insertIndex) insertIndex -= 1;
-    nextIds.splice(insertIndex, 0, draggingConflictId);
-    conflictPriorityIds = nextIds;
-    renderConflictPriority();
-  });
-
   toggleOrderSchedule.addEventListener('click', function () {
     const expanded = toggleOrderSchedule.getAttribute('aria-expanded') === 'true';
     toggleOrderSchedule.setAttribute('aria-expanded', String(!expanded));
@@ -381,7 +296,6 @@
 
   clearSelectedOrders.addEventListener('click', function () {
     selectedOrderIds = [];
-    conflictPriorityIds = conflictRules.map(function (rule) { return rule.id; });
     renderPriorityQueue();
     showToast('已清空选中订单');
   });
@@ -397,7 +311,6 @@
     renderTimeAxis(defaultStart, defaultEnd);
     resetTimelineOrder();
     renderPriorityQueue();
-    renderConflictPriority();
     showToast('时间范围和订单排程已重置');
   });
   rangeStart.addEventListener('change', function () { syncEndTimeLimit(true); });
@@ -416,5 +329,4 @@
   syncEndTimeLimit(false);
   renderTimeAxis(defaultStart, defaultEnd);
   renderPriorityQueue();
-  renderConflictPriority();
 }());

@@ -1,9 +1,10 @@
-import { getLaboratory, getLaboratoryConfig, resolveDashboardAssetUrl } from './assets/data/dashboard-data.js';
+import { getLaboratory, getLaboratoryConfig } from './assets/data/dashboard-data.js';
 
 (function(){
   'use strict';
 
   const DIRECT_API_BASE_URL='http://121.196.164.163:8081';
+  const UNIFIED_MAP_IMAGE='assets/agvmap.png';
   const DEMO_MODE=false;
   const DEMO_LAB={name:'点位路线演示'};
   const DEMO_CONFIG={id:'DEMO',revision:'-',status:'STATIC',map:{name:'四点位直角路线演示'}};
@@ -100,9 +101,8 @@ import { getLaboratory, getLaboratoryConfig, resolveDashboardAssetUrl } from './
     status.textContent=(detail.map?.name||'地图')+' · '+entities.points.length+' 个点位 · 原始坐标不缩放';mapArt.appendChild(status);
   }
 
-  function applyMapImage(imageUrl){
-    if(!imageUrl)throw new Error('配置详情未返回地图图片');
-    const fullUrl=resolveDashboardAssetUrl(imageUrl,apiBaseUrl);mapArt.style.setProperty('--map-image','url("'+fullUrl.replace(/"/g,'%22')+'")');
+  function applyMapImage(){
+    mapArt.style.setProperty('--map-image','url("'+UNIFIED_MAP_IMAGE+'")');
   }
 
   function rightAnglePath(start,end){
@@ -114,7 +114,7 @@ import { getLaboratory, getLaboratoryConfig, resolveDashboardAssetUrl } from './
   }
 
   function renderDetail(lab,config,detail){
-    hideTooltip();clearState();const imageUrl=detail.map?.imageUrl||config.map?.imageUrl;if(imageUrl)applyMapImage(imageUrl);else{mapArt.style.removeProperty('--map-image');mapArt.style.removeProperty('aspect-ratio')}routeLayer.removeAttribute('hidden');if(legend)legend.removeAttribute('hidden');routeLayer.replaceChildren();routeLayer.setAttribute('viewBox','0 0 '+MAP_COORDINATE_WIDTH+' '+MAP_COORDINATE_HEIGHT);routeLayer.setAttribute('preserveAspectRatio','none');routeLayer.setAttribute('aria-label',DEMO_MODE?'四个写死点位的静态演示图层':'后端实验室地图点位图层；左下角为原点；原始坐标不缩放');
+    hideTooltip();clearState();applyMapImage();routeLayer.removeAttribute('hidden');if(legend)legend.removeAttribute('hidden');routeLayer.replaceChildren();routeLayer.setAttribute('viewBox','0 0 '+MAP_COORDINATE_WIDTH+' '+MAP_COORDINATE_HEIGHT);routeLayer.setAttribute('preserveAspectRatio','none');routeLayer.setAttribute('aria-label',DEMO_MODE?'四个写死点位的静态演示图层':'后端实验室地图点位图层；左下角为原点；原始坐标不缩放');
     const entities=resolveSpatialEntities(detail),project=createProjector(),positions=entities.points.map(point=>project(point));
     const defs=svg('defs'),marker=svg('marker',{id:'pointSequenceArrow',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto-start-reverse'}),arrow=svg('path',{d:'M 0 0 L 10 5 L 0 10 Z',fill:'#27558b'});marker.appendChild(arrow);defs.appendChild(marker);routeLayer.appendChild(defs);
     const linksGroup=svg('g',{'aria-label':'点位按 ID 从小到大的直角箭头路线'});
