@@ -968,3 +968,227 @@ body:has(.editor-shell) .subflow-node .node-handle {
 }
 
 body:has(.editor-shell) .subflow-canvas.connecting { cursor: crosshair; }
+
+/* Workflow SVG icons, child counts and deterministic left-in/right-out connections. */
+body:has(.editor-shell) .flow-action-icon {
+  width: 22px;
+  height: 22px;
+  display: block;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+body:has(.editor-shell) .flow-action-icon .icon-solid {
+  fill: currentColor;
+  stroke: none;
+}
+
+body:has(.editor-shell) .flow-action-icon .icon-cut {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.8;
+}
+
+body:has(.editor-shell) .flow-action-icon .icon-cut-fill {
+  fill: #fff;
+  stroke: none;
+}
+
+body:has(.editor-shell) .flow-node.start,
+body:has(.editor-shell) .flow-node.end {
+  width: 64px;
+  height: 64px;
+  justify-content: center;
+  padding: 0;
+  border: 2px solid #1677d2;
+  border-radius: 50%;
+  background: #fff;
+  text-align: center;
+}
+
+body:has(.editor-shell) .flow-node.end {
+  border-color: #5f6b7a;
+}
+
+body:has(.editor-shell) .flow-node.start .flow-node-icon,
+body:has(.editor-shell) .flow-node.end .flow-node-icon {
+  width: 42px;
+  height: 42px;
+  color: #1677d2;
+  background: rgba(21, 119, 210, .08);
+}
+
+body:has(.editor-shell) .flow-node.end .flow-node-icon {
+  color: #5f6b7a;
+  background: rgba(95, 107, 122, .09);
+}
+
+body:has(.editor-shell) .flow-node.start .flow-action-icon,
+body:has(.editor-shell) .flow-node.end .flow-action-icon {
+  width: 26px;
+  height: 26px;
+}
+
+body:has(.editor-shell) .palette-icon .flow-action-icon,
+body:has(.editor-shell) .child-palette-icon .flow-action-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Never paint legacy character glyphs while the SVG icon system initializes. */
+body:has(.editor-shell) .palette-icon:not(:has(.flow-action-icon)),
+body:has(.editor-shell) .child-palette-icon:not(:has(.flow-action-icon)) {
+  font-size: 0;
+}
+
+body:has(.editor-shell) .palette-icon:not(:has(.flow-action-icon))::after,
+body:has(.editor-shell) .child-palette-icon:not(:has(.flow-action-icon))::after {
+  width: 13px;
+  height: 13px;
+  border: 1.8px solid currentColor;
+  border-radius: 4px;
+  transform: rotate(45deg);
+  content: "";
+}
+
+body:has(.editor-shell) .flow-node-copy {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+body:has(.editor-shell) .flow-node-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+body:has(.editor-shell) .flow-node-child-count {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  color: #1577d2;
+  background: rgba(21, 119, 210, .09);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 14px;
+}
+
+body:has(.editor-shell) .flow-node-subflow-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 20px;
+  padding: 2px 6px;
+  border: 1px solid rgba(40, 189, 107, .24);
+  border-radius: 999px;
+  color: #159352;
+  background: rgba(40, 189, 107, .08);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 14px;
+  cursor: pointer;
+  transition: border-color .14s ease, background .14s ease, transform .14s ease;
+}
+
+body:has(.editor-shell) .flow-node-subflow-entry:hover,
+body:has(.editor-shell) .flow-node-subflow-entry:focus-visible {
+  border-color: rgba(40, 189, 107, .55);
+  background: rgba(40, 189, 107, .15);
+  outline: 0;
+  transform: translateX(1px);
+}
+
+body:has(.editor-shell) .flow-node-subflow-entry .flow-node-child-count {
+  min-height: 0;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+body:has(.editor-shell) .flow-node-subflow-entry b {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 12px;
+}
+
+body:has(.editor-shell) .subflow-entry-field {
+  padding: 10px;
+  border: 1px solid rgba(40, 189, 107, .18);
+  border-radius: 8px;
+  background: rgba(40, 189, 107, .06);
+}
+
+body:has(.editor-shell) .subflow-entry-field > span {
+  color: #159352;
+}
+
+body:has(.editor-shell) .subflow-entry-button {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 10px;
+  border: 1px solid rgba(40, 189, 107, .25);
+  border-radius: 7px;
+  color: #0d6f3d;
+  background: #fff;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+body:has(.editor-shell) .subflow-entry-button:hover,
+body:has(.editor-shell) .subflow-entry-button:focus-visible {
+  border-color: #28bd6b;
+  outline: 2px solid rgba(40, 189, 107, .14);
+  outline-offset: 1px;
+}
+
+body:has(.editor-shell) .subflow-entry-button span { color: rgba(8, 24, 41, .55); }
+body:has(.editor-shell) .subflow-entry-button strong { color: #159352; font-weight: 600; }
+
+body:has(.editor-shell) .canvas-stage,
+body:has(.editor-shell) .subflow-stage {
+  isolation: isolate;
+}
+
+body:has(.editor-shell) .flow-lines,
+body:has(.editor-shell) .subflow-lines {
+  z-index: 1;
+}
+
+body:has(.editor-shell) .flow-node,
+body:has(.editor-shell) .subflow-node {
+  z-index: 2;
+}
+
+body:has(.editor-shell) :is(.flow-path,.flow-preview,.subflow-path,.subflow-preview) {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+body:has(.editor-shell) :is(.flow-node,.subflow-node).connection-target {
+  outline: 3px solid rgba(40, 189, 107, .28);
+  outline-offset: 3px;
+  box-shadow: 0 8px 22px -4px rgba(40, 189, 107, .24);
+}
+
+body:has(.editor-shell) :is(.flow-node,.subflow-node).connection-target .handle-in {
+  background: #28bd6b;
+  box-shadow: 0 0 0 4px rgba(40, 189, 107, .18);
+  transform: translateY(-50%) scale(1.22);
+}
+
+body:has(.editor-shell) .subflow-node.start .handle-in,
+body:has(.editor-shell) .subflow-node.end .handle-out {
+  display: none;
+}

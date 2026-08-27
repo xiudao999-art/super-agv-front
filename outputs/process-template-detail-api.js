@@ -37,17 +37,16 @@
   }
 
   function iconForNode(name,tagName,actionKey){
-    if(tagName==='startEvent'||name==='开始')return'开';
-    if(tagName==='endEvent'||name==='结束')return'结';
+    if(tagName==='startEvent'||name==='开始')return'start';
+    if(tagName==='endEvent'||name==='结束')return'end';
     const value=String(actionKey||name||'');
-    if(value.includes('PICK')||value.includes('取料')||value.includes('抓取'))return'↑';
-    if(value.includes('PLACE')||value.includes('放料')||value.includes('放置'))return'↓';
-    if(value.includes('VISION')||value.includes('拍照')||value.includes('视觉'))return'▣';
-    if(value.includes('MOVE')||value.includes('移动'))return'↔';
-    if(value.includes('HOME')||value.includes('归零'))return'↻';
-    if(tagName==='userTask')return'人';
-    if(tagName==='subProcess')return'◇';
-    return'◇';
+    if(value.includes('PICK')||value.includes('取料')||value.includes('抓取'))return value.includes('BATCH')||value.includes('复合')?'multi-pick':'pick';
+    if(value.includes('PLACE')||value.includes('放料')||value.includes('放置'))return value.includes('BATCH')||value.includes('复合')?'multi-place':'place';
+    if(value.includes('VISION')||value.includes('拍照')||value.includes('视觉'))return'camera';
+    if(value.includes('MOVE')||value.includes('移动'))return'move';
+    if(value.includes('HOME')||value.includes('归零'))return'reset';
+    if(tagName==='userTask'||tagName==='subProcess')return'action';
+    return'action';
   }
 
   function normalizeStoredNodes(rawNodes,nodeProperties){
@@ -176,7 +175,7 @@
           ...child,
           id:String(child.id||('C'+(largestSubNodeId+index+1))),
           name:String(child.name||'未命名子节点'),
-          icon:String(child.icon||'◇'),
+          icon:String(child.icon||iconForNode(child.name||'','',child.actionKey||child.actionType)),
           x:finiteNumber(child.x,30+(index%3)*210),
           y:finiteNumber(child.y,35+Math.floor(index/3)*95)
         };
