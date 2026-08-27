@@ -317,6 +317,7 @@
     .thumb-3 { background-image: url('assets/overview/vision.png'); }
     .thumb-4 { background-image: url('assets/overview/gripper.png'); }
     .thumb-5 { background-image: url('assets/overview/scanner.png'); }
+    .thumb-agv-storage { background-image: url('assets/images/AGV.svg'); }
     .module-copy { min-width: 0; flex: 1; }
     .module-name { display: flex; align-items: center; gap: 10px; width: 100%; }
     .module-copy strong { display: block; font-size: 16px; line-height: 24px; white-space: nowrap; }
@@ -348,7 +349,7 @@
     .task-meta { margin: 0; color: rgba(8,24,41,.48); font-size: 12px; line-height: 16px; }
     .steps {
       display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 8px;
       margin: 24px 0 16px;
     }
@@ -503,8 +504,21 @@
       font-size: 12px;
       line-height: 1.5;
       overflow-wrap: anywhere;
+      white-space: normal;
       pointer-events: none;
       backdrop-filter: blur(5px);
+    }
+    .lab-map-tooltip::after {
+      position: absolute;
+      left: var(--tooltip-arrow-x, 50%);
+      bottom: -5px;
+      width: 9px;
+      height: 9px;
+      border-right: 1px solid rgba(255,255,255,.14);
+      border-bottom: 1px solid rgba(255,255,255,.14);
+      background: rgba(12,29,47,.94);
+      content: "";
+      transform: translateX(-50%) rotate(45deg);
     }
     .lab-map-tooltip[hidden] { display: none; }
     .lab-map-link {
@@ -848,8 +862,9 @@
       .module-section, .lower-grid { margin-top: 12px; }
       .right-column { grid-template-columns: 1fr; gap: 12px; }
       .module-list { grid-template-columns: repeat(6, 205px); }
-      .steps { grid-template-columns: repeat(7, 92px); overflow-x: auto; padding-bottom: 8px; }
+      .steps { grid-template-columns: repeat(5, 92px); overflow-x: auto; padding-bottom: 8px; }
       .map-art { min-height: 0; aspect-ratio: 171 / 92; background-size: 100% 100%; background-position: center; }
+      .lab-map-tooltip { max-width: min(240px, calc(100% - 16px)); font-size: 11px; }
       .map-legend { top: 6px; right: 6px; gap: 6px; padding: 5px 6px; }
       .map-legend .legend-item span:last-child { display: none; }
       .modal-overlay { padding: 12px; align-items: center; }

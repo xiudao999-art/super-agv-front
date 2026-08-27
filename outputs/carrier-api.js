@@ -29,7 +29,7 @@
   const deletingIds=new Set();
 
   const statusMeta={
-    IDLE:{label:'空闲',className:'status-cancelled'},
+    IDLE:{label:'空闲',className:'status-executing'},
     STORED:{label:'在库',className:'status-completed'},
     PENDING:{label:'待处理',className:'status-waiting'},
     TRANSPORTING:{label:'运输中',className:'status-executing'},

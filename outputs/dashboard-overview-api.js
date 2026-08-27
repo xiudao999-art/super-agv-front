@@ -28,7 +28,7 @@ import { dashboardOverviewEndpoint, getDashboardOverview } from './assets/data/d
     OFFLINE:'离线'
   };
   const sourceLabels={UPSTREAM:'上游下发',MES:'MES 下发',LIMS:'LIMS 下发',MANUAL:'人工下发'};
-  const moduleThumbs={CHASSIS:'thumb-1',ROBOT_ARM:'thumb-2',VISION:'thumb-3',GRIPPER:'thumb-4',SCANNER:'thumb-5',AGV_STORAGE_PLACEMENT:'thumb-1'};
+  const moduleThumbs={CHASSIS:'thumb-1',ROBOT_ARM:'thumb-2',VISION:'thumb-3',GRIPPER:'thumb-4',SCANNER:'thumb-5',AGV_STORAGE_PLACEMENT:'thumb-agv-storage'};
   const moduleLabels={VISION:'视觉校准'};
 
   let currentData=null;

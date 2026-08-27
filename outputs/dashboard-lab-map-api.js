@@ -40,17 +40,17 @@ import { getLaboratory, getLaboratoryConfig, resolveDashboardAssetUrl } from './
   function svg(tag,attributes){const node=document.createElementNS(SVG_NS,tag);Object.entries(attributes||{}).forEach(([name,value])=>node.setAttribute(name,String(value)));return node}
 
   function hideTooltip(){tooltip.hidden=true;tooltip.setAttribute('aria-hidden','true')}
-  function positionTooltip(clientX,clientY){
-    const mapRect=mapArt.getBoundingClientRect(),offset=14,padding=8;
+  function positionTooltip(anchor){
+    const mapRect=mapArt.getBoundingClientRect(),anchorRect=anchor.getBoundingClientRect(),offset=10,padding=8;
     tooltip.style.left='0px';tooltip.style.top='0px';
-    const width=tooltip.offsetWidth,height=tooltip.offsetHeight,localX=clientX-mapRect.left,localY=clientY-mapRect.top;
-    let left=localX+offset,top=localY+offset;
-    if(left+width>mapRect.width-padding)left=localX-width-offset;
-    if(top+height>mapRect.height-padding)top=localY-height-offset;
-    tooltip.style.left=Math.max(padding,Math.min(left,mapRect.width-width-padding))+'px';
-    tooltip.style.top=Math.max(padding,Math.min(top,mapRect.height-height-padding))+'px';
+    const width=tooltip.offsetWidth,height=tooltip.offsetHeight,anchorX=anchorRect.left+anchorRect.width/2-mapRect.left,anchorTop=anchorRect.top-mapRect.top;
+    const left=Math.max(padding,Math.min(anchorX-width/2,mapRect.width-width-padding));
+    const top=Math.max(padding,anchorTop-height-offset);
+    tooltip.style.left=left+'px';
+    tooltip.style.top=top+'px';
+    tooltip.style.setProperty('--tooltip-arrow-x',Math.max(12,Math.min(anchorX-left,width-12))+'px');
   }
-  function showTooltip(label,clientX,clientY){tooltip.textContent=label;tooltip.hidden=false;tooltip.setAttribute('aria-hidden','false');positionTooltip(clientX,clientY)}
+  function showTooltip(label,anchor){tooltip.textContent=label;tooltip.hidden=false;tooltip.setAttribute('aria-hidden','false');positionTooltip(anchor)}
   function showState(message,error){hideTooltip();mapArt.dataset.mapState=message;mapArt.classList.toggle('lab-map-error',Boolean(error));mapArt.classList.toggle('lab-map-loading',!error)}
   function clearState(){mapArt.classList.remove('lab-map-loading','lab-map-error');delete mapArt.dataset.mapState}
   function announce(message){if(typeof window.showToast==='function')window.showToast(message);else{const toast=document.getElementById('toast');if(toast){toast.textContent=message;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2400)}}}
@@ -83,10 +83,9 @@ import { getLaboratory, getLaboratoryConfig, resolveDashboardAssetUrl } from './
     wrapper.appendChild(shape);
     if(index<24){const label=svg('text',{class:'lab-map-label',x:position.x+11,y:position.y-10});label.textContent='ID '+item.id;wrapper.appendChild(label)}
     const announcePoint=()=>announce(labelText);
-    wrapper.addEventListener('pointerenter',event=>showTooltip(labelText,event.clientX,event.clientY));
-    wrapper.addEventListener('pointermove',event=>showTooltip(labelText,event.clientX,event.clientY));
+    wrapper.addEventListener('pointerenter',()=>showTooltip(labelText,shape));
     wrapper.addEventListener('pointerleave',hideTooltip);
-    wrapper.addEventListener('focus',()=>{const rect=wrapper.getBoundingClientRect();showTooltip(labelText,rect.right,rect.bottom)});
+    wrapper.addEventListener('focus',()=>showTooltip(labelText,shape));
     wrapper.addEventListener('blur',hideTooltip);
     wrapper.addEventListener('click',announcePoint);wrapper.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();announcePoint()}});group.appendChild(wrapper);
   }
