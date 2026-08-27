@@ -1,4 +1,41 @@
 const ACTION_TAGS = new Set(['BUTTON', 'A']);
+const CONFIG_CENTER_ROUTES = new Set([
+    'robots-and-devices.html',
+    'laboratory-configuration.html',
+    'passage-rules.html',
+    'stations-and-points.html',
+    'peripheral-resources.html',
+    'charging-and-battery.html',
+    'process-list.html',
+    'process-templates.html'
+]);
+const CONFIG_ACTION_ICONS = {
+    edit: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5 5 5M4 20l4-1 11-11-4-4L4 15v5Z"/></svg>',
+    delete: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6"/></svg>'
+};
+
+function configActionType(button) {
+    const label = (button.getAttribute('aria-label') || button.getAttribute('title') || button.textContent || '').trim();
+    if (/^(编辑|修改)/.test(label) || button.matches('.edit,[data-edit],[data-template-edit],[data-process-edit]')) return { type: 'edit', label: label || '编辑' };
+    if (/^删除/.test(label) || button.matches('.delete,[data-delete],[data-template-delete]')) return { type: 'delete', label: label || '删除' };
+    return null;
+}
+
+function enhanceConfigActionIcons(root = document) {
+    const route = location.pathname.split('/').pop() || '';
+    if (!CONFIG_CENTER_ROUTES.has(route)) return;
+
+    root.querySelectorAll?.('table tbody td:last-child button').forEach((button) => {
+        const action = configActionType(button);
+        if (!action) return;
+        button.classList.remove('agv-config-action-edit', 'agv-config-action-delete');
+        button.classList.add('agv-config-action-icon', `agv-config-action-${action.type}`);
+        button.dataset.agvConfigAction = action.type;
+        button.setAttribute('aria-label', action.label);
+        button.setAttribute('title', action.label);
+        if (!button.querySelector('svg')) button.innerHTML = CONFIG_ACTION_ICONS[action.type];
+    });
+}
 
 function getDirectActions(container) {
     return Array.from(container.children).filter((element) => {
@@ -315,6 +352,7 @@ function markStickyActionColumns(root = document) {
 }
 
 function enhanceTableActions(root = document) {
+    enhanceConfigActionIcons(root);
     markStickyActionColumns(root);
 
     root.querySelectorAll?.('table tbody td:last-child').forEach((cell) => {
@@ -363,4 +401,4 @@ if (document.readyState === 'loading') {
     startTableActionEnhancer();
 }
 
-export { enhanceTableActions, markStickyActionColumns };
+export { enhanceConfigActionIcons, enhanceTableActions, markStickyActionColumns };

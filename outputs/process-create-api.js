@@ -35,6 +35,8 @@ import { createFlow, getFlowPage, getWorkflowTemplates } from './assets/data/wor
   const flowListDescription=document.querySelector('.content .list-head p');
   const flowFilter=document.getElementById('processFilter');
   const flowPageState={pageNum:1,pageSize:10,total:0,loading:false};
+  const flowHeaderRow=document.querySelector('.content .table-wrap thead tr');
+  if(flowHeaderRow&&!flowHeaderRow.querySelector('[data-flow-status-header]')){const statusHeader=document.createElement('th');statusHeader.dataset.flowStatusHeader='';statusHeader.textContent='状态';flowHeaderRow.insertBefore(statusHeader,flowHeaderRow.children[4]||flowHeaderRow.lastElementChild)}
 
   function formatDateTime(value){
     if(!value)return'-';
@@ -51,23 +53,33 @@ import { createFlow, getFlowPage, getWorkflowTemplates } from './assets/data/wor
     return cell;
   }
 
+  function appendStatusCell(row,record){
+    const cell=document.createElement('td'),tag=document.createElement('span'),raw=record.status??record.enabled??record.enableStatus;
+    tag.className='status-tag ';
+    if(raw===1||raw==='1'||raw===true||String(raw).toUpperCase()==='ENABLED'||String(raw).toUpperCase()==='ACTIVE'){tag.className+='valid';tag.textContent='启用'}
+    else if(raw===0||raw==='0'||raw===false||String(raw).toUpperCase()==='DISABLED'||String(raw).toUpperCase()==='INACTIVE'){tag.className+='standby';tag.textContent='停用'}
+    else{tag.className+='unknown';tag.textContent='未返回'}
+    cell.appendChild(tag);row.appendChild(cell);return cell;
+  }
+
   function openFlowEditor(record){modalTitle.textContent='编辑流程 · '+(record.flowNumber||record.id);openModal('processModal')}
 
   function renderFlowRows(records){
     flowTableBody.innerHTML='';
     if(!records.length){
       const row=document.createElement('tr'),cell=document.createElement('td');
-      cell.colSpan=6;cell.style.textAlign='center';cell.style.color='var(--muted)';cell.textContent='暂无流程数据';row.appendChild(cell);flowTableBody.appendChild(row);return;
+      cell.colSpan=7;cell.style.textAlign='center';cell.style.color='var(--muted)';cell.textContent='暂无流程数据';row.appendChild(cell);flowTableBody.appendChild(row);return;
     }
     records.forEach(record=>{
       const row=document.createElement('tr');
       const flowName=record.flowName||('流程 '+record.id);
       row.dataset.processRow='';
-      row.dataset.search=[record.flowNumber,flowName,record.templateName,record.templateId].join(' ').toLowerCase();
+      row.dataset.search=[record.flowNumber,flowName,record.templateName,record.templateId,record.status].join(' ').toLowerCase();
       appendTextCell(row,record.flowNumber||('FLOW-'+record.id));
       appendTextCell(row,flowName);
       appendTextCell(row,record.templateName||('- · 模板 ID '+record.templateId));
       appendTextCell(row,record.templateNodeCount??0);
+      appendStatusCell(row,record);
       appendTextCell(row,formatDateTime(record.updatedAt));
       const actionCell=appendTextCell(row,'');const actions=document.createElement('div');actions.className='row-actions';const editButton=document.createElement('button');editButton.type='button';editButton.className='row-btn row-icon-button edit';editButton.setAttribute('aria-label','编辑流程');editButton.title='编辑流程';editButton.innerHTML='<svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-edit"/></svg>';editButton.addEventListener('click',()=>openFlowEditor(record));actions.appendChild(editButton);actionCell.appendChild(actions);
       flowTableBody.appendChild(row);
@@ -104,7 +116,7 @@ import { createFlow, getFlowPage, getWorkflowTemplates } from './assets/data/wor
 
   async function loadFlowPage(pageNum=flowPageState.pageNum){
     if(flowPageState.loading)return;
-    flowPageState.loading=true;flowTableBody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted)">正在加载流程数据…</td></tr>';
+    flowPageState.loading=true;flowTableBody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted)">正在加载流程数据…</td></tr>';
     try{
       const query=new URLSearchParams({pageNum:String(pageNum),pageSize:String(flowPageState.pageSize)});
       const result=await getFlowPage(query,{baseUrl:apiBaseUrl});
@@ -115,7 +127,7 @@ import { createFlow, getFlowPage, getWorkflowTemplates } from './assets/data/wor
       if(flowListDescription)flowListDescription.textContent='后端实时数据 · 当前第 '+flowPageState.pageNum+' 页';
     }catch(error){
       console.error('加载流程列表失败',error);
-      flowTableBody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--red)">流程列表加载失败</td></tr>';showToast('流程列表加载失败：'+error.message);
+      flowTableBody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--red)">流程列表加载失败</td></tr>';showToast('流程列表加载失败：'+error.message);
     }finally{flowPageState.loading=false}
   }
 
