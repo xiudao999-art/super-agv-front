@@ -62,7 +62,7 @@
 
   function renderProcedures(list=procedures) {
     const body=document.getElementById('procedureBody'); if(!body)return;
-    body.innerHTML=list.map(item=>{const related=tickets[item.id]||[];return `<tr class="clickable-row" data-procedure="${item.id}"><td class="ops-code">${item.id}</td><td><strong class="table-primary">${item.title}</strong><span class="table-secondary">${item.signal}</span></td><td>${scopeChip(item.scope)}</td><td>${item.duty}</td><td>${related.length?related.map(id=>`<a class="ticket-chip" href="exception-recovery.html?ticket=${id}" onclick="event.stopPropagation()">${id}</a>`).join(''):'<span class="table-secondary">—</span>'}</td></tr>`}).join('');
+    body.innerHTML=list.map(item=>{const related=tickets[item.id]||[];return `<tr class="clickable-row" data-procedure="${item.id}"><td class="ops-code">${item.id}</td><td><strong class="table-primary">${item.title}</strong><span class="table-secondary">${item.signal}</span></td><td>${scopeChip(item.scope)}</td><td>${item.duty}</td><td>${related.length?related.map(id=>`<a class="ticket-chip procedure-ticket-link" href="exception-recovery.html?ticket=${id}" onclick="event.stopPropagation()">${id}</a>`).join(''):'<span class="table-secondary">—</span>'}</td></tr>`}).join('');
     if(document.getElementById('procedureSummary'))document.getElementById('procedureSummary').textContent='共 '+list.length+' 条急停规程';
     body.querySelectorAll('[data-procedure]').forEach(row=>row.addEventListener('click',()=>openProcedure(row.dataset.procedure)));
   }
