@@ -72,7 +72,7 @@
       const actionCell=textCell(row,'');const actions=document.createElement('div');actions.className='row-actions';
       const editButton=document.createElement('button');editButton.type='button';editButton.className='row-btn row-icon-button edit';editButton.setAttribute('aria-label','编辑模板');editButton.title='编辑模板';editButton.innerHTML='<svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-edit"/></svg>';editButton.addEventListener('click',event=>{event.stopPropagation();openEditor(template.id)});
       const deployButton=document.createElement('button');deployButton.type='button';deployButton.className='row-btn';deployButton.textContent=template.status==='ENABLED'?'重新发布':'发布';deployButton.addEventListener('click',event=>{event.stopPropagation();deployTemplate(template,deployButton)});
-      const moreMenu=document.createElement('agv-action-menu');moreMenu.dataset.agvActionMenuTrigger='icon';moreMenu.dataset.agvActionMenuPlacement='top';actions.append(editButton,deployButton,moreMenu);moreMenu.actions=[deployButton];actionCell.appendChild(actions);tableBody.appendChild(row);
+      actions.append(editButton,deployButton);actionCell.appendChild(actions);tableBody.appendChild(row);
     });
     if(filterInput?.value)filterInput.dispatchEvent(new Event('input'));
   }
