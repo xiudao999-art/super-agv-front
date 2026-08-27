@@ -38,7 +38,7 @@
 
   async function deployTemplate(template,button){
     if(!window.confirm('确认发布模板“'+template.templateName+'”吗？发布后将部署到 Flowable。'))return;
-    const originalLabel=button.textContent;button.disabled=true;button.textContent='发布中…';
+    button.disabled=true;button.setAttribute('aria-busy','true');
     const controller=new AbortController(),timeoutId=setTimeout(()=>controller.abort(),15000);
     try{
       const response=await fetch(apiUrl('/api/workflow-templates/deploy?id='+encodeURIComponent(template.id)),{method:'POST',headers:{Accept:'application/json'},signal:controller.signal});
@@ -52,7 +52,7 @@
     }catch(error){
       console.error('发布流程模板失败',error);
       showToast(error.name==='AbortError'?'发布超时，请检查 121.196.164.163:8081':'发布失败：'+error.message);
-    }finally{clearTimeout(timeoutId);button.disabled=false;button.textContent=originalLabel}
+    }finally{clearTimeout(timeoutId);button.disabled=false;button.removeAttribute('aria-busy')}
   }
 
   function renderTemplateRows(records){
@@ -71,7 +71,7 @@
       const statusCell=textCell(row,'');const status=document.createElement('span');status.className='status-tag '+(template.status==='ENABLED'?'valid':'draft');status.textContent=(template.version?'V'+template.version+' · ':'')+(template.statusDescription||(template.status==='ENABLED'?'已启用':'草稿'));status.title='更新时间：'+formatDateTime(template.updatedAt);statusCell.appendChild(status);
       const actionCell=textCell(row,'');const actions=document.createElement('div');actions.className='row-actions';
       const editButton=document.createElement('button');editButton.type='button';editButton.className='row-btn row-icon-button edit';editButton.setAttribute('aria-label','编辑模板');editButton.title='编辑模板';editButton.innerHTML='<svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-edit"/></svg>';editButton.addEventListener('click',event=>{event.stopPropagation();openEditor(template.id)});
-      const deployButton=document.createElement('button');deployButton.type='button';deployButton.className='row-btn';deployButton.textContent=template.status==='ENABLED'?'重新发布':'发布';deployButton.addEventListener('click',event=>{event.stopPropagation();deployTemplate(template,deployButton)});
+      const deployLabel=template.status==='ENABLED'?'重新发布模板':'发布模板',deployButton=document.createElement('button');deployButton.type='button';deployButton.className='row-btn row-icon-button publish';deployButton.setAttribute('aria-label',deployLabel);deployButton.title=deployLabel;deployButton.innerHTML='<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M12 4 8 8M12 4l4 4M5 14v5h14v-5"/></svg>';deployButton.addEventListener('click',event=>{event.stopPropagation();deployTemplate(template,deployButton)});
       actions.append(editButton,deployButton);actionCell.appendChild(actions);tableBody.appendChild(row);
     });
     if(filterInput?.value)filterInput.dispatchEvent(new Event('input'));
