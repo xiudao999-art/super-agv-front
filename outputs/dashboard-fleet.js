@@ -12,6 +12,7 @@ import {
 
   const DIRECT_API_BASE_URL = 'http://121.196.164.163:8081';
   const apiBaseUrl = location.protocol === 'file:' ? DIRECT_API_BASE_URL : '';
+  const SVG_NS = 'http://www.w3.org/2000/svg';
   const colors = ['#2188ff', '#18a66a', '#8a5cf5', '#f39b24', '#ec5272'];
   const statusMeta = {
     RUNNING: { label: '运行中', color: '#2188ff' },
@@ -19,6 +20,18 @@ import {
     IDLE: { label: '空闲', color: '#18a66a' },
     CHARGING: { label: '充电中', color: '#8a5cf5' },
     ERROR: { label: '异常', color: '#e64a62' }
+  };
+  const fleetRoutePoints = {
+    'AGV-01': [[92, 304], [164, 304], [164, 228], [302, 228], [430, 194], [454, 420], [566, 420]],
+    'AGV-02': [[116, 192], [259, 192], [259, 328], [349, 328], [349, 405], [454, 405], [454, 250]],
+    'AGV-03': [[92, 247], [207, 247], [292, 326], [430, 326], [430, 194], [549, 194], [549, 130]],
+    'AGV-04': [[293, 471], [293, 405], [391, 405], [391, 326], [520, 326], [520, 194], [648, 194]],
+    'AGV-05': [[943, 445], [819, 445], [819, 382], [903, 382], [903, 294], [740, 294], [648, 330]],
+    'AGV-06': [[118, 247], [220, 247], [220, 405], [348, 405], [454, 441], [628, 441]],
+    'AGV-07': [[451, 102], [479, 102], [479, 194], [648, 194], [648, 294], [819, 294]],
+    'AGV-08': [[99, 306], [241, 306], [241, 259], [430, 259], [430, 420], [520, 420]],
+    'AGV-09': [[943, 348], [819, 348], [819, 294], [648, 294], [648, 420], [552, 420]],
+    'AGV-10': [[451, 160], [520, 160], [520, 194], [630, 194], [630, 345], [816, 345]]
   };
   const fallbackFleet = [
     ['AGV-01', 'RUNNING', 78, 'W-B01', 'TRN-0031-01', '检测仪 B'],
@@ -33,7 +46,8 @@ import {
     ['AGV-10', 'ERROR', 21, 'W-D02', 'TRN-0038-01', '等待人工处理']
   ].map((item, index) => ({
     code: item[0], status: item[1], battery: item[2], point: item[3],
-    task: item[4], target: item[5], online: item[1] !== 'ERROR', routeColor: colors[index % colors.length]
+    task: item[4], target: item[5], online: item[1] !== 'ERROR', routeColor: colors[index % colors.length],
+    routePoints: fleetRoutePoints[item[0]] || []
   }));
 
   const elements = {
@@ -51,6 +65,7 @@ import {
     mapArt: document.getElementById('fleetMapArt'),
     mapState: document.getElementById('fleetMapState'),
     pointLayer: document.getElementById('fleetPointLayer'),
+    agvLayer: document.getElementById('fleetAgvLayer'),
     tooltip: document.getElementById('fleetMapTooltip'),
     legend: document.getElementById('fleetRouteLegend'),
     orderMetrics: document.getElementById('orderMetrics'),
@@ -131,32 +146,81 @@ import {
   }
 
   function renderMapOptions() {
-    const running = fleet.filter(robot => robot.status === 'RUNNING');
-    elements.mapSelect.innerHTML = '<option value="all">全部运行中 AGV</option>' + running.map(robot => `<option value="${robot.code}">${robot.code}</option>`).join('');
-    if (selectedRobot !== 'all' && !running.some(robot => robot.code === selectedRobot)) selectedRobot = 'all';
+    elements.mapSelect.innerHTML = '<option value="all">全部 AGV</option>' + fleet.map(robot => `<option value="${robot.code}">${robot.code} · ${statusMeta[robot.status]?.label || robot.status}</option>`).join('');
+    if (selectedRobot !== 'all' && !fleet.some(robot => robot.code === selectedRobot)) selectedRobot = 'all';
     elements.mapSelect.value = selectedRobot;
     renderMapRoutes();
   }
 
-  function renderMapRoutes() {
-    const running = fleet.filter(robot => robot.status === 'RUNNING');
-    const shown = selectedRobot === 'all' ? running : running.filter(robot => robot.code === selectedRobot);
-    document.querySelectorAll('[data-fleet-robot]').forEach(route => {
-      const visible = shown.some(robot => robot.code === route.dataset.fleetRobot);
-      route.hidden = !visible;
-      route.classList.toggle('is-filtered-out', !visible);
-      route.setAttribute('aria-hidden', String(!visible));
+  function nearestPointSequence(points) {
+    if (!Array.isArray(points) || points.length < 2) return Array.isArray(points) ? [...points] : [];
+    const remaining = points.slice(1).map(point => [...point]);
+    const ordered = [[...points[0]]];
+    while (remaining.length) {
+      const current = ordered[ordered.length - 1];
+      let nearestIndex = 0;
+      let nearestDistance = Infinity;
+      remaining.forEach((point, index) => {
+        const distance = Math.hypot(point[0] - current[0], point[1] - current[1]);
+        if (distance < nearestDistance) { nearestDistance = distance; nearestIndex = index; }
+      });
+      ordered.push(remaining.splice(nearestIndex, 1)[0]);
+    }
+    return ordered;
+  }
+
+  function createSvg(tag, attributes = {}) {
+    const node = document.createElementNS(SVG_NS, tag);
+    Object.entries(attributes).forEach(([name, value]) => node.setAttribute(name, String(value)));
+    return node;
+  }
+
+  function renderRobotPointLayer(robot, robotIndex) {
+    const points = nearestPointSequence(robot.routePoints);
+    const markerId = `fleetArrow${(robotIndex % colors.length) + 1}`;
+    const group = createSvg('g', { class: 'fleet-route', 'data-fleet-robot': robot.code, style: `--route:${robot.routeColor}`, 'aria-label': `${robot.code} 点位与方向连线` });
+    for (let index = 0; index < points.length - 1; index += 1) {
+      const start = points[index], end = points[index + 1];
+      group.appendChild(createSvg('path', { class: 'fleet-route-line', d: `M ${start[0]} ${start[1]} L ${end[0]} ${end[1]}`, 'marker-end': `url(#${markerId})` }));
+    }
+    points.forEach((point, index) => {
+      const label = `${robot.code} 点位 ${index + 1} · X ${point[0]} / Y ${point[1]}`;
+      const node = createSvg('g', { class: 'fleet-agv-waypoint-node', tabindex: '0', role: 'button', 'aria-label': label, transform: `translate(${point[0]} ${point[1]})` });
+      const diamond = createSvg('path', { class: 'fleet-agv-waypoint', d: 'M 0 -7 L 7 0 L 0 7 L -7 0 Z' });
+      node.appendChild(diamond);
+      node.addEventListener('pointerenter', () => showTooltip(label, diamond));
+      node.addEventListener('pointerleave', hideTooltip);
+      node.addEventListener('focus', () => showTooltip(label, diamond));
+      node.addEventListener('blur', hideTooltip);
+      group.appendChild(node);
     });
-    elements.pointLayer.hidden = selectedRobot !== 'all';
+    const current = points[points.length - 1];
+    if (current) {
+      const marker = createSvg('g', { class: 'fleet-agv-current', transform: `translate(${current[0]} ${current[1]})` });
+      marker.append(createSvg('circle', { r: '14' }), createSvg('rect', { x: '-7', y: '-5', width: '14', height: '10', rx: '3' }));
+      const text = createSvg('text', { x: '17', y: '5' });
+      text.textContent = robot.code;
+      marker.appendChild(text);
+      group.appendChild(marker);
+    }
+    return group;
+  }
+
+  function renderMapRoutes() {
+    const shown = selectedRobot === 'all' ? fleet : fleet.filter(robot => robot.code === selectedRobot);
+    elements.agvLayer.replaceChildren(...shown.map(robot => renderRobotPointLayer(robot, fleet.indexOf(robot))));
+    elements.pointLayer.setAttribute('hidden', '');
     elements.mapCount.textContent = `${shown.length} 台显示`;
-    elements.mapSummary.textContent = shown.length ? `${shown.map(robot => `${robot.code}（${robot.point}）`).join('、')} 的当前位置与规划路线` : '当前没有运行中的 AGV';
+    elements.mapSummary.textContent = selectedRobot === 'all'
+      ? `显示全部 ${shown.length} 台 AGV 的独立点位与方向连线`
+      : shown.length ? `${shown[0].code}（${shown[0].point}）的点位与方向连线` : '当前没有可显示的 AGV';
     elements.legend.innerHTML = shown.map(robot => `<span class="fleet-legend-item" style="--legend:${robot.routeColor}"><i></i>${robot.code}</span>`).join('');
   }
 
   function selectRobot(code) {
     const robot = fleet.find(item => item.code === code);
     if (!robot) return;
-    selectedRobot = robot.status === 'RUNNING' ? code : 'all';
+    selectedRobot = code;
     elements.mapSelect.value = selectedRobot;
     renderMapRoutes();
     renderFleetCards();
@@ -188,7 +252,6 @@ import {
   function renderPoints(detail) {
     hideTooltip();
     elements.pointLayer.replaceChildren();
-    const SVG_NS = 'http://www.w3.org/2000/svg';
     const machines = new Map((Array.isArray(detail?.machines) ? detail.machines : []).map(machine => [machine.id, machine]));
     const points = (Array.isArray(detail?.points) ? detail.points : []).map(point => {
       let x = Number(point.x), y = Number(point.y), note = point.frame || 'MAP';

@@ -979,8 +979,8 @@
               <select id="fleetMapRobot"><option value="all">全部运行中 AGV</option></select>
             </div>
             <div class="fleet-map-badges">
-              <span class="fleet-badge" id="fleetMapCount">0 台显示</span>
-              <span class="fleet-badge muted" id="fleetMapVersion">地图版本 --</span>
+              <span class="fleet-badge map-version" id="fleetMapVersion">大型实验室地图 V1</span>
+              <span class="fleet-badge map-count" id="fleetMapCount">当前显示 0 台</span>
             </div>
           </div>
         </header>
@@ -994,17 +994,14 @@
               <marker id="fleetArrow4" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#f39b24"/></marker>
               <marker id="fleetArrow5" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#ec5272"/></marker>
             </defs>
-            <g class="fleet-route" data-fleet-robot="AGV-01" style="--route:#2188ff"><path d="M105 310H304V226H446V422H642V295H900" marker-end="url(#fleetArrow1)"/><g class="fleet-agv-point" transform="translate(565 422)"><circle r="15"/><rect x="-8" y="-6" width="16" height="12" rx="4"/><text x="18" y="5">AGV-01</text></g></g>
-            <g class="fleet-route" data-fleet-robot="AGV-02" style="--route:#18a66a"><path d="M115 250H255V400H452V194H550V126" marker-end="url(#fleetArrow2)"/><g class="fleet-agv-point" transform="translate(390 400)"><circle r="15"/><rect x="-8" y="-6" width="16" height="12" rx="4"/><text x="18" y="5">AGV-02</text></g></g>
-            <g class="fleet-route" data-fleet-robot="AGV-03" style="--route:#8a5cf5"><path d="M170 306V192H430V440H630V345H816" marker-end="url(#fleetArrow3)"/><g class="fleet-agv-point" transform="translate(630 345)"><circle r="15"/><rect x="-8" y="-6" width="16" height="12" rx="4"/><text x="18" y="5">AGV-03</text></g></g>
-            <g class="fleet-route" data-fleet-robot="AGV-04" style="--route:#f39b24"><path d="M294 470V405H350V325H455V195H648V420" marker-end="url(#fleetArrow4)"/><g class="fleet-agv-point" transform="translate(350 325)"><circle r="15"/><rect x="-8" y="-6" width="16" height="12" rx="4"/><text x="18" y="5">AGV-04</text></g></g>
-            <g class="fleet-route" data-fleet-robot="AGV-05" style="--route:#ec5272"><path d="M900 445H820V382H945V294H650V195H520V105" marker-end="url(#fleetArrow5)"/><g class="fleet-agv-point" transform="translate(820 382)"><circle r="15"/><rect x="-8" y="-6" width="16" height="12" rx="4"/><text x="18" y="5">AGV-05</text></g></g>
+            <g id="fleetAgvLayer" aria-label="各 AGV 独立点位与方向连线"></g>
             <g id="fleetPointLayer" aria-label="实验室点位"></g>
           </svg>
           <div class="fleet-map-state" id="fleetMapState">地图加载中…</div>
           <div class="fleet-map-tooltip" id="fleetMapTooltip" role="tooltip" hidden></div>
-          <div class="fleet-route-legend" id="fleetRouteLegend"></div>
+          <div class="fleet-map-note">路线为各 AGV 当前任务的调度走向，地图筛选只影响显示，不改变实际任务</div>
         </div>
+        <div class="fleet-route-legend" id="fleetRouteLegend" aria-label="AGV 路线图例"></div>
       </section>
 
       <section class="fleet-metrics-block fleet-agv-summary" aria-labelledby="agvStatsTitle">
