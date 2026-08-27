@@ -384,3 +384,42 @@ body .page-canvas .editor-meta-head .status-tag {
 body .page-canvas .editor-meta-head .status-tag::before {
   display: block;
 }
+
+/* Configuration center table actions: blue edit icon and red delete icon. */
+body .page-canvas table button.agv-config-action-icon {
+  width: 28px !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  display: inline-grid !important;
+  place-items: center;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  cursor: pointer;
+}
+body .page-canvas table button.agv-config-action-icon svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body .page-canvas table button.agv-config-action-edit { color: var(--agv-blue) !important; }
+body .page-canvas table button.agv-config-action-delete { color: var(--agv-red) !important; }
+body .page-canvas table button.agv-config-action-edit:hover { background: #edf6ff !important; }
+body .page-canvas table button.agv-config-action-delete:hover { background: #fff1ef !important; }
+body .page-canvas table button.agv-config-action-icon:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+body .page-canvas table button.agv-config-action-icon:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}

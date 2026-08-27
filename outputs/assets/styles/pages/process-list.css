@@ -23,3 +23,4 @@
 .content agv-action-menu[data-agv-action-menu-trigger="icon"] .agv-action-menu__trigger{width:16px;min-width:16px;height:16px;min-height:16px;padding:0;border:0;border-radius:0;background:transparent}.content .agv-action-menu__icon{display:block;width:16px;height:16px}.content agv-action-menu[data-agv-action-menu-trigger="icon"] .agv-action-menu__panel{min-width:88px}
 
 .content .row-icon-button .icon{width:16px;height:16px;stroke:currentColor}
+.content .status-tag.unknown{color:#89939d;border-color:#e1e5e8;background:#fafbfc}

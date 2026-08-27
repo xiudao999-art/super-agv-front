@@ -15,13 +15,13 @@
 
 
   const iconByActionKey={
-    'MOVE':'↔',
-    'ARM.PICK':'↑',
-    'ARM.PICK_BATCH':'⇈',
-    'ARM.PLACE':'↓',
-    'ARM.PLACE_BATCH':'⇊',
-    'ARM.HOME':'↻',
-    'VISION.CAPTURE':'▣'
+    'MOVE':'move',
+    'ARM.PICK':'pick',
+    'ARM.PICK_BATCH':'multi-pick',
+    'ARM.PLACE':'place',
+    'ARM.PLACE_BATCH':'multi-place',
+    'ARM.HOME':'reset',
+    'VISION.CAPTURE':'camera'
   };
   const legacyNameByActionKey={
     'MOVE':['移动'],
@@ -54,14 +54,16 @@
     const card=document.createElement('button');
     card.type='button';card.className='palette-card action-card'+(isActive?'':' action-draft');card.draggable=isActive;card.disabled=!isActive;
     card.title=(action.definition?.description||action.definition?.displayName||action.actionKey)+' · '+action.status+' · revision '+action.revision;
-    const icon=document.createElement('span');icon.className='palette-icon';icon.textContent=iconByActionKey[action.actionKey]||'◇';
+    const iconKey=iconByActionKey[action.actionKey]||workflowIconKeyV2(action.actionKey,action.definition?.displayName);
+    card.dataset.nodeName=action.definition?.displayName||action.actionKey;card.dataset.nodeType='AGV 节点';card.dataset.nodeIcon=iconKey;
+    const icon=document.createElement('span');icon.className='palette-icon';icon.innerHTML=workflowIconMarkupV2(iconKey,action.definition?.displayName);
     const label=document.createElement('span');label.className='action-label';
     const name=document.createElement('span');name.textContent=action.definition?.displayName||action.actionKey;
     const key=document.createElement('small');key.textContent=action.actionKey;label.append(name,key);card.append(icon,label);
     if(isActive){
       let dragged=false;
-      card.addEventListener('click',()=>{if(dragged)return;addNodeV2(name.textContent,'AGV 节点',icon.textContent,200+editorNodesV2.length%3*210,470,metadata)});
-      card.addEventListener('dragstart',event=>{dragged=true;event.dataTransfer.effectAllowed='copy';event.dataTransfer.setData('text/plain',JSON.stringify({name:name.textContent,type:'AGV 节点',icon:icon.textContent,...metadata}))});
+      card.addEventListener('click',()=>{if(dragged)return;addNodeV2(name.textContent,'AGV 节点',iconKey,200+editorNodesV2.length%3*210,470,metadata)});
+      card.addEventListener('dragstart',event=>{dragged=true;event.dataTransfer.effectAllowed='copy';event.dataTransfer.setData('text/plain',JSON.stringify({name:name.textContent,type:'AGV 节点',icon:iconKey,...metadata}))});
       card.addEventListener('dragend',()=>setTimeout(()=>dragged=false,0));
     }
     return card;
@@ -100,6 +102,7 @@
       originalSections.slice(1).forEach(section=>section.remove());
       appendActionSection('可用动作（'+active.length+'）',active);
       if(draft.length)appendActionSection('草稿动作（'+draft.length+' · 不可使用）',draft);
+      syncTerminalPaletteV2();
       paletteSubtitle.textContent='已同步动作服务 · '+active.length+' 个可用 / '+draft.length+' 个草稿';
       syncCanvasActionMetadata(actions);
       window.__actionCatalogApi={endpoint,actions,activeCount:active.length,draftCount:draft.length,reload:loadActions,sync(){syncCanvasActionMetadata(actions)}};

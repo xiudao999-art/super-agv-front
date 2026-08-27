@@ -15,23 +15,40 @@
 .log-title-meta{display:flex;align-items:center;gap:8px}.log-title-meta h2{margin:0!important}.log-title-meta .process-count{margin:0;font-size:12px;font-weight:500}.log-heading-row{align-items:flex-start;margin-bottom:16px}.log-filters.agv-filter-bar{margin:0 0 16px!important}.log-filters.agv-filter-bar .agv-filter-field{flex:1 1 200px!important;max-width:none}.log-filters.agv-filter-bar .agv-filter-actions{margin-left:auto}@media(max-width:1180px){.log-filters.agv-filter-bar .agv-filter-field{flex-basis:calc(50% - 8px)!important}.log-filters.agv-filter-bar .agv-filter-actions{margin-left:0}}@media(max-width:760px){.log-title-meta{align-items:flex-start;flex-direction:column;gap:5px}.log-filters.agv-filter-bar .agv-filter-field{flex-basis:100%!important}.log-filters.agv-filter-bar .agv-filter-actions{margin-left:0}}
 
 
-/* Log detail action follows the compact detail icon used by the order list. */
-.log-table .view-log.row-icon-button {
-  display: inline-grid;
-  width: 28px;
-  height: 28px;
-  min-height: 28px;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
+/* Keep log status tags aligned with the rest of the configuration pages. */
+.page-canvas.log-page :is(.tag,.title-status) {
+  min-width: 0;
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+}
+.page-canvas.log-page :is(.tag,.title-status)::before {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+
+/* The full row is the detail action, including keyboard focus and feedback. */
+.log-table tbody tr[data-log-index] {
   cursor: pointer;
+  transition: background-color .15s ease;
 }
-.log-table .view-log.row-icon-button img {
-  display: block;
-  width: 16px;
-  height: 16px;
+.log-table tbody tr[data-log-index]:hover td { background: #f6fbff; }
+.log-table tbody tr[data-log-index]:active td { background: #edf7ff; }
+.log-table tbody tr[data-log-index]:focus-visible {
+  outline: 2px solid rgba(21,119,210,.45);
+  outline-offset: -2px;
 }
-.log-table .view-log.row-icon-button:hover { background: rgba(21,119,210,.08); }
-.log-table .view-log.row-icon-button:focus-visible { outline: 2px solid #1577d2; outline-offset: 2px; }
