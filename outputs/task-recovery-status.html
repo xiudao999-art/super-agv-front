@@ -1,6 +1,95 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>复合机器人调度系统 · 任务恢复与状态核对</title>
-  <link rel="stylesheet" href="assets/styles/pages/task-recovery-status.css">
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f6f8">
+  <title>复合机器人调度系统 · 任务恢复与状态核对</title>
   <link rel="stylesheet" href="assets/styles/tokens.css">
   <link rel="stylesheet" href="assets/styles/base.css">
   <link rel="stylesheet" href="assets/styles/components.css">
-  <script type="module" src="assets/components/register.js" blocking="render"></script></head><body><agv-app-shell active-route="task-recovery-status.html" section-title="异常与恢复" user-name="陈工"><div class="agv-legacy-hooks" hidden><aside id="sidebar"></aside><div id="scrim"></div><button id="menuBtn" type="button"></button><button id="statusInfoBtn" type="button"></button><button id="statusBtn" type="button"></button><button id="alertInfoBtn" type="button"></button><button id="alertBtn" type="button"></button></div><agv-page-header class="page-head"><div><h1>异常与恢复</h1><p>聚合异常原因、影响范围、恢复状态和人工处理建议</p></div></agv-page-header><div class="page-canvas"><section class="page-panel"><div class="recovery-tabs"><agv-tabs class="tabs"><a class="tab-btn" href="current-anomalies.html">当前异常</a><i class="tab-divider"></i><a class="tab-btn" href="alarm-records.html">告警记录</a><i class="tab-divider"></i><a class="tab-btn active" href="task-recovery-status.html">任务恢复与状态核对</a></agv-tabs></div><div class="content"><div class="list-head"><div><h2>恢复检查记录</h2><p>只处理重启、中断、执行结果不确定或系统记录与现场不一致的情况</p></div><button class="head-btn recovery-launch" id="launchRecovery"><svg class="icon"><use href="assets/icons.svg#i-doc"/></svg>发起恢复检查</button></div><div class="table-wrap recovery-table"><table><thead><tr><th>检查编号</th><th>检查类型</th><th>关联对象</th><th>触发原因</th><th>当前状态</th></tr></thead><tbody><tr class="clickable-row recovery-row selected" data-recovery data-id="REC-20260816-003" data-type="系统重启恢复" data-object="TRN-0031-01" data-reason="任务执行中检测到系统非正常重启" data-state="可自动继续"><td>REC-20260816-003</td><td>系统重启恢复</td><td>TRN-0031-01</td><td>任务执行中检测到系统非正常重启</td><td><span class="status-tag blue-state">可自动继续</span></td></tr><tr class="clickable-row recovery-row" data-recovery data-id="REC-20260816-002" data-type="库位状态核对" data-object="A-04-07" data-reason="系统记录为空，但传感器检测有物" data-state="等待人工核对"><td>REC-20260816-002</td><td>库位状态核对</td><td>A-04-07</td><td>系统记录为空，但传感器检测有物</td><td><span class="status-tag standby">等待人工核对</span></td></tr><tr class="clickable-row recovery-row" data-recovery data-id="REC-20260816-001" data-type="上游结果补发" data-object="SYS-ORD-0030" data-reason="任务已完成，但上游确认超时" data-state="补发完成"><td>REC-20260816-001</td><td>上游结果补发</td><td>SYS-ORD-0030</td><td>任务已完成，但上游确认超时</td><td><span class="status-tag valid">补发完成</span></td></tr></tbody></table></div></div></section><div class="recovery-process-grid"><section class="recovery-process"><div class="recovery-process-head"><div><h2 id="recoveryProcessTitle">REC-20260816-003 · 处理过程</h2><p id="recoveryProcessSubtitle">系统重启恢复 / TRN-0031-01</p></div><span class="status-tag blue-state" id="recoveryProcessState">可自动继续</span></div><article class="recovery-step"><span class="step-number">1</span><div><h3>冻结影响范围</h3><p>暂停相关任务，锁定涉及的机器人、库位和机台，避免状态继续变化</p></div><span class="status-tag valid">已完成</span></article><article class="recovery-step"><span class="step-number">2</span><div><h3>读取系统检查点</h3><p>读取最近一次安全检查点与动作完成证据</p></div><span class="status-tag valid">已完成</span></article><article class="recovery-step"><span class="step-number">3</span><div><h3>采集现场与上游状态</h3><p>AGV-01 位于 W-B01，载具 TRAY-000238 在 C01；MES 订单处理中</p></div><span class="status-tag valid">已完成</span></article><article class="recovery-step"><span class="step-number">4</span><div><h3>比对并判断</h3><p>现场状态与检查点一致，可继续等待许可</p></div><span class="status-tag blue-state">可自动继续</span></article><article class="recovery-step"><span class="step-number">5</span><div><h3>执行恢复结果</h3><p>安全继续、补记完成、补发通知，或等待人工扫码与管理员审批</p></div><span class="status-tag standby">按判断执行</span></article></section><aside class="recovery-rules"><h2>恢复结果规则</h2><article class="recovery-rule"><h3>确认未执行</h3><p>从最近安全检查点继续</p></article><article class="recovery-rule"><h3>确认已完成</h3><p>补记结果后进入下一步，不重复动作</p></article><article class="recovery-rule"><h3>状态无法确定</h3><p>保持锁定，要求操作员现场扫码或确认</p></article><article class="recovery-rule"><h3>需要改物理记录</h3><p>管理员审批后修改载具位置或库位占用</p></article><article class="recovery-rule"><h3>仅回调未确认</h3><p>使用同一幂等键补发通知，不重做物理动作</p></article></aside></div></div></agv-app-shell><div class="modal-overlay" id="recoveryLaunchModal" hidden><section class="modal-card"><h2>发起恢复检查</h2><form id="recoveryLaunchForm" class="form-grid"><label class="form-field"><span>检查类型</span><select><option>系统重启恢复</option><option>库位状态核对</option><option>上游结果补发</option></select></label><label class="form-field"><span>关联对象</span><input value="TRN-0031-01"></label><label class="form-field wide"><span>触发原因</span><input value="任务执行结果需要重新核对"></label><div class="modal-actions form-field wide"><button type="button" class="modal-close" data-close="recoveryLaunchModal">取消</button><button type="submit" class="modal-primary">发起检查</button></div></form></section></div><div class="modal-overlay" id="statusModal" hidden><section class="modal-card"><h2>系统运行状态</h2><div class="status-list"><article class="status-item normal"><strong>绿色·系统正常</strong><p>核心服务、数据库、任务引擎和机器人连接正常。</p></article><article class="status-item limited"><strong>黄色·受限运行</strong><p>部分非核心设备或上游接口异常，系统仍可继续部分业务。</p></article><article class="status-item abnormal"><strong>红色·系统异常</strong><p>核心能力异常，系统暂停接收和分配新任务。</p></article><article class="status-item maintenance"><strong>灰色·维护模式</strong><p>系统处于人工维护、升级或硬件调试状态。</p></article></div><div class="modal-actions"><button class="modal-close" data-close="statusModal">关闭</button></div></section></div><div class="alert-overlay" id="alertDrawer" hidden><aside class="alert-drawer"><header class="alert-header"><h2>异常提醒</h2><p>3条未完成·1条严重</p></header><div class="alert-feed"><article class="alert-card"><strong>机台允许进样事件等待超过流程配置的30秒</strong><p>ALM-20260817-0042 · 待处理</p></article><article class="alert-card"><strong>系统记录为空，但库位传感器检测有物</strong><p>ALM-20260817-0041 · 处理中</p></article></div><footer class="alert-footer"><button class="alert-primary" id="recoveryBtn">进入异常与恢复</button></footer></aside></div><div class="toast" id="toast"></div><script>const toast=document.getElementById('toast');let toastTimer;function showToast(message){toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2200)}function openModal(id){const modal=document.getElementById(id);if(!modal)return;modal.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>modal.classList.add('open'))}function closeModal(id){const modal=document.getElementById(id);if(!modal)return;modal.classList.remove('open');document.body.style.overflow='';setTimeout(()=>modal.hidden=true,200)}document.querySelectorAll('[data-close]').forEach(button=>button.addEventListener('click',()=>closeModal(button.dataset.close)));document.querySelectorAll('.modal-overlay').forEach(modal=>modal.addEventListener('click',event=>{if(event.target===modal)closeModal(modal.id)}));document.getElementById('statusInfoBtn')?.addEventListener('click',()=>openModal('statusModal'));const drawer=document.getElementById('alertDrawer');document.getElementById('alertInfoBtn')?.addEventListener('click',()=>{drawer.hidden=false;requestAnimationFrame(()=>drawer.classList.add('open'))});drawer?.addEventListener('click',event=>{if(event.target===drawer){drawer.classList.remove('open');setTimeout(()=>drawer.hidden=true,220)}});document.getElementById('recoveryBtn')?.addEventListener('click',()=>location.href='current-anomalies.html');document.querySelectorAll('.demo-link').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();showToast(link.dataset.page+'模块将使用独立 HTML 页面')}));const sidebar=document.getElementById('sidebar'),scrim=document.getElementById('scrim');document.getElementById('menuBtn')?.addEventListener('click',()=>{sidebar.classList.toggle('open');scrim.classList.toggle('show')});scrim?.addEventListener('click',()=>{sidebar.classList.remove('open');scrim.classList.remove('show')});document.querySelectorAll('[data-recovery]').forEach(row=>row.addEventListener('click',()=>{document.querySelectorAll('[data-recovery]').forEach(item=>item.classList.remove('selected'));row.classList.add('selected');document.getElementById('recoveryProcessTitle').textContent=row.dataset.id+' · 处理过程';document.getElementById('recoveryProcessSubtitle').textContent=row.dataset.type+' / '+row.dataset.object;document.getElementById('recoveryProcessState').textContent=row.dataset.state;showToast('已切换恢复检查记录')}));document.getElementById('launchRecovery').addEventListener('click',()=>openModal('recoveryLaunchModal'));document.getElementById('recoveryLaunchForm').addEventListener('submit',event=>{event.preventDefault();closeModal('recoveryLaunchModal');showToast('恢复检查已发起')});</script></body></html>
+  <link rel="stylesheet" href="assets/styles/tables.css">
+  <link rel="stylesheet" href="assets/styles/pages/exception-recovery.css">
+  <script type="module" src="assets/components/register.js" blocking="render"></script>
+</head>
+<body data-recovery-page="recovery">
+  <agv-app-shell active-route="task-recovery-status.html" section-title="异常与恢复" user-name="陈工">
+    <div class="agv-legacy-hooks" hidden>
+      <aside id="sidebar"></aside><div id="scrim"></div><button id="menuBtn" type="button"></button>
+      <button id="statusInfoBtn" type="button"></button><button id="statusBtn" type="button"></button>
+      <button id="alertInfoBtn" type="button"></button><button id="alertBtn" type="button"></button>
+    </div>
+
+    <agv-page-header class="page-head">
+      <div><h1>异常与恢复</h1><p>在重启、中断或状态不一致后核对现场证据，决定安全继续、补记完成、补发通知或转人工处理</p></div>
+    </agv-page-header>
+
+    <main class="page-canvas">
+      <section class="recovery-panel">
+        <nav class="module-tabs" aria-label="异常与恢复模块导航">
+          <a class="module-tab" href="current-anomalies.html">当前异常</a>
+          <a class="module-tab" href="alarm-records.html">告警记录</a>
+          <a class="module-tab active" href="task-recovery-status.html" aria-current="page">任务恢复与状态核对</a>
+        </nav>
+        <div class="module-content">
+          <header class="list-heading">
+            <div><h2>恢复检查记录</h2><p>只处理重启、中断、执行结果不确定或系统记录与现场不一致的情况</p></div>
+            <button class="primary-action" id="launchRecovery" type="button"><svg class="icon"><use href="assets/icons.svg#i-plus"></use></svg>发起恢复检查</button>
+          </header>
+
+          <div class="table-wrap recovery-table-wrap">
+            <table class="data-table recovery-table" aria-label="恢复检查记录">
+              <colgroup><col style="width:168px"><col style="width:132px"><col style="width:145px"><col style="width:250px"><col></colgroup>
+              <thead><tr><th>检查编号</th><th>检查类型</th><th>关联对象</th><th>触发原因</th><th>当前结论</th></tr></thead>
+              <tbody id="recoveryBody"></tbody>
+            </table>
+          </div>
+          <footer class="table-footer"><span id="recoveryRecordSummary">共 0 条恢复检查记录</span><span>点击记录查看完整检查过程</span></footer>
+        </div>
+      </section>
+
+      <div class="recovery-process-grid">
+        <section class="recovery-process">
+          <header class="recovery-process-head">
+            <div><h2 id="recoveryProcessTitle"></h2><p id="recoveryProcessSubtitle"></p></div>
+            <div id="recoveryProcessStatus"></div>
+          </header>
+          <div class="recovery-steps" id="recoverySteps"></div>
+        </section>
+
+        <aside class="recovery-rules">
+          <h2>恢复结果规则</h2>
+          <article class="recovery-rule"><h3>确认未执行</h3><p>从最近安全检查点继续。</p></article>
+          <article class="recovery-rule"><h3>确认已完成</h3><p>补记结果后进入下一步，不重复动作。</p></article>
+          <article class="recovery-rule"><h3>状态无法确定</h3><p>保持锁定，要求操作员现场扫码或确认。</p></article>
+          <article class="recovery-rule"><h3>需要改物理记录</h3><p>管理员审批后修改载具位置或库位占用。</p></article>
+          <article class="recovery-rule"><h3>仅回调未确认</h3><p>使用同一幂等键补发通知，不重做物理动作。</p></article>
+        </aside>
+      </div>
+    </main>
+  </agv-app-shell>
+
+  <div class="modal-overlay" id="recoveryLaunchModal" hidden>
+    <section class="launch-modal" role="dialog" aria-modal="true" aria-labelledby="recoveryLaunchTitle">
+      <header class="modal-header">
+        <div><h2 id="recoveryLaunchTitle">发起恢复检查</h2><p>新建表单不预填业务数据，由操作员按现场情况填写</p></div>
+        <button class="modal-x" type="button" data-close="recoveryLaunchModal" aria-label="关闭">×</button>
+      </header>
+      <form id="recoveryLaunchForm">
+        <div class="modal-body">
+          <div class="form-grid">
+            <label class="form-field"><span>检查类型</span><select name="type" required><option value="">请选择检查类型</option><option>系统重启恢复</option><option>任务中断恢复</option><option>库位状态核对</option><option>上游结果补发</option></select></label>
+            <label class="form-field"><span>关联对象</span><input name="object" required placeholder="请输入任务、订单或库位编号"></label>
+            <label class="form-field wide"><span>触发原因</span><textarea name="trigger" required placeholder="说明为什么需要发起恢复检查"></textarea></label>
+          </div>
+          <p class="readonly-note">检查发起后，系统将先冻结影响范围，再读取最近检查点并采集现场与上游状态。</p>
+          <div class="modal-actions"><button class="modal-close" type="button" data-close="recoveryLaunchModal">取消</button><button class="modal-primary" type="submit">发起检查</button></div>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="assets/scripts/exception-recovery.js"></script>
+</body>
+</html>
