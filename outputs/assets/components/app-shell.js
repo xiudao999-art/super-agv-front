@@ -3,6 +3,7 @@ const navGroups = [
   { label: '运行调度', items: [
     { href: 'order-management.html', label: '订单管理', icon: 'clipboard' },
     { href: 'storage-and-carriers.html', label: '库位与载具', icon: 'sliders' },
+    { href: 'conflict-node-scheduling.html', label: '冲突节点排程', icon: 'conflict' },
     { href: 'device-debug.html', label: '设备调试', icon: 'wrench' }
   ] },
   { label: '配置中心', items: [
@@ -28,6 +29,7 @@ const iconPaths = {
   grid: '<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
   clipboard: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M8 9h8M8 13h6"/>',
   sliders: '<path d="M5 3v6M5 15v6M12 3v12M12 19v2M19 3v3M19 12v9M2 9h6M9 15h6M16 6h6"/><circle cx="5" cy="12" r="2"/><circle cx="12" cy="18" r="2"/><circle cx="19" cy="9" r="2"/>',
+  conflict: '<circle cx="7" cy="5" r="2"/><circle cx="17" cy="19" r="2"/><path d="M7 7v3a2 2 0 0 0 2 2h6a2 2 0 0 1 2 2v3M17 7v2a3 3 0 0 1-3 3M7 17v-2a3 3 0 0 1 3-3"/>',
   panel: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 3v18"/>',
   map: '<path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2V5Z"/><path d="M9 3v16M15 5v16"/>',
   flow: '<circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 6h7a4 4 0 0 1 0 8H9a4 4 0 1 0 0 8h8"/>',
