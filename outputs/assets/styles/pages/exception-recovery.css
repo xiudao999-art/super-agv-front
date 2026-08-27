@@ -249,7 +249,7 @@ body {
 }
 
 .alarm-table {
-  min-width: 1388px;
+  min-width: 1476px;
 }
 
 .recovery-table {
@@ -276,6 +276,25 @@ body {
   color: #25364a;
   font-size: 13px;
   line-height: 19px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.table-wrap > table.data-table td {
+  height: auto;
+  min-height: 56px;
+  padding: 13px 14px;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.table-wrap > table.data-table th {
+  padding: 13px 14px;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
 }
 
 .data-table tbody tr:last-child td {
@@ -297,8 +316,11 @@ body {
 }
 
 .table-primary {
+  display: block;
   color: #122235;
   font-weight: 600;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .table-secondary {
@@ -307,6 +329,8 @@ body {
   color: #84909d;
   font-size: 12px;
   line-height: 18px;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .message-cell {
@@ -315,11 +339,11 @@ body {
 
 .message-cell strong {
   display: block;
-  overflow: hidden;
   color: #25364a;
   font-weight: 550;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .status-tag,
@@ -327,19 +351,22 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 24px;
-  padding: 0 10px;
-  border-radius: 12px;
+  gap: 6px;
+  min-height: 26px;
+  padding: 3px 10px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
+  line-height: 18px;
   white-space: nowrap;
 }
 
 .status-tag::before,
 .severity-tag::before {
-  width: 6px;
-  height: 6px;
-  margin-right: 6px;
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
   border-radius: 50%;
   background: currentColor;
   content: "";
@@ -347,30 +374,68 @@ body {
 
 .severity-danger,
 .status-danger {
+  border-color: #f2c9c6;
   background: #fff1f0;
   color: #cf3f3f;
 }
 
 .severity-warning,
 .status-warning {
+  border-color: #f3d9a6;
   background: #fff7e6;
   color: #c27600;
 }
 
 .severity-info,
 .status-info {
+  border-color: #bddbf2;
   background: #eaf4fd;
   color: #1677c8;
 }
 
 .status-success {
+  border-color: #bfe4d2;
   background: #eaf8f1;
   color: #1f8b5c;
 }
 
 .status-neutral {
+  border-color: #d8dde2;
   background: #f0f2f4;
   color: #687582;
+}
+
+.table-view-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid #b8d8ef;
+  border-radius: 6px;
+  background: #f3f9fe;
+  color: #1677c8;
+  font-size: 12px;
+  line-height: 26px;
+  cursor: pointer;
+}
+
+.table-view-button:hover {
+  border-color: #7db8df;
+  background: #eaf4fd;
+}
+
+.table-view-button .icon {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.table-wrap .severity-tag {
+  border-color: currentColor;
 }
 
 .detail-item .status-tag {

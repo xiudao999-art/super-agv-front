@@ -186,6 +186,20 @@ function showToast(message) {
   toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2300);
 }
 
+function clearFormValues(form) {
+  if (!form) return;
+  form.reset();
+  form.querySelectorAll('input, select, textarea').forEach(function (control) {
+    if (control.type === 'checkbox' || control.type === 'radio') {
+      control.checked = false;
+    } else if (control.tagName === 'SELECT') {
+      control.selectedIndex = 0;
+    } else {
+      control.value = '';
+    }
+  });
+}
+
 function openLayer(id) {
   const layer = document.getElementById(id);
   if (!layer) return;
@@ -307,9 +321,9 @@ function resetAnomalyForms() {
   document.querySelectorAll('.route-card').forEach(function (card) { card.classList.remove('active'); });
   document.querySelectorAll('.route-panel').forEach(function (panel) { panel.hidden = true; });
   document.getElementById('resultPanel').hidden = true;
-  document.getElementById('directResumeForm')?.reset();
-  document.getElementById('manualRecoveryForm')?.reset();
-  document.getElementById('anomalyResultForm')?.reset();
+  clearFormValues(document.getElementById('directResumeForm'));
+  clearFormValues(document.getElementById('manualRecoveryForm'));
+  clearFormValues(document.getElementById('anomalyResultForm'));
   updateDirectButton();
 }
 
@@ -398,11 +412,18 @@ function renderAlarmRecords() {
       '<td>' + escapeHtml(record.source) + '</td>' +
       '<td>' + escapeHtml(record.object) + '</td>' +
       '<td>' + escapeHtml(record.robot) + '</td>' +
-      '<td>' + escapeHtml(record.owner) + '</td></tr>';
-  }).join('') : '<tr><td class="empty-state" colspan="10">没有符合筛选条件的告警记录</td></tr>';
+      '<td>' + escapeHtml(record.owner) + '</td>' +
+      '<td><button class="table-view-button" type="button" data-view-alarm="' + record.id + '" aria-label="查看告警 ' + record.id + '"><svg class="icon"><use href="assets/icons.svg#i-doc"></use></svg>查看</button></td></tr>';
+  }).join('') : '<tr><td class="empty-state" colspan="11">没有符合筛选条件的告警记录</td></tr>';
   document.getElementById('alarmRecordSummary').textContent = '共 ' + records.length + ' 条告警记录';
   body.querySelectorAll('[data-alarm-record]').forEach(function (row) {
     row.addEventListener('click', function () { openAlarmRecord(row.dataset.alarmRecord); });
+  });
+  body.querySelectorAll('[data-view-alarm]').forEach(function (button) {
+    button.addEventListener('click', function (event) {
+      event.stopPropagation();
+      openAlarmRecord(button.dataset.viewAlarm);
+    });
   });
 }
 
@@ -477,7 +498,7 @@ function initRecoveryPage() {
   renderRecoveryRecords();
   renderRecoveryProcess();
   document.getElementById('launchRecovery').addEventListener('click', function () {
-    document.getElementById('recoveryLaunchForm').reset();
+    clearFormValues(document.getElementById('recoveryLaunchForm'));
     openLayer('recoveryLaunchModal');
   });
   document.getElementById('recoveryLaunchForm').addEventListener('submit', function (event) {

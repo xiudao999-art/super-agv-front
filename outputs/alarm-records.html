@@ -36,7 +36,7 @@
             <div><h2>告警记录</h2><p>记录只用于查询与复盘；点击行查看关联订单、处理建议和现场证据</p></div>
           </header>
 
-          <form class="filters" id="alarmFilters" onsubmit="return false">
+          <form class="filters" id="alarmFilters" autocomplete="off" onsubmit="return false">
             <label class="field-shell"><span>开始时间</span><input id="alarmStart" type="datetime-local" aria-label="开始时间"></label>
             <label class="field-shell"><span>结束时间</span><input id="alarmEnd" type="datetime-local" aria-label="结束时间"></label>
             <label class="field-shell"><span>告警等级</span><select id="alarmLevel"><option value="">全部等级</option><option>严重</option><option>警告</option><option>提示</option></select></label>
@@ -51,9 +51,9 @@
             <table class="data-table alarm-table" aria-label="告警记录列表">
               <colgroup>
                 <col style="width:156px"><col style="width:154px"><col style="width:80px"><col style="width:92px"><col style="width:100px">
-                <col style="width:260px"><col style="width:118px"><col style="width:160px"><col style="width:84px"><col style="width:82px">
+                <col style="width:260px"><col style="width:118px"><col style="width:160px"><col style="width:84px"><col style="width:82px"><col style="width:88px">
               </colgroup>
-              <thead><tr><th>告警编号</th><th>发生时间</th><th>等级</th><th>状态</th><th>类型</th><th>告警内容</th><th>来源模块</th><th>异常对象</th><th>AGV</th><th>负责人</th></tr></thead>
+              <thead><tr><th>告警编号</th><th>发生时间</th><th>等级</th><th>状态</th><th>类型</th><th>告警内容</th><th>来源模块</th><th>异常对象</th><th>AGV</th><th>负责人</th><th>操作</th></tr></thead>
               <tbody id="alarmBody"></tbody>
             </table>
           </div>
