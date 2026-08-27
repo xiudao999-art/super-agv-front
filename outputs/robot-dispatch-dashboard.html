@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="assets/styles/base.css">
   <link rel="stylesheet" href="assets/styles/components.css">
   <script type="module" src="assets/components/register.js" blocking="render"></script>
+  <link rel="stylesheet" href="assets/styles/dashboard-fleet.css">
   <style>
     :root {
       --blue: #2182d1;
@@ -960,12 +961,85 @@
     <section class="intro">
       <div>
         <h1>运行总览</h1>
-        <p>查看单台 AGV、订单、资源和异常的实时状态</p>
+        <p>监控多台 AGV 的实时位置、运行任务和车队状态</p>
       </div>
       <button class="fullscreen-btn" id="fullscreenBtn" aria-label="全屏大屏"><svg class="icon"><use href="#i-expand"/></svg><span>全屏大屏</span></button>
     </section>
 
-    <div class="dashboard">
+    <div class="fleet-dashboard" id="fleetDashboard">
+      <section class="fleet-panel fleet-map-panel" aria-labelledby="fleetMapTitle">
+        <header class="fleet-panel-head">
+          <div>
+            <h2 id="fleetMapTitle">多 AGV 实时运行地图</h2>
+            <p id="fleetMapSummary">正在加载实验室地图与车辆运行状态…</p>
+          </div>
+          <div class="fleet-map-controls">
+            <div class="fleet-map-select-wrap">
+              <label for="fleetMapRobot">地图显示 AGV</label>
+              <select id="fleetMapRobot"><option value="all">全部运行中 AGV</option></select>
+            </div>
+            <div class="fleet-map-badges">
+              <span class="fleet-badge" id="fleetMapCount">0 台显示</span>
+              <span class="fleet-badge muted" id="fleetMapVersion">地图版本 --</span>
+            </div>
+          </div>
+        </header>
+        <div class="fleet-map-art" id="fleetMapArt" role="group" aria-label="多 AGV 实时运行地图">
+          <img class="fleet-map-image" src="assets/agvmap.png" alt="多 AGV 实验室完整地图">
+          <svg class="fleet-route-layer" viewBox="0 0 1024 551" preserveAspectRatio="none" aria-label="多 AGV 路线与实验室点位图层">
+            <defs>
+              <marker id="fleetArrow1" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#2188ff"/></marker>
+              <marker id="fleetArrow2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#18a66a"/></marker>
+              <marker id="fleetArrow3" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#8a5cf5"/></marker>
+              <marker id="fleetArrow4" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#f39b24"/></marker>
+              <marker id="fleetArrow5" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8Z" fill="#ec5272"/></marker>
+            </defs>
+            <g class="fleet-route" data-fleet-robot="AGV-01" style="--route:#2188ff"><path d="M105 310H304V226H446V422H642V295H900" marker-end="url(#fleetArrow1)"/><g class="fleet-agv-point" transform="translate(565 422)"><circle r="15"/><rect x="-8" y="-6" width="16" height="12" rx="4"/><text x="18" y="5">AGV-01</text></g></g>
+            <g class="fleet-route" data-fleet-robot="AGV-02" style="--route:#18a66a"><path d="M115 250H255V400H452V194H550V126" marker-end="url(#fleetArrow2)"/><g class="fleet-agv-point" transform="translate(390 400)"><circle r="15"/><rect x="-8" y="-6" width="16" height="12" rx="4"/><text x="18" y="5">AGV-02</text></g></g>
+            <g class="fleet-route" data-fleet-robot="AGV-03" style="--route:#8a5cf5"><path d="M170 306V192H430V440H630V345H816" marker-end="url(#fleetArrow3)"/><g class="fleet-agv-point" transform="translate(630 345)"><circle r="15"/><rect x="-8" y="-6" width="16" height="12" rx="4"/><text x="18" y="5">AGV-03</text></g></g>
+            <g class="fleet-route" data-fleet-robot="AGV-04" style="--route:#f39b24"><path d="M294 470V405H350V325H455V195H648V420" marker-end="url(#fleetArrow4)"/><g class="fleet-agv-point" transform="translate(350 325)"><circle r="15"/><rect x="-8" y="-6" width="16" height="12" rx="4"/><text x="18" y="5">AGV-04</text></g></g>
+            <g class="fleet-route" data-fleet-robot="AGV-05" style="--route:#ec5272"><path d="M900 445H820V382H945V294H650V195H520V105" marker-end="url(#fleetArrow5)"/><g class="fleet-agv-point" transform="translate(820 382)"><circle r="15"/><rect x="-8" y="-6" width="16" height="12" rx="4"/><text x="18" y="5">AGV-05</text></g></g>
+            <g id="fleetPointLayer" aria-label="实验室点位"></g>
+          </svg>
+          <div class="fleet-map-state" id="fleetMapState">地图加载中…</div>
+          <div class="fleet-map-tooltip" id="fleetMapTooltip" role="tooltip" hidden></div>
+          <div class="fleet-route-legend" id="fleetRouteLegend"></div>
+        </div>
+      </section>
+
+      <section class="fleet-metrics-block fleet-agv-summary" aria-labelledby="agvStatsTitle">
+        <div class="fleet-section-label"><h2 id="agvStatsTitle">AGV 状态统计</h2><p>车队实时在线与任务分布</p></div>
+        <div class="fleet-metrics five" id="agvMetrics"></div>
+      </section>
+
+      <section class="fleet-metrics-block fleet-order-summary" aria-labelledby="orderStatsTitle">
+        <div class="fleet-section-label"><h2 id="orderStatsTitle">订单情况统计</h2><p>统计今日已接收、执行中、排队中、已完成和异常订单</p></div>
+        <div class="fleet-metrics five" id="orderMetrics"></div>
+      </section>
+
+      <section class="fleet-panel fleet-monitor" aria-labelledby="fleetMonitorTitle">
+        <header class="fleet-panel-head monitor-head">
+          <div><h2 id="fleetMonitorTitle">AGV 状态监控</h2><p>查看每台 AGV 的电量、位置、任务和目标点位</p></div>
+          <span class="fleet-badge" id="fleetResultCount">共 10 台</span>
+        </header>
+        <div class="fleet-filter-bar">
+          <label class="fleet-search"><span aria-hidden="true">⌕</span><input id="fleetSearch" type="search" placeholder="搜索 AGV 编号" autocomplete="off"></label>
+          <select id="fleetStatusFilter" aria-label="按运行状态筛选"><option value="all">全部状态</option><option value="RUNNING">运行中</option><option value="WAITING">等待资源</option><option value="IDLE">空闲</option><option value="CHARGING">充电中</option><option value="ERROR">异常</option></select>
+          <button class="fleet-reset" id="fleetReset" type="button">重置</button>
+          <button class="fleet-search-button" id="fleetSearchButton" type="button">搜索</button>
+        </div>
+        <div class="fleet-carousel-wrap">
+          <button class="fleet-carousel-arrow previous" type="button" data-fleet-scroll="-1" aria-label="向左查看更多 AGV">‹</button>
+          <div class="fleet-cards" id="fleetCards"></div>
+          <button class="fleet-carousel-arrow next" type="button" data-fleet-scroll="1" aria-label="向右查看更多 AGV">›</button>
+        </div>
+        <div class="fleet-empty" id="fleetEmpty" hidden>没有符合当前条件的 AGV</div>
+      </section>
+
+      <div class="fleet-page-actions"><a class="fleet-secondary-action" href="conflict-node-scheduling.html">进入冲突节点排程</a></div>
+    </div>
+
+    <div class="dashboard legacy-dashboard" hidden>
       <section class="stats" aria-label="运行指标">
         <article class="stat-card" data-overview-card="agv">
           <div class="stat-head"><span>AGV 状态</span><span class="status-pill"><i class="dot"></i>在线</span></div>
@@ -1330,7 +1404,6 @@
       }
     });
   </script>
-  <script type="module" src="dashboard-overview-api.js"></script>
-  <script type="module" src="dashboard-lab-map-api.js"></script>
+  <script type="module" src="dashboard-fleet.js"></script>
 </body>
 </html>
