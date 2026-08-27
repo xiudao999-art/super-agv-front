@@ -310,7 +310,7 @@ import {
       if (!configId) throw new Error('暂无可用实验室配置');
       const detailResult = await getLaboratoryConfig(configId, { baseUrl: apiBaseUrl, timeout: 30000 });
       const detail = detailResult.data;
-      elements.mapVersion.textContent = `地图版本 ${detail?.revision || config?.revision || '--'}`;
+      elements.mapVersion.textContent = `大型实验室地图 V${detail?.revision || config?.revision || 1}`;
       renderPoints(detail || {});
       elements.mapState.hidden = true;
     } catch (error) {
