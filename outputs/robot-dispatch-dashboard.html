@@ -935,7 +935,9 @@
       </div>
       <div class="nav-group">
         <p class="nav-label">运维与数据</p>
-        <a class="nav-item" href="current-anomalies.html"><svg class="icon"><use href="#i-shield"/></svg><span>异常与恢复</span></a>
+        <a class="nav-item" href="exception-recovery.html" data-page="异常与恢复"><svg class="icon"><use href="#i-shield"/></svg><span>异常与恢复</span></a>
+        <a class="nav-item" href="emergency-stop-procedure.html" data-page="急停处置规程"><svg class="icon"><use href="#i-alert"/></svg><span>急停处置规程</span></a>
+        <a class="nav-item" href="current-anomalies.html" data-page="历史异常与恢复"><svg class="icon"><use href="#i-doc"/></svg><span>历史异常与恢复</span></a>
         <a class="nav-item" href="system-logs.html" data-page="系统日志"><svg class="icon"><use href="#i-log"/></svg><span>系统日志</span></a>
         <a class="nav-item" href="lab-capacity.html" data-page="实验室产能"><svg class="icon"><use href="#i-chart"/></svg><span>实验室产能</span></a>
       </div>
@@ -1395,11 +1397,7 @@
     });
     alertRecoveryBtn.addEventListener('click', function () {
       closeAlertDrawer(false);
-      const targetNav = document.querySelector('.nav-item[data-page="异常与恢复"]');
-      document.querySelectorAll('.nav-item').forEach(function (nav) { nav.classList.remove('active'); });
-      targetNav.classList.add('active');
-      pageLabel.textContent = '异常与恢复';
-      setTimeout(function () { showToast('已进入异常与恢复页面'); }, 250);
+      location.href = 'exception-recovery.html';
     });
 
     document.getElementById('fullscreenBtn').addEventListener('click', async function () {

@@ -1,5 +1,5 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>复合机器人调度系统 · 流程模板配置</title>
-  <link rel="stylesheet" href="assets/styles/pages/process-template-editor.css?v=2.3.1">
+  <link rel="stylesheet" href="assets/styles/pages/process-template-editor.css?v=2.3.2">
   <link rel="stylesheet" href="assets/styles/tokens.css">
   <link rel="stylesheet" href="assets/styles/base.css">
   <link rel="stylesheet" href="assets/styles/components.css">
@@ -14,8 +14,8 @@ let editorNodesV2=[
   {id:7,name:'结束',type:'通用节点',icon:'end',x:40,y:555}
 ];
 let editorConnectionsV2=[
-  {id:1,from:1,to:2},{id:2,from:2,to:3},{id:3,from:3,to:4},
-  {id:4,from:4,to:5},{id:5,from:5,to:6},{id:6,from:6,to:7}
+  {id:1,from:1,to:2,fromPort:'right',toPort:'left'},{id:2,from:2,to:3,fromPort:'right',toPort:'left'},{id:3,from:3,to:4,fromPort:'right',toPort:'left'},
+  {id:4,from:4,to:5,fromPort:'right',toPort:'left'},{id:5,from:5,to:6,fromPort:'right',toPort:'left'},{id:6,from:6,to:7,fromPort:'right',toPort:'left'}
 ];
 let selectedNodeIdV2=1,selectedConnectionIdV2=null,nextNodeIdV2=8,nextConnectionIdV2=7,zoomV2=1,canvasPanXV2=0,canvasPanYV2=0,canvasPanV2=null,canvasPanSuppressClickV2=false,nodeDragV2=null,connectionDragV2=null,paletteDraggedV2=false;
 const subflowDataV2=new Map();
@@ -36,7 +36,7 @@ const deleteNodeButtonV2=document.getElementById('deleteNode');deleteNodeButtonV
 const subflowEntryFieldV2=document.createElement('div');subflowEntryFieldV2.className='property-field subflow-entry-field';subflowEntryFieldV2.hidden=true;
 const subflowEntryButtonV2=document.createElement('button');subflowEntryButtonV2.type='button';subflowEntryButtonV2.className='subflow-entry-button';
 const propertyFieldsV2=document.querySelector('.property-fields');subflowEntryFieldV2.innerHTML='<span>子节点流程</span>';subflowEntryFieldV2.appendChild(subflowEntryButtonV2);propertyFieldsV2.insertBefore(subflowEntryFieldV2,propertyFieldsV2.children[1]||null);
-const tipV2=document.createElement('div');tipV2.className='canvas-tip';tipV2.textContent='连线固定右侧出、左侧进；拖到目标节点时会自动吸附到左侧入口';
+const tipV2=document.createElement('div');tipV2.className='canvas-tip';tipV2.textContent='左右端点均可作为连线的起点或终点；每个端点最多连接一条直角折线';
 document.querySelector('.canvas-heading').appendChild(tipV2);
 function nodeV2(id){return editorNodesV2.find(item=>item.id===Number(id))}
 function clampV2(value,min,max){return Math.max(min,Math.min(max,value))}
@@ -101,16 +101,27 @@ function syncTerminalPaletteV2(){
   });
   document.querySelectorAll('.palette-card[data-node-name="开始"],.palette-card[data-node-name="结束"]').forEach(card=>{const reached=terminalNodeCountV2(card.dataset.nodeName)>0;card.classList.toggle('limit-reached',reached);card.setAttribute('aria-disabled',String(reached));card.draggable=!reached;card.title=reached?'画布中已存在'+card.dataset.nodeName+'节点':''});
 }
-function orthogonalRouteV2(sx,sy,tx,ty){
-  const terminalGap=28;
-  let points;
-  if(tx-sx>=terminalGap*2){
-    const bendX=(sx+tx)/2;
-    points=[{x:sx,y:sy},{x:bendX,y:sy},{x:bendX,y:ty},{x:tx,y:ty}];
+function connectionPortV2(connection,key,fallback){return connection?.[key]==='left'||connection?.[key]==='right'?connection[key]:fallback}
+function portPointV2(node,port,width=nodeWidthV2(node),height=64){return{x:node.x+(port==='right'?width:0),y:node.y+height/2}}
+function portKeyV2(nodeId,port){return String(nodeId)+':'+port}
+function occupiedPortsV2(connections,ignoreId=null){const occupied=new Set();connections.forEach(connection=>{if(connection.id===ignoreId)return;occupied.add(portKeyV2(connection.from,connectionPortV2(connection,'fromPort','right')));occupied.add(portKeyV2(connection.to,connectionPortV2(connection,'toPort','left')))});return occupied}
+function freePortV2(nodeId,connections,preferred='right'){const occupied=occupiedPortsV2(connections),ports=preferred==='left'?['left','right']:['right','left'];return ports.find(port=>!occupied.has(portKeyV2(nodeId,port)))||null}
+function orthogonalRouteV2(sx,sy,tx,ty,sourcePort='right',targetPort='left'){
+  const terminalGap=28,sourceDirection=sourcePort==='right'?1:-1,targetDirection=targetPort==='right'?1:-1;
+  const sourceLead={x:sx+sourceDirection*terminalGap,y:sy},targetLead={x:tx+targetDirection*terminalGap,y:ty};
+  let points=[{x:sx,y:sy},sourceLead];
+  const facing=(sourceDirection===1&&targetDirection===-1&&sourceLead.x<=targetLead.x)||(sourceDirection===-1&&targetDirection===1&&sourceLead.x>=targetLead.x);
+  if(sourceLead.y===targetLead.y){
+    if(facing)points.push(targetLead);
+    else{const laneY=Math.max(sourceLead.y,targetLead.y)+76;points.push({x:sourceLead.x,y:laneY},{x:targetLead.x,y:laneY},targetLead)}
+  }else if(sourcePort!==targetPort&&facing){
+    const bendX=(sourceLead.x+targetLead.x)/2;points.push({x:bendX,y:sourceLead.y},{x:bendX,y:targetLead.y},targetLead);
+  }else if(sourcePort===targetPort){
+    const laneX=sourcePort==='left'?Math.min(sourceLead.x,targetLead.x)-terminalGap:Math.max(sourceLead.x,targetLead.x)+terminalGap;points.push({x:laneX,y:sourceLead.y},{x:laneX,y:targetLead.y},targetLead);
   }else{
-    const exitX=sx+terminalGap,entryX=tx-terminalGap,upperLane=Math.min(sy,ty)-76,laneY=upperLane>=24?upperLane:Math.max(sy,ty)+76;
-    points=[{x:sx,y:sy},{x:exitX,y:sy},{x:exitX,y:laneY},{x:entryX,y:laneY},{x:entryX,y:ty},{x:tx,y:ty}];
+    const upperLane=Math.min(sourceLead.y,targetLead.y)-76,laneY=upperLane>=24?upperLane:Math.max(sourceLead.y,targetLead.y)+76;points.push({x:sourceLead.x,y:laneY},{x:targetLead.x,y:laneY},targetLead);
   }
+  points.push({x:tx,y:ty});
   const route=points.filter((point,index)=>index===0||point.x!==points[index-1].x||point.y!==points[index-1].y);
   const segments=[];
   let d='M '+route[0].x+' '+route[0].y;
@@ -118,9 +129,10 @@ function orthogonalRouteV2(sx,sy,tx,ty){
   const deletePoint=segments.reduce((longest,current)=>current.length>longest.length?current:longest,segments[0]).point;
   return{d,deletePoint,points:route};
 }
-function orthogonalPathV2(sx,sy,tx,ty){return orthogonalRouteV2(sx,sy,tx,ty).d}
-function connectionPathV2(connection){const from=nodeV2(connection.from),to=nodeV2(connection.to);if(!from||!to)return '';return orthogonalPathV2(from.x+nodeWidthV2(from),from.y+32,to.x,to.y+32)}
-function connectionMidpointV2(connection){const from=nodeV2(connection.from),to=nodeV2(connection.to);if(!from||!to)return null;return orthogonalRouteV2(from.x+nodeWidthV2(from),from.y+32,to.x,to.y+32).deletePoint}
+function orthogonalPathV2(sx,sy,tx,ty,sourcePort='right',targetPort='left'){return orthogonalRouteV2(sx,sy,tx,ty,sourcePort,targetPort).d}
+function connectionRouteV2(connection){const from=nodeV2(connection.from),to=nodeV2(connection.to);if(!from||!to)return null;const fromPort=connectionPortV2(connection,'fromPort','right'),toPort=connectionPortV2(connection,'toPort','left'),start=portPointV2(from,fromPort),end=portPointV2(to,toPort);return orthogonalRouteV2(start.x,start.y,end.x,end.y,fromPort,toPort)}
+function connectionPathV2(connection){return connectionRouteV2(connection)?.d||''}
+function connectionMidpointV2(connection){return connectionRouteV2(connection)?.deletePoint||null}
 function canConnectNodesV2(fromId,toId,notify=false){
   const from=nodeV2(fromId),to=nodeV2(toId);
   let message='';
@@ -131,13 +143,22 @@ function canConnectNodesV2(fromId,toId,notify=false){
   if(message&&notify)showToast(message);
   return !message;
 }
+function canConnectPortsV2(fromId,fromPort,toId,toPort,notify=false){
+  if(!canConnectNodesV2(fromId,toId,notify))return false;
+  const occupied=occupiedPortsV2(editorConnectionsV2),sourceKey=portKeyV2(fromId,fromPort),targetKey=portKeyV2(toId,toPort);
+  let message='';
+  if(occupied.has(sourceKey))message='起点端点已有连线，每个端点最多连接一条线';
+  else if(occupied.has(targetKey))message='目标端点已有连线，请使用节点另一侧端点';
+  if(message&&notify)showToast(message);
+  return !message;
+}
 function clearMainConnectionTargetV2(){stageV2.querySelectorAll('.connection-target').forEach(element=>element.classList.remove('connection-target'))}
 function mainConnectionTargetAtPointV2(clientX,clientY){
   clearMainConnectionTargetV2();
-  const targetElement=document.elementFromPoint(clientX,clientY)?.closest('.flow-node'),to=Number(targetElement?.dataset.nodeId);
-  if(!connectionDragV2||!canConnectNodesV2(connectionDragV2.from,to))return null;
-  targetElement.classList.add('connection-target');
-  return nodeV2(to);
+  const targetHandle=document.elementFromPoint(clientX,clientY)?.closest('.flow-node .node-handle'),targetElement=targetHandle?.closest('.flow-node'),to=Number(targetElement?.dataset.nodeId),toPort=targetHandle?.dataset.port;
+  if(!connectionDragV2||!toPort||!canConnectPortsV2(connectionDragV2.from,connectionDragV2.fromPort,to,toPort))return null;
+  targetElement.classList.add('connection-target');targetHandle.classList.add('connection-target');
+  const node=nodeV2(to),point=portPointV2(node,toPort);return{node,port:toPort,x:point.x,y:point.y};
 }
 function openSubflowForNodeV2(nodeId){
   const node=nodeV2(nodeId);
@@ -150,15 +171,19 @@ function renderConnectionsV2(){
   svg.setAttribute('class','flow-lines');svg.setAttribute('width',String(stageV2.offsetWidth));svg.setAttribute('height',String(stageV2.offsetHeight));
   svg.innerHTML='<defs><marker id="flowArrowV2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#87919a"/></marker><marker id="flowArrowSelectedV2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#e1473f"/></marker></defs>';
   editorConnectionsV2.forEach(connection=>{const selected=connection.id===selectedConnectionIdV2,path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('class','flow-path'+(selected?' selected':''));path.setAttribute('d',connectionPathV2(connection));path.setAttribute('marker-end',selected?'url(#flowArrowSelectedV2)':'url(#flowArrowV2)');path.dataset.connectionId=connection.id;path.addEventListener('click',event=>{event.stopPropagation();selectedNodeIdV2=null;selectedConnectionIdV2=connection.id;subflowViewActiveV2=false;renderCanvasV2()});svg.appendChild(path);if(selected){const midpoint=connectionMidpointV2(connection);if(midpoint){const remove=document.createElementNS('http://www.w3.org/2000/svg','g');remove.setAttribute('class','flow-line-delete');remove.setAttribute('transform','translate('+midpoint.x+' '+midpoint.y+')');remove.setAttribute('role','button');remove.setAttribute('tabindex','0');remove.setAttribute('aria-label','删除选中连线');remove.innerHTML='<circle r="12"></circle><path d="M -4 -4 L 4 4 M 4 -4 L -4 4"></path>';remove.addEventListener('pointerdown',event=>{event.stopPropagation();event.preventDefault()});remove.addEventListener('click',event=>{event.stopPropagation();selectedConnectionIdV2=connection.id;deleteSelectedConnectionV2()});remove.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();selectedConnectionIdV2=connection.id;deleteSelectedConnectionV2()}});svg.appendChild(remove)}}});
-  if(connectionDragV2){const from=nodeV2(connectionDragV2.from);if(from){const preview=document.createElementNS('http://www.w3.org/2000/svg','path');preview.setAttribute('class','flow-preview');preview.setAttribute('d',orthogonalPathV2(from.x+nodeWidthV2(from),from.y+32,connectionDragV2.x,connectionDragV2.y));svg.appendChild(preview)}}
+  if(connectionDragV2){const from=nodeV2(connectionDragV2.from);if(from){const start=portPointV2(from,connectionDragV2.fromPort),preview=document.createElementNS('http://www.w3.org/2000/svg','path');preview.setAttribute('class','flow-preview');preview.setAttribute('d',orthogonalPathV2(start.x,start.y,connectionDragV2.x,connectionDragV2.y,connectionDragV2.fromPort,connectionDragV2.targetPort||connectionDragV2.fromPort));svg.appendChild(preview)}}
   stageV2.prepend(svg);
+}
+function nodeHandleMarkupV2(node,port,connections){
+  const occupied=occupiedPortsV2(connections).has(portKeyV2(node.id,port)),sideLabel=port==='left'?'左侧':'右侧';
+  return '<span class="node-handle '+(port==='left'?'handle-in':'handle-out')+(occupied?' occupied':'')+'" data-handle="port" data-port="'+port+'" title="'+(occupied?sideLabel+'端点已有连线':sideLabel+'端点：可作为起点或终点')+'"></span>';
 }
 function nodeMarkupV2(node){
   const isTerminal=Boolean(terminalNodeNameV2(node)),role=isTerminal?'通用节点':(node.type==='AGV 节点'?'主节点':node.type),childCount=isTerminal?0:childCountV2(node.id);
-  if(isTerminal)return '<span class="flow-node-delete" role="button" aria-label="删除节点" title="删除节点">×</span><span class="node-handle handle-in" data-handle="in" title="连接到此节点"></span><span class="flow-node-icon" title="'+node.name+'节点">'+nodeIconMarkupV2(node)+'</span><span class="node-handle handle-out" data-handle="out" title="拖动创建连线"></span>';
+  if(isTerminal)return '<span class="flow-node-delete" role="button" aria-label="删除节点" title="删除节点">×</span>'+nodeHandleMarkupV2(node,'left',editorConnectionsV2)+'<span class="flow-node-icon" title="'+node.name+'节点">'+nodeIconMarkupV2(node)+'</span>'+nodeHandleMarkupV2(node,'right',editorConnectionsV2);
   const subflowEntry=isSubflowParentV2(node)?'<span class="flow-node-subflow-entry" data-open-subflow="'+node.id+'" role="button" tabindex="0" aria-label="进入 '+node.name+' 的子节点配置">'+(childCount?'<span class="flow-node-child-count">'+childCount+' 个子节点</span>':'<span>配置子节点</span>')+'<b aria-hidden="true">›</b></span>':'<span>'+role+'</span>';
   const core='<span class="flow-node-copy"><strong>'+node.id+' · '+node.name+'</strong><small class="flow-node-meta">'+subflowEntry+'</small></span><span class="flow-node-icon">'+nodeIconMarkupV2(node)+'</span>';
-  return '<span class="flow-node-delete" role="button" aria-label="删除节点" title="删除节点">×</span><span class="node-handle handle-in" data-handle="in" title="连接到此节点"></span>'+core+'<span class="node-handle handle-out" data-handle="out" title="拖动创建连线"></span>';
+  return '<span class="flow-node-delete" role="button" aria-label="删除节点" title="删除节点">×</span>'+nodeHandleMarkupV2(node,'left',editorConnectionsV2)+core+nodeHandleMarkupV2(node,'right',editorConnectionsV2);
 }
 function renderCanvasV2(){
   if(!canvasAreaV2.classList.contains('canvas-fullscreen'))retainMainCanvasExtentV2();
@@ -171,7 +196,7 @@ function refreshPropertiesV2(){
   if(!selected){const from=nodeV2(selectedConnection?.from),to=nodeV2(selectedConnection?.to);subflowEntryFieldV2.hidden=true;selectedLabelV2.textContent=selectedConnection?'当前连线：'+selectedConnection.from+' → '+selectedConnection.to:'当前未选择节点或连线';nodeNameInputV2.value='';nodeNameInputV2.readOnly=true;nodeNameInputV2.title='请先在画布中选择节点';nodeTypeInputV2.value=selectedConnection?'连线':'';connectTargetV2.innerHTML='<option value="">请先选择节点</option>';linkSummaryV2.textContent=selectedConnection?selectedConnection.from+' → '+selectedConnection.to:'暂无选中连线';linkNamesV2.textContent=selectedConnection?(from?.name||'')+' → '+(to?.name||''):'单击节点或连线进行选择';deleteConnectionV2.disabled=!selectedConnection;return}
   selectedLabelV2.textContent='当前节点：'+selected.name;nodeNameInputV2.value=selected.name;nodeNameInputV2.readOnly=Boolean(terminalNodeNameV2(selected));nodeNameInputV2.title=nodeNameInputV2.readOnly?'开始和结束节点名称不可修改':'';nodeTypeInputV2.value=selected.type;
   const canOpenSubflow=isSubflowParentV2(selected);subflowEntryFieldV2.hidden=!canOpenSubflow;if(canOpenSubflow)subflowEntryButtonV2.innerHTML='<span>'+(childCountV2(selected.id)?childCountV2(selected.id)+' 个子节点':'尚未配置子节点')+'</span><strong>进入配置 ›</strong>';
-  connectTargetV2.innerHTML=editorNodesV2.filter(item=>canConnectNodesV2(selected.id,item.id)).map(item=>'<option value="'+item.id+'">'+item.id+' · '+item.name+'</option>').join('')||'<option value="">暂无可连接节点</option>';
+  const selectedFreePort=freePortV2(selected.id,editorConnectionsV2,'right');connectTargetV2.innerHTML=selectedFreePort?editorNodesV2.filter(item=>canConnectNodesV2(selected.id,item.id)&&freePortV2(item.id,editorConnectionsV2,'left')).map(item=>'<option value="'+item.id+'">'+item.id+' · '+item.name+'</option>').join('')||'<option value="">暂无可连接节点</option>':'<option value="">当前节点的两个端点均已占用</option>';
   const connection=editorConnectionsV2.find(item=>item.id===selectedConnectionIdV2)||editorConnectionsV2.find(item=>item.from===selected.id);
   if(connection){const from=nodeV2(connection.from),to=nodeV2(connection.to);linkSummaryV2.textContent=connection.from+' → '+connection.to;linkNamesV2.textContent=(from?.name||'')+' → '+(to?.name||'');deleteConnectionV2.disabled=false}else{linkSummaryV2.textContent='暂无后续连线';linkNamesV2.textContent='请选择目标节点或拖动端点';deleteConnectionV2.disabled=true}
 }
@@ -180,16 +205,16 @@ function startNodePointerV2(event,node,element){
   if(event.target.closest('.flow-node-delete,[data-open-subflow]')){event.stopPropagation();return}
   const handle=event.target.closest('.node-handle');
   selectedNodeIdV2=node.id;selectedConnectionIdV2=null;
-  if(handle){if(handle.dataset.handle==='out'&&terminalNodeNameV2(node)!=='结束'){const rect=stageV2.getBoundingClientRect();connectionDragV2={from:node.id,x:(event.clientX-rect.left)/zoomV2,y:(event.clientY-rect.top)/zoomV2,targetId:null};boardV2.classList.add('connecting');renderConnectionsV2();event.preventDefault()}return}
+  if(handle){const fromPort=handle.dataset.port;if(terminalNodeNameV2(node)==='结束')showToast('结束节点只能作为连线终点');else if(occupiedPortsV2(editorConnectionsV2).has(portKeyV2(node.id,fromPort)))showToast('该端点已有连线，请使用另一侧端点');else{const rect=stageV2.getBoundingClientRect(),start=portPointV2(node,fromPort);connectionDragV2={from:node.id,fromPort,x:start.x,y:start.y,targetId:null,targetPort:null};boardV2.classList.add('connecting');renderConnectionsV2();event.preventDefault()}return}
   const rect=stageV2.getBoundingClientRect();nodeDragV2={id:node.id,offsetX:(event.clientX-rect.left)/zoomV2-node.x,offsetY:(event.clientY-rect.top)/zoomV2-node.y,element,moved:false};element.classList.add('dragging');element.setPointerCapture?.(event.pointerId);event.preventDefault();refreshPropertiesV2();
 }
 document.addEventListener('pointermove',event=>{
   if(nodeDragV2){const current=nodeV2(nodeDragV2.id),rect=stageV2.getBoundingClientRect(),position=stagePositionV2(stageV2,(event.clientX-rect.left)/zoomV2-nodeDragV2.offsetX,(event.clientY-rect.top)/zoomV2-nodeDragV2.offsetY,nodeDragV2.element,180,64);current.x=position.x;current.y=position.y;nodeDragV2.element.style.left=current.x+'px';nodeDragV2.element.style.top=current.y+'px';nodeDragV2.moved=true;renderConnectionsV2()}
-  if(connectionDragV2){const rect=stageV2.getBoundingClientRect(),target=mainConnectionTargetAtPointV2(event.clientX,event.clientY),position=target?{x:target.x,y:target.y+32}:stagePositionV2(stageV2,(event.clientX-rect.left)/zoomV2,(event.clientY-rect.top)/zoomV2);connectionDragV2.x=position.x;connectionDragV2.y=position.y;connectionDragV2.targetId=target?.id??null;renderConnectionsV2()}
+  if(connectionDragV2){const rect=stageV2.getBoundingClientRect(),target=mainConnectionTargetAtPointV2(event.clientX,event.clientY),position=target?{x:target.x,y:target.y}:stagePositionV2(stageV2,(event.clientX-rect.left)/zoomV2,(event.clientY-rect.top)/zoomV2);connectionDragV2.x=position.x;connectionDragV2.y=position.y;connectionDragV2.targetId=target?.node.id??null;connectionDragV2.targetPort=target?.port??null;renderConnectionsV2()}
 });
 document.addEventListener('pointerup',event=>{
   if(nodeDragV2){const moved=nodeDragV2.moved,nodeId=nodeDragV2.id;nodeDragV2.element.classList.remove('dragging');nodeDragV2=null;selectedNodeIdV2=nodeId;selectedConnectionIdV2=null;subflowViewActiveV2=false;renderCanvasV2();if(moved)showToast('节点位置已更新')}
-  if(connectionDragV2){const from=connectionDragV2.from,target=mainConnectionTargetAtPointV2(event.clientX,event.clientY),to=target?.id;if(to&&canConnectNodesV2(from,to,true)){const existing=editorConnectionsV2.find(item=>item.from===from&&item.to===to);if(existing){selectedConnectionIdV2=existing.id;showToast('该连线已存在')}else{const connection={id:nextConnectionIdV2++,from,to};editorConnectionsV2.push(connection);selectedConnectionIdV2=connection.id;showToast('已创建动态连线')}}else if(document.elementFromPoint(event.clientX,event.clientY)?.closest('.flow-node')){canConnectNodesV2(from,Number(document.elementFromPoint(event.clientX,event.clientY)?.closest('.flow-node')?.dataset.nodeId),true)}connectionDragV2=null;clearMainConnectionTargetV2();boardV2.classList.remove('connecting');renderCanvasV2()}
+  if(connectionDragV2){const from=connectionDragV2.from,fromPort=connectionDragV2.fromPort,target=mainConnectionTargetAtPointV2(event.clientX,event.clientY),to=target?.node.id,toPort=target?.port;if(to&&toPort&&canConnectPortsV2(from,fromPort,to,toPort,true)){const existing=editorConnectionsV2.find(item=>item.from===from&&item.to===to);if(existing){selectedConnectionIdV2=existing.id;showToast('该连线已存在')}else{const connection={id:nextConnectionIdV2++,from,to,fromPort,toPort};editorConnectionsV2.push(connection);selectedConnectionIdV2=connection.id;showToast('已创建直角连线')}}else if(document.elementFromPoint(event.clientX,event.clientY)?.closest('.flow-node'))showToast('请将连线拖到节点左侧或右侧的端点');connectionDragV2=null;clearMainConnectionTargetV2();boardV2.classList.remove('connecting');renderCanvasV2()}
 });
 function addNodeV2(name,type,icon,x,y,action={}){if(!canUseTerminalNodeV2(name))return null;const width=terminalNodeNameV2(name)?64:180,position=stagePositionV2(stageV2,x??240,y??480,null,width,64),item={id:nextNodeIdV2++,name,type,icon,actionKey:action.actionKey||null,actionId:action.actionId||null,actionRevision:action.actionRevision??null,actionStatus:action.actionStatus||null,downstreamActionType:action.downstreamActionType||action.actionKey||null,x:position.x,y:position.y};editorNodesV2.push(item);selectedNodeIdV2=item.id;selectedConnectionIdV2=null;renderCanvasV2();showToast(name+' 已添加到画布');return item}
 document.querySelectorAll('.palette-card').forEach(card=>{
@@ -201,7 +226,7 @@ boardV2.addEventListener('dragover',event=>{event.preventDefault();event.dataTra
 boardV2.addEventListener('drop',event=>{event.preventDefault();try{const data=JSON.parse(event.dataTransfer.getData('text/plain')),rect=stageV2.getBoundingClientRect(),width=terminalNodeNameV2(data.name)?64:180;addNodeV2(data.name,data.type,data.icon,(event.clientX-rect.left)/zoomV2-width/2,(event.clientY-rect.top)/zoomV2-32,data)}catch(error){showToast('请从左侧拖入节点')}});
 boardV2.addEventListener('click',event=>{if(canvasPanSuppressClickV2){canvasPanSuppressClickV2=false;return}if(event.target===boardV2||event.target===stageV2){selectedNodeIdV2=null;selectedConnectionIdV2=null;subflowViewActiveV2=false;renderCanvasV2()}});
 nodeNameInputV2.addEventListener('change',event=>{const selected=nodeV2(selectedNodeIdV2);if(!selected)return;const nextName=event.target.value.trim()||'未命名节点';if(terminalNodeNameV2(selected)&&nextName!==selected.name){event.target.value=selected.name;return showToast('开始和结束节点名称不可修改')}if(!canUseTerminalNodeV2(nextName,selected.id)){event.target.value=selected.name;return}selected.name=nextName;renderCanvasV2()});
-document.getElementById('addLink').addEventListener('click',()=>{const from=selectedNodeIdV2,to=Number(connectTargetV2.value);if(!canConnectNodesV2(from,to,true))return;const existing=editorConnectionsV2.find(item=>item.from===from&&item.to===to);if(existing){selectedConnectionIdV2=existing.id;renderCanvasV2();return showToast('该连线已存在')}const connection={id:nextConnectionIdV2++,from,to};editorConnectionsV2.push(connection);selectedConnectionIdV2=connection.id;renderCanvasV2();showToast('连线已添加')});
+document.getElementById('addLink').addEventListener('click',()=>{const from=selectedNodeIdV2,to=Number(connectTargetV2.value),fromPort=freePortV2(from,editorConnectionsV2,'right'),toPort=freePortV2(to,editorConnectionsV2,'left');if(!fromPort||!toPort)return showToast('起点或目标节点已没有可用端点');if(!canConnectPortsV2(from,fromPort,to,toPort,true))return;const existing=editorConnectionsV2.find(item=>item.from===from&&item.to===to);if(existing){selectedConnectionIdV2=existing.id;renderCanvasV2();return showToast('该连线已存在')}const connection={id:nextConnectionIdV2++,from,to,fromPort,toPort};editorConnectionsV2.push(connection);selectedConnectionIdV2=connection.id;renderCanvasV2();showToast('连线已添加')});
 function deleteSelectedConnectionV2(){if(selectedConnectionIdV2===null)return false;editorConnectionsV2=editorConnectionsV2.filter(item=>item.id!==selectedConnectionIdV2);selectedConnectionIdV2=null;renderCanvasV2();showToast('选中连线已删除');return true}
 function deleteSelectedNodeV2(){const selected=nodeV2(selectedNodeIdV2);if(!selected)return false;const deletedNodeId=selected.id;editorNodesV2=editorNodesV2.filter(item=>item.id!==deletedNodeId);editorConnectionsV2=editorConnectionsV2.filter(item=>item.from!==deletedNodeId&&item.to!==deletedNodeId);subflowDataV2.delete(deletedNodeId);subflowConnectionsV2.delete(deletedNodeId);selectedNodeIdV2=null;selectedConnectionIdV2=null;subflowViewActiveV2=false;renderCanvasV2();showToast('选中节点及关联连线已删除');return true}
 deleteConnectionV2.addEventListener('click',deleteSelectedConnectionV2);
@@ -227,20 +252,31 @@ const exitSubflowV2=document.getElementById('exitSubflow');
 const saveSubflowV2=document.getElementById('saveSubflow');
 const subflowCanvasV2=document.getElementById('subflowCanvas');
 const subflowStageV2=document.getElementById("subflowStage");const subflowZoomValueV2=document.getElementById("subflowZoomValue");let subflowZoomV2=1;
-document.querySelector('.subflow-note').textContent='新增子节点后不会自动连线；请从节点右侧端点拖到目标节点手动连接。';
+document.querySelector('.subflow-note').textContent='新增子节点后不会自动连线；左右端点都可手动发起或接收连线，每个端点最多一条线。';
 let subflowViewActiveV2=false,subflowParentIdV2=null,selectedSubNodeIdV2=null,selectedSubConnectionIdV2=null,nextSubNodeIdV2=1,nextSubConnectionIdV2=1,subNodeDragV2=null,subConnectionDragV2=null,subPaletteDraggedV2=false,subSelectionActiveV2=false;
 function subNodesV2(){if(subflowParentIdV2===null)return[];if(!subflowDataV2.has(subflowParentIdV2))subflowDataV2.set(subflowParentIdV2,[]);return subflowDataV2.get(subflowParentIdV2)}
 function subNodeV2(id){return subNodesV2().find(item=>item.id===id)}
 function subConnectionsV2(){if(subflowParentIdV2===null)return[];if(!subflowConnectionsV2.has(subflowParentIdV2))subflowConnectionsV2.set(subflowParentIdV2,[]);return subflowConnectionsV2.get(subflowParentIdV2)}
-function subConnectionPathV2(from,to){return orthogonalPathV2(from.x+180,from.y+32,to.x,to.y+32)}
-function subConnectionRouteV2(connection){const from=subNodeV2(connection.from),to=subNodeV2(connection.to);if(!from||!to)return null;return orthogonalRouteV2(from.x+180,from.y+32,to.x,to.y+32)}
+function subPortPointV2(node,port){return portPointV2(node,port,160,64)}
+function subConnectionPathV2(from,to,fromPort='right',toPort='left'){const start=subPortPointV2(from,fromPort),end=subPortPointV2(to,toPort);return orthogonalPathV2(start.x,start.y,end.x,end.y,fromPort,toPort)}
+function subConnectionRouteV2(connection){const from=subNodeV2(connection.from),to=subNodeV2(connection.to);if(!from||!to)return null;const fromPort=connectionPortV2(connection,'fromPort','right'),toPort=connectionPortV2(connection,'toPort','left'),start=subPortPointV2(from,fromPort),end=subPortPointV2(to,toPort);return orthogonalRouteV2(start.x,start.y,end.x,end.y,fromPort,toPort)}
+function canConnectSubPortsV2(fromId,fromPort,toId,toPort,notify=false){
+  const from=subNodeV2(fromId),to=subNodeV2(toId),occupied=occupiedPortsV2(subConnectionsV2());let message='';
+  if(!from||!to)message='请选择有效的目标子节点';
+  else if(from.id===to.id)message='子节点不能连接到自身';
+  else if(terminalNodeNameV2(from)==='结束')message='结束节点只能作为连线终点';
+  else if(terminalNodeNameV2(to)==='开始')message='开始节点只能作为连线起点';
+  else if(occupied.has(portKeyV2(fromId,fromPort)))message='起点端点已有连线';
+  else if(occupied.has(portKeyV2(toId,toPort)))message='目标端点已有连线，请使用另一侧端点';
+  if(message&&notify)showToast(message);return !message;
+}
 function clearSubConnectionTargetV2(){subflowStageV2.querySelectorAll('.connection-target').forEach(element=>element.classList.remove('connection-target'))}
 function subConnectionTargetAtPointV2(clientX,clientY){
   clearSubConnectionTargetV2();
-  const targetElement=document.elementFromPoint(clientX,clientY)?.closest('.subflow-node'),to=targetElement?.dataset.subnodeId;
-  if(!subConnectionDragV2||!to||to===subConnectionDragV2.from)return null;
-  targetElement.classList.add('connection-target');
-  return subNodeV2(to);
+  const targetHandle=document.elementFromPoint(clientX,clientY)?.closest('.subflow-node .node-handle'),targetElement=targetHandle?.closest('.subflow-node'),to=targetElement?.dataset.subnodeId,toPort=targetHandle?.dataset.port;
+  if(!subConnectionDragV2||!toPort||!canConnectSubPortsV2(subConnectionDragV2.from,subConnectionDragV2.fromPort,to,toPort))return null;
+  targetElement.classList.add('connection-target');targetHandle.classList.add('connection-target');
+  const node=subNodeV2(to),point=subPortPointV2(node,toPort);return{node,port:toPort,x:point.x,y:point.y};
 }
 function deleteSelectedSubConnectionV2(){if(selectedSubConnectionIdV2===null)return false;const connections=subConnectionsV2(),index=connections.findIndex(item=>item.id===selectedSubConnectionIdV2);if(index<0)return false;connections.splice(index,1);selectedSubConnectionIdV2=null;renderSubflowV2();showToast('选中子节点连线已删除');return true}
 function renderSubLinesV2(){
@@ -249,10 +285,10 @@ function renderSubLinesV2(){
   svg.setAttribute('class','subflow-lines');svg.setAttribute('width',String(subflowStageV2.offsetWidth));svg.setAttribute('height',String(subflowStageV2.offsetHeight));
   svg.innerHTML='<defs><marker id="subflowArrowV2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#5d92bd"/></marker><marker id="subflowArrowSelectedV2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#e1473f"/></marker></defs>';
   subConnectionsV2().forEach(connection=>{const route=subConnectionRouteV2(connection);if(!route)return;const selected=connection.id===selectedSubConnectionIdV2,path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('class','subflow-path'+(selected?' selected':''));path.setAttribute('d',route.d);path.setAttribute('marker-end',selected?'url(#subflowArrowSelectedV2)':'url(#subflowArrowV2)');path.dataset.subConnectionId=connection.id;path.addEventListener('click',event=>{event.stopPropagation();selectedSubNodeIdV2=null;subSelectionActiveV2=false;selectedSubConnectionIdV2=connection.id;renderSubflowV2()});svg.appendChild(path);if(selected){const remove=document.createElementNS('http://www.w3.org/2000/svg','g');remove.setAttribute('class','flow-line-delete');remove.setAttribute('transform','translate('+route.deletePoint.x+' '+route.deletePoint.y+')');remove.setAttribute('role','button');remove.setAttribute('tabindex','0');remove.setAttribute('aria-label','删除选中子节点连线');remove.innerHTML='<circle r="12"></circle><path d="M -4 -4 L 4 4 M 4 -4 L -4 4"></path>';remove.addEventListener('pointerdown',event=>{event.stopPropagation();event.preventDefault()});remove.addEventListener('click',event=>{event.stopPropagation();deleteSelectedSubConnectionV2()});svg.appendChild(remove)}});
-  if(subConnectionDragV2){const from=subNodeV2(subConnectionDragV2.from);if(from){const preview=document.createElementNS('http://www.w3.org/2000/svg','path');preview.setAttribute('class','subflow-preview');preview.setAttribute('d',orthogonalPathV2(from.x+180,from.y+32,subConnectionDragV2.x,subConnectionDragV2.y));svg.appendChild(preview)}}
+  if(subConnectionDragV2){const from=subNodeV2(subConnectionDragV2.from);if(from){const start=subPortPointV2(from,subConnectionDragV2.fromPort),preview=document.createElementNS('http://www.w3.org/2000/svg','path');preview.setAttribute('class','subflow-preview');preview.setAttribute('d',orthogonalPathV2(start.x,start.y,subConnectionDragV2.x,subConnectionDragV2.y,subConnectionDragV2.fromPort,subConnectionDragV2.targetPort||subConnectionDragV2.fromPort));svg.appendChild(preview)}}
   subflowStageV2.prepend(svg);
 }
-function refreshSubPropertiesV2(node){if(!node)return;subSelectionActiveV2=true;selectedSubConnectionIdV2=null;selectedLabelV2.textContent='当前子节点：'+node.name;nodeNameInputV2.value=node.name;nodeTypeInputV2.value=terminalNodeNameV2(node)?'通用节点':'子节点';const nodes=subNodesV2(),connection=subConnectionsV2().find(item=>item.from===node.id),next=subNodeV2(connection?.to);connectTargetV2.innerHTML=nodes.filter(item=>item.id!==node.id).map(item=>'<option value="'+item.id+'">'+item.id+' · '+item.name+'</option>').join('')||'<option value="">暂无其他子节点</option>';linkSummaryV2.textContent=connection?node.id+' → '+connection.to:'暂无后续连线';linkNamesV2.textContent=connection?node.name+' → '+(next?.name||''):'请拖动节点右侧端点手动连线';deleteConnectionV2.disabled=!connection}
+function refreshSubPropertiesV2(node){if(!node)return;subSelectionActiveV2=true;selectedSubConnectionIdV2=null;selectedLabelV2.textContent='当前子节点：'+node.name;nodeNameInputV2.value=node.name;nodeTypeInputV2.value=terminalNodeNameV2(node)?'通用节点':'子节点';const nodes=subNodesV2(),connections=subConnectionsV2(),connection=connections.find(item=>item.from===node.id),next=subNodeV2(connection?.to),sourcePort=freePortV2(node.id,connections,'right');connectTargetV2.innerHTML=sourcePort?nodes.filter(item=>item.id!==node.id&&freePortV2(item.id,connections,'left')&&terminalNodeNameV2(item)!=='开始').map(item=>'<option value="'+item.id+'">'+item.id+' · '+item.name+'</option>').join('')||'<option value="">暂无可连接子节点</option>':'<option value="">当前子节点的两个端点均已占用</option>';linkSummaryV2.textContent=connection?node.id+' → '+connection.to:'暂无后续连线';linkNamesV2.textContent=connection?node.name+' → '+(next?.name||''):'请从左侧或右侧端点手动连线';deleteConnectionV2.disabled=!connection}
 function renderSubflowV2(){
   const parent=nodeV2(selectedNodeIdV2);
   if(!subflowViewActiveV2||!isSubflowParentV2(parent)){editorWorkspaceV2.classList.remove('subflow-mode');canvasAreaV2.classList.remove('subflow-active');subflowPanelV2.hidden=true;subflowParentIdV2=null;selectedSubNodeIdV2=null;selectedSubConnectionIdV2=null;subSelectionActiveV2=false;return}
@@ -262,8 +298,8 @@ function renderSubflowV2(){
   if(nodes.length&&!selectedSubNodeIdV2&&selectedSubConnectionIdV2===null){selectedSubNodeIdV2=nodes[0].id;subSelectionActiveV2=true}
   subflowCountV2.textContent=nodes.length+' 个子节点';subflowStageV2.innerHTML='';
   if(!nodes.length){const empty=document.createElement('div');empty.className='subflow-empty';empty.textContent='从左侧拖入子节点开始配置';subflowStageV2.appendChild(empty)}
-  nodes.forEach(node=>{const button=document.createElement('button');button.type='button';button.className='subflow-node'+(terminalNodeNameV2(node)==='开始'?' start':'')+(terminalNodeNameV2(node)==='结束'?' end':'')+(node.id===selectedSubNodeIdV2?' selected':'');button.style.left=node.x+'px';button.style.top=node.y+'px';button.dataset.subnodeId=node.id;button.innerHTML='<span class="node-handle handle-in" data-handle="in" title="连接到此子节点"></span><span><strong>'+node.name+'</strong><small>'+(terminalNodeNameV2(node)?'通用节点':'子节点')+'</small></span><span class="subflow-node-icon">'+nodeIconMarkupV2(node)+'</span><span class="node-handle handle-out" data-handle="out" title="拖动创建子节点连线"></span>';
-    button.addEventListener('pointerdown',event=>{if(event.button!==0)return;selectedSubNodeIdV2=node.id;selectedSubConnectionIdV2=null;subSelectionActiveV2=true;const handle=event.target.closest('.node-handle');if(handle){if(handle.dataset.handle==='out'&&terminalNodeNameV2(node)!=='结束'){const rect=subflowStageV2.getBoundingClientRect();subConnectionDragV2={from:node.id,x:(event.clientX-rect.left)/subflowZoomV2,y:(event.clientY-rect.top)/subflowZoomV2,targetId:null};subflowCanvasV2.classList.add('connecting');renderSubLinesV2();event.preventDefault()}event.stopPropagation();return}const rect=subflowStageV2.getBoundingClientRect();subNodeDragV2={id:node.id,offsetX:(event.clientX-rect.left)/subflowZoomV2-node.x,offsetY:(event.clientY-rect.top)/subflowZoomV2-node.y,element:button,moved:false};button.classList.add('dragging');button.setPointerCapture?.(event.pointerId);refreshSubPropertiesV2(node);event.stopPropagation();event.preventDefault()});
+  nodes.forEach(node=>{const button=document.createElement('button');button.type='button';button.className='subflow-node'+(terminalNodeNameV2(node)==='开始'?' start':'')+(terminalNodeNameV2(node)==='结束'?' end':'')+(node.id===selectedSubNodeIdV2?' selected':'');button.style.left=node.x+'px';button.style.top=node.y+'px';button.dataset.subnodeId=node.id;button.innerHTML=nodeHandleMarkupV2(node,'left',subConnectionsV2())+'<span><strong>'+node.name+'</strong><small>'+(terminalNodeNameV2(node)?'通用节点':'子节点')+'</small></span><span class="subflow-node-icon">'+nodeIconMarkupV2(node)+'</span>'+nodeHandleMarkupV2(node,'right',subConnectionsV2());
+    button.addEventListener('pointerdown',event=>{if(event.button!==0)return;selectedSubNodeIdV2=node.id;selectedSubConnectionIdV2=null;subSelectionActiveV2=true;const handle=event.target.closest('.node-handle');if(handle){const fromPort=handle.dataset.port;if(terminalNodeNameV2(node)==='结束')showToast('结束节点只能作为连线终点');else if(occupiedPortsV2(subConnectionsV2()).has(portKeyV2(node.id,fromPort)))showToast('该端点已有连线，请使用另一侧端点');else{const start=subPortPointV2(node,fromPort);subConnectionDragV2={from:node.id,fromPort,x:start.x,y:start.y,targetId:null,targetPort:null};subflowCanvasV2.classList.add('connecting');renderSubLinesV2();event.preventDefault()}event.stopPropagation();return}const rect=subflowStageV2.getBoundingClientRect();subNodeDragV2={id:node.id,offsetX:(event.clientX-rect.left)/subflowZoomV2-node.x,offsetY:(event.clientY-rect.top)/subflowZoomV2-node.y,element:button,moved:false};button.classList.add('dragging');button.setPointerCapture?.(event.pointerId);refreshSubPropertiesV2(node);event.stopPropagation();event.preventDefault()});
     button.addEventListener('click',event=>{if(event.target.closest('.node-handle'))return;event.stopPropagation();selectedSubNodeIdV2=node.id;selectedSubConnectionIdV2=null;renderSubflowV2();refreshSubPropertiesV2(node)});subflowStageV2.appendChild(button)});
   renderSubLinesV2();
   const activeSubNode=subNodeV2(selectedSubNodeIdV2);if(activeSubNode)refreshSubPropertiesV2(activeSubNode);else{const connection=subConnectionsV2().find(item=>item.id===selectedSubConnectionIdV2),from=subNodeV2(connection?.from),to=subNodeV2(connection?.to);if(connection){selectedLabelV2.textContent='当前子节点连线：'+connection.from+' → '+connection.to;nodeNameInputV2.value='';nodeTypeInputV2.value='连线';linkSummaryV2.textContent=connection.from+' → '+connection.to;linkNamesV2.textContent=(from?.name||'')+' → '+(to?.name||'');deleteConnectionV2.disabled=false}}
@@ -274,8 +310,8 @@ function closeSubflowV2(saved=false){const parent=nodeV2(subflowParentIdV2);subf
 exitSubflowV2.addEventListener('click',()=>closeSubflowV2(false));
 saveSubflowV2.addEventListener("click",()=>closeSubflowV2(true));function applySubflowZoomV2(value){subflowZoomV2=clampV2(value,.7,1.3);subflowStageV2.style.transform="scale("+subflowZoomV2+")";subflowStageV2.style.transformOrigin="0 0";subflowZoomValueV2.textContent=Math.round(subflowZoomV2*100)+"%"}document.getElementById("subflowZoomOut").addEventListener("click",()=>applySubflowZoomV2(subflowZoomV2-.1));document.getElementById("subflowZoomIn").addEventListener("click",()=>applySubflowZoomV2(subflowZoomV2+.1));document.getElementById("subflowFullscreen").addEventListener("click",()=>toggleCanvasDialogV2());
 stageV2.addEventListener('pointerdown',event=>{if(event.target.closest('.flow-node'))subSelectionActiveV2=false});
-document.addEventListener('pointermove',event=>{if(subNodeDragV2){const node=subNodeV2(subNodeDragV2.id),rect=subflowStageV2.getBoundingClientRect();if(node){const position=stagePositionV2(subflowStageV2,(event.clientX-rect.left)/subflowZoomV2-subNodeDragV2.offsetX,(event.clientY-rect.top)/subflowZoomV2-subNodeDragV2.offsetY,subNodeDragV2.element,180,64);node.x=position.x;node.y=position.y;subNodeDragV2.element.style.left=node.x+'px';subNodeDragV2.element.style.top=node.y+'px';subNodeDragV2.moved=true;renderSubLinesV2()}}if(subConnectionDragV2){const rect=subflowStageV2.getBoundingClientRect(),target=subConnectionTargetAtPointV2(event.clientX,event.clientY),position=target?{x:target.x,y:target.y+32}:stagePositionV2(subflowStageV2,(event.clientX-rect.left)/subflowZoomV2,(event.clientY-rect.top)/subflowZoomV2);subConnectionDragV2.x=position.x;subConnectionDragV2.y=position.y;subConnectionDragV2.targetId=target?.id??null;renderSubLinesV2()}});
-document.addEventListener('pointerup',event=>{if(subNodeDragV2){const moved=subNodeDragV2.moved;subNodeDragV2.element.classList.remove('dragging');subNodeDragV2=null;renderSubflowV2();if(moved)showToast('子节点位置已更新')}if(subConnectionDragV2){const from=subConnectionDragV2.from,target=subConnectionTargetAtPointV2(event.clientX,event.clientY),to=target?.id;if(to&&to!==from){const existing=subConnectionsV2().find(item=>item.from===from&&item.to===to);if(existing){selectedSubConnectionIdV2=existing.id;showToast('该子节点连线已存在')}else{const connection={id:nextSubConnectionIdV2++,from,to};subConnectionsV2().push(connection);selectedSubConnectionIdV2=connection.id;selectedSubNodeIdV2=null;subSelectionActiveV2=false;showToast('子节点连线已创建')}}subConnectionDragV2=null;clearSubConnectionTargetV2();subflowCanvasV2.classList.remove('connecting');renderSubflowV2()}});
+document.addEventListener('pointermove',event=>{if(subNodeDragV2){const node=subNodeV2(subNodeDragV2.id),rect=subflowStageV2.getBoundingClientRect();if(node){const position=stagePositionV2(subflowStageV2,(event.clientX-rect.left)/subflowZoomV2-subNodeDragV2.offsetX,(event.clientY-rect.top)/subflowZoomV2-subNodeDragV2.offsetY,subNodeDragV2.element,160,64);node.x=position.x;node.y=position.y;subNodeDragV2.element.style.left=node.x+'px';subNodeDragV2.element.style.top=node.y+'px';subNodeDragV2.moved=true;renderSubLinesV2()}}if(subConnectionDragV2){const rect=subflowStageV2.getBoundingClientRect(),target=subConnectionTargetAtPointV2(event.clientX,event.clientY),position=target?{x:target.x,y:target.y}:stagePositionV2(subflowStageV2,(event.clientX-rect.left)/subflowZoomV2,(event.clientY-rect.top)/subflowZoomV2);subConnectionDragV2.x=position.x;subConnectionDragV2.y=position.y;subConnectionDragV2.targetId=target?.node.id??null;subConnectionDragV2.targetPort=target?.port??null;renderSubLinesV2()}});
+document.addEventListener('pointerup',event=>{if(subNodeDragV2){const moved=subNodeDragV2.moved;subNodeDragV2.element.classList.remove('dragging');subNodeDragV2=null;renderSubflowV2();if(moved)showToast('子节点位置已更新')}if(subConnectionDragV2){const from=subConnectionDragV2.from,fromPort=subConnectionDragV2.fromPort,target=subConnectionTargetAtPointV2(event.clientX,event.clientY),to=target?.node.id,toPort=target?.port;if(to&&toPort&&canConnectSubPortsV2(from,fromPort,to,toPort,true)){const existing=subConnectionsV2().find(item=>item.from===from&&item.to===to);if(existing){selectedSubConnectionIdV2=existing.id;showToast('该子节点连线已存在')}else{const connection={id:nextSubConnectionIdV2++,from,to,fromPort,toPort};subConnectionsV2().push(connection);selectedSubConnectionIdV2=connection.id;selectedSubNodeIdV2=null;subSelectionActiveV2=false;showToast('子节点直角连线已创建')}}else if(document.elementFromPoint(event.clientX,event.clientY)?.closest('.subflow-node'))showToast('请将连线拖到子节点左侧或右侧的端点');subConnectionDragV2=null;clearSubConnectionTargetV2();subflowCanvasV2.classList.remove('connecting');renderSubflowV2()}});
 function addSubNodeV2(name,icon,x,y){if(subflowParentIdV2===null)return showToast('请先点击一个主节点');const nodes=subNodesV2(),position=stagePositionV2(subflowStageV2,x??(60+nodes.length%3*280),y??(200+Math.floor(nodes.length/3)*180),null,180,64),item={id:'C'+nextSubNodeIdV2++,name,icon,x:position.x,y:position.y};nodes.push(item);selectedSubNodeIdV2=item.id;subSelectionActiveV2=true;renderSubflowV2();refreshSubPropertiesV2(item);showToast(name+' 已添加到子流程')}
 document.querySelectorAll('.sub-palette-card').forEach(card=>{card.addEventListener('click',()=>{if(!subPaletteDraggedV2)addSubNodeV2(card.dataset.subName,card.dataset.subIcon)});card.addEventListener('dragstart',event=>{subPaletteDraggedV2=true;event.dataTransfer.effectAllowed='copy';event.dataTransfer.setData('application/x-subflow-node',JSON.stringify({name:card.dataset.subName,icon:card.dataset.subIcon}))});card.addEventListener('dragend',()=>setTimeout(()=>subPaletteDraggedV2=false,0))});
 subflowCanvasV2.addEventListener('dragover',event=>{if(event.dataTransfer.types.includes('application/x-subflow-node')){event.preventDefault();event.dataTransfer.dropEffect='copy'}});
@@ -288,7 +324,7 @@ deleteNodeButtonV2.addEventListener('click',event=>{if(!subSelectionActiveV2)ret
 function isEditorTypingTargetV2(target){return target instanceof Element&&Boolean(target.closest('input,textarea,select,[contenteditable="true"]'))}
 document.addEventListener('keydown',event=>{if(event.defaultPrevented||event.repeat||!['Delete','Backspace'].includes(event.key)||isEditorTypingTargetV2(event.target))return;let deleted=false;if(subflowViewActiveV2&&subSelectionActiveV2)deleted=deleteSelectedSubNodeV2();else if(subflowViewActiveV2&&selectedSubConnectionIdV2!==null)deleted=deleteSelectedSubConnectionV2();else if(selectedConnectionIdV2!==null)deleted=deleteSelectedConnectionV2();else if(selectedNodeIdV2!==null)deleted=deleteSelectedNodeV2();if(deleted)event.preventDefault()});
 deleteConnectionV2.addEventListener('click',event=>{if(!subflowViewActiveV2||selectedSubConnectionIdV2===null)return;event.stopImmediatePropagation();deleteSelectedSubConnectionV2()},true);
-document.getElementById('addLink').addEventListener('click',event=>{if(!subSelectionActiveV2)return;event.stopImmediatePropagation();const from=selectedSubNodeIdV2,to=connectTargetV2.value;if(!from||!to||to===from)return showToast('请选择后续子节点');const existing=subConnectionsV2().find(item=>item.from===from&&item.to===to);if(existing){selectedSubConnectionIdV2=existing.id;renderSubflowV2();return showToast('该子节点连线已存在')}const connection={id:nextSubConnectionIdV2++,from,to};subConnectionsV2().push(connection);selectedSubConnectionIdV2=connection.id;selectedSubNodeIdV2=null;subSelectionActiveV2=false;renderSubflowV2();showToast('子节点连线已添加')},true);
+document.getElementById('addLink').addEventListener('click',event=>{if(!subSelectionActiveV2)return;event.stopImmediatePropagation();const from=selectedSubNodeIdV2,to=connectTargetV2.value,connections=subConnectionsV2(),fromPort=freePortV2(from,connections,'right'),toPort=freePortV2(to,connections,'left');if(!from||!to||to===from)return showToast('请选择后续子节点');if(!fromPort||!toPort)return showToast('起点或目标子节点已没有可用端点');if(!canConnectSubPortsV2(from,fromPort,to,toPort,true))return;const existing=connections.find(item=>item.from===from&&item.to===to);if(existing){selectedSubConnectionIdV2=existing.id;renderSubflowV2();return showToast('该子节点连线已存在')}const connection={id:nextSubConnectionIdV2++,from,to,fromPort,toPort};connections.push(connection);selectedSubConnectionIdV2=connection.id;selectedSubNodeIdV2=null;subSelectionActiveV2=false;renderSubflowV2();showToast('子节点连线已添加')},true);
 Object.defineProperty(window.__flowEditorState,'subflows',{get(){return Object.fromEntries(subflowDataV2)}});
 Object.defineProperty(window.__flowEditorState,'subflowConnections',{get(){return Object.fromEntries(subflowConnectionsV2)}});
 renderSubflowV2();
@@ -387,11 +423,12 @@ function buildEditorDataV2(){
   return {
     nodeProperties,
     nodes:editorNodesV2.map(node=>({...node,bpmnNodeId:idByNode.get(node.id)})),
-    connections:editorConnectionsV2.map(connection=>({...connection,sourceRef:idByNode.get(connection.from),targetRef:idByNode.get(connection.to)})),
+    connections:editorConnectionsV2.map(connection=>({...connection,fromPort:connectionPortV2(connection,'fromPort','right'),toPort:connectionPortV2(connection,'toPort','left'),sourceRef:idByNode.get(connection.from),targetRef:idByNode.get(connection.to)})),
     subflows:Object.fromEntries([...subflowDataV2].map(([parentId,children])=>[idByNode.get(parentId),children.map(child=>({...child,actionType:actionTypeV2(child.name)}))])),
-    subflowConnections:Object.fromEntries([...subflowConnectionsV2].map(([parentId,connections])=>[idByNode.get(parentId),connections.map(connection=>({...connection}))]))
+    subflowConnections:Object.fromEntries([...subflowConnectionsV2].map(([parentId,connections])=>[idByNode.get(parentId),connections.map(connection=>({...connection,fromPort:connectionPortV2(connection,'fromPort','right'),toPort:connectionPortV2(connection,'toPort','left')}))]))
   };
 }
+function validateConnectionPortsV2(connections,label){const occupied=new Set();connections.forEach(connection=>{const endpoints=[[connection.from,connectionPortV2(connection,'fromPort','right')],[connection.to,connectionPortV2(connection,'toPort','left')]];endpoints.forEach(([nodeId,port])=>{const key=portKeyV2(nodeId,port);if(occupied.has(key))throw new Error(label+'的节点 '+nodeId+' '+(port==='left'?'左':'右')+'侧端点连接了多条线');occupied.add(key)})})}
 function validateWorkflowV2(templateName,applicableObject){
   if(!templateName)throw new Error('请填写模板名称');
   if(!applicableObject)throw new Error('请选择适用对象');
@@ -405,7 +442,8 @@ function validateWorkflowV2(templateName,applicableObject){
   if(unmappedAction)throw new Error('动作节点缺少 actionKey：'+unmappedAction.name);
   const nodeIds=new Set(editorNodesV2.map(node=>node.id));
   if(editorConnectionsV2.some(connection=>!nodeIds.has(connection.from)||!nodeIds.has(connection.to)))throw new Error('流程图存在无效连线');
-  subflowDataV2.forEach((children,parentId)=>{const childIds=new Set(children.map(child=>child.id)),connections=subflowConnectionsV2.get(parentId)||[];if(connections.some(connection=>!childIds.has(connection.from)||!childIds.has(connection.to)))throw new Error('子流程存在无效连线');if(children.length>1&&children.some(child=>!connections.some(connection=>connection.from===child.id||connection.to===child.id)))throw new Error('子流程中存在尚未手动连线的节点')});
+  validateConnectionPortsV2(editorConnectionsV2,'主流程');
+  subflowDataV2.forEach((children,parentId)=>{const childIds=new Set(children.map(child=>child.id)),connections=subflowConnectionsV2.get(parentId)||[];if(connections.some(connection=>!childIds.has(connection.from)||!childIds.has(connection.to)))throw new Error('子流程存在无效连线');validateConnectionPortsV2(connections,'子流程');if(children.length>1&&children.some(child=>!connections.some(connection=>connection.from===child.id||connection.to===child.id)))throw new Error('子流程中存在尚未手动连线的节点')});
 }
 let isSavingWorkflowTemplateV2=false;
 async function saveWorkflowTemplateV2(){
@@ -446,4 +484,4 @@ async function saveWorkflowTemplateV2(){
 }
 saveTemplateButtonV2.addEventListener('click',saveWorkflowTemplateV2);
 window.__workflowTemplateApi={endpoint:isWorkflowTemplateEditModeV2?WORKFLOW_TEMPLATE_UPDATE_ENDPOINT:WORKFLOW_TEMPLATE_ENDPOINT,createEndpoint:WORKFLOW_TEMPLATE_ENDPOINT,updateEndpoint:WORKFLOW_TEMPLATE_UPDATE_ENDPOINT,mode:isWorkflowTemplateEditModeV2?'edit':'create',templateId:workflowTemplateEditIdV2,get saving(){return isSavingWorkflowTemplateV2},buildPayload(){const templateName=templateNameInputV2?.value.trim()||'',applicableObject=applicableObjectInputV2?.value||'';return {...(isWorkflowTemplateEditModeV2?{id:workflowTemplateEditIdV2}:{}),templateName,applicableObject,bpmnXml:buildBpmnXmlV2(templateName),editorData:buildEditorDataV2()}}};
-</script><script src="process-action-api.js?v=2.3.1"></script><script src="process-template-detail-api.js?v=2.3.1"></script></body></html>
+</script><script src="process-action-api.js?v=2.3.1"></script><script src="process-template-detail-api.js?v=2.3.2"></script></body></html>

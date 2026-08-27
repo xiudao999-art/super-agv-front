@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f3f6f8">
+  <title>复合机器人调度系统 · 异常与恢复</title>
+  <link rel="stylesheet" href="assets/styles/tokens.css">
+  <link rel="stylesheet" href="assets/styles/base.css">
+  <link rel="stylesheet" href="assets/styles/components.css">
+  <link rel="stylesheet" href="assets/styles/tables.css">
+  <link rel="stylesheet" href="assets/styles/pages/exception-recovery.css">
+  <link rel="stylesheet" href="assets/styles/pages/exception-operations.css">
+  <script type="module" src="assets/components/register.js" blocking="render"></script>
+</head>
+<body data-exception-operations="workorders">
+  <agv-app-shell active-route="exception-recovery.html" section-title="异常与恢复" user-name="陈工">
+    <agv-page-header class="page-head">
+      <div><h1>异常与恢复</h1><p>核账 → 人工确认 → 选择恢复方式 → 放行续跑。点击异常查看详情并处置。</p></div>
+    </agv-page-header>
+    <main class="page-canvas">
+      <section class="recovery-panel">
+        <div class="module-content">
+          <div class="table-wrap">
+            <table class="data-table ops-table workorder-ops-table" aria-label="异常工单列表">
+              <colgroup><col class="col-code"><col class="col-description"><col class="col-level"><col class="col-object"><col class="col-time"><col class="col-status"></colgroup>
+              <thead><tr><th>异常编号</th><th>异常描述</th><th>处置级别</th><th>机器人 / 节点</th><th>发生时间</th><th>状态</th></tr></thead>
+              <tbody id="workorderBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </agv-app-shell>
+
+  <div class="modal-overlay" id="workorderModal" hidden>
+    <section class="exception-modal ops-modal" role="dialog" aria-modal="true" aria-labelledby="workorderModalTitle">
+      <header class="modal-header"><div><h2 id="workorderModalTitle">异常详情与恢复处置</h2><p id="workorderModalSubtitle"></p></div><button class="modal-x" type="button" data-close-ops aria-label="关闭">×</button></header>
+      <div class="modal-body" id="workorderModalBody"></div>
+      <footer class="ops-modal-footer"><button class="modal-close" type="button" data-close-ops>关闭</button><button class="modal-primary" id="releaseWorkorder" type="button" disabled>确认放行，恢复自动化</button></footer>
+    </section>
+  </div>
+  <div class="toast" id="opsToast" role="status" aria-live="polite"></div>
+  <script src="assets/scripts/exception-operations.js"></script>
+</body>
+</html>

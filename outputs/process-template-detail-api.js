@@ -84,7 +84,7 @@
       let id=finiteNumber(raw.id,index+1);
       while(usedIds.has(id))id+=1;
       usedIds.add(id);
-      return {...raw,id,from:finiteNumber(raw.from,NaN),to:finiteNumber(raw.to,NaN)};
+      return {...raw,id,from:finiteNumber(raw.from,NaN),to:finiteNumber(raw.to,NaN),fromPort:raw.fromPort==='left'||raw.fromPort==='right'?raw.fromPort:'right',toPort:raw.toPort==='left'||raw.toPort==='right'?raw.toPort:'left'};
     }).filter(connection=>nodeIds.has(connection.from)&&nodeIds.has(connection.to));
   }
 
@@ -124,6 +124,8 @@
         id:index+1,
         from:idByBpmnNode.get(element.getAttribute('sourceRef')),
         to:idByBpmnNode.get(element.getAttribute('targetRef')),
+        fromPort:'right',
+        toPort:'left',
         sourceRef:element.getAttribute('sourceRef'),
         targetRef:element.getAttribute('targetRef')
       }))
@@ -152,7 +154,7 @@
         const childIds=new Set(children.map(child=>child.id));
         subflowConnections[parentKey]=[...element.children]
           .filter(child=>child.localName==='sequenceFlow')
-          .map((flow,index)=>({id:index+1,from:flow.getAttribute('sourceRef'),to:flow.getAttribute('targetRef')}))
+          .map((flow,index)=>({id:index+1,from:flow.getAttribute('sourceRef'),to:flow.getAttribute('targetRef'),fromPort:'right',toPort:'left'}))
           .filter(connection=>childIds.has(connection.from)&&childIds.has(connection.to));
       }
     });
@@ -198,7 +200,7 @@
       const normalized=connections.map((connection,index)=>{
         const id=finiteNumber(connection.id,index+1);
         largestConnectionId=Math.max(largestConnectionId,id);
-        return {...connection,id,from:String(connection.from||''),to:String(connection.to||'')};
+        return {...connection,id,from:String(connection.from||''),to:String(connection.to||''),fromPort:connection.fromPort==='left'||connection.fromPort==='right'?connection.fromPort:'right',toPort:connection.toPort==='left'||connection.toPort==='right'?connection.toPort:'left'};
       }).filter(connection=>connection.from!==connection.to&&childIds.has(connection.from)&&childIds.has(connection.to));
       subflowConnectionsV2.set(parentId,normalized);
     });
@@ -221,7 +223,7 @@
     editorConnectionsV2=restored.connections;
     const storedSubflows=editorData.subflows&&Object.keys(editorData.subflows).length?editorData.subflows:restored.subflows;
     restoreSubflows(storedSubflows,editorNodesV2);
-    const storedSubflowConnections=editorData.subflowConnections&&typeof editorData.subflowConnections==='object'?editorData.subflowConnections:(restored.subflowConnections||Object.fromEntries(Object.entries(storedSubflows||{}).map(([parentKey,children])=>[parentKey,Array.isArray(children)?children.slice(0,-1).map((child,index)=>({id:index+1,from:String(child.id),to:String(children[index+1].id)})):[]])));
+    const storedSubflowConnections=editorData.subflowConnections&&typeof editorData.subflowConnections==='object'?editorData.subflowConnections:(restored.subflowConnections||Object.fromEntries(Object.entries(storedSubflows||{}).map(([parentKey,children])=>[parentKey,Array.isArray(children)?children.slice(0,-1).map((child,index)=>({id:index+1,from:String(child.id),to:String(children[index+1].id),fromPort:'right',toPort:'left'})):[]])));
     restoreSubflowConnections(storedSubflowConnections,editorNodesV2);
     nextNodeIdV2=Math.max(0,...editorNodesV2.map(node=>node.id))+1;
     nextConnectionIdV2=Math.max(0,...editorConnectionsV2.map(connection=>connection.id))+1;

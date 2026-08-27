@@ -244,7 +244,7 @@ function ensureCommonLayers() {
 
   document.getElementById('statusInfoBtn')?.addEventListener('click', function () { openLayer('statusModal'); });
   document.getElementById('alertInfoBtn')?.addEventListener('click', function () { openLayer('alertDrawer'); });
-  document.getElementById('openExceptionPage')?.addEventListener('click', function () { location.href = 'current-anomalies.html'; });
+  document.getElementById('openExceptionPage')?.addEventListener('click', function () { location.href = 'exception-recovery.html'; });
 }
 
 function bindCommonEvents() {

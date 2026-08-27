@@ -969,7 +969,7 @@ body:has(.editor-shell) .subflow-node .node-handle {
 
 body:has(.editor-shell) .subflow-canvas.connecting { cursor: crosshair; }
 
-/* Workflow SVG icons, child counts and deterministic left-in/right-out connections. */
+/* Workflow SVG icons, child counts and bidirectional left/right connection ports. */
 body:has(.editor-shell) .flow-action-icon {
   width: 22px;
   height: 22px;
@@ -1172,8 +1172,9 @@ body:has(.editor-shell) .subflow-node {
 }
 
 body:has(.editor-shell) :is(.flow-path,.flow-preview,.subflow-path,.subflow-preview) {
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  stroke-linecap: butt;
+  stroke-linejoin: miter;
+  shape-rendering: geometricPrecision;
 }
 
 body:has(.editor-shell) :is(.flow-node,.subflow-node).connection-target {
@@ -1182,13 +1183,25 @@ body:has(.editor-shell) :is(.flow-node,.subflow-node).connection-target {
   box-shadow: 0 8px 22px -4px rgba(40, 189, 107, .24);
 }
 
-body:has(.editor-shell) :is(.flow-node,.subflow-node).connection-target .handle-in {
+body:has(.editor-shell) :is(.flow-node,.subflow-node) .node-handle.connection-target {
   background: #28bd6b;
   box-shadow: 0 0 0 4px rgba(40, 189, 107, .18);
   transform: translateY(-50%) scale(1.22);
 }
 
-body:has(.editor-shell) .subflow-node.start .handle-in,
-body:has(.editor-shell) .subflow-node.end .handle-out {
-  display: none;
+body:has(.editor-shell) :is(.flow-node,.subflow-node).start .handle-in,
+body:has(.editor-shell) :is(.flow-node,.subflow-node).end .handle-out {
+  display: block;
+}
+
+body:has(.editor-shell) :is(.flow-node,.subflow-node) .node-handle.occupied {
+  border-color: #fff;
+  background: #aab4bd;
+  box-shadow: 0 0 0 1px #d5dbe0;
+  cursor: not-allowed;
+}
+
+body:has(.editor-shell) :is(.flow-node,.subflow-node) .node-handle:not(.occupied):hover {
+  box-shadow: 0 0 0 4px rgba(33, 130, 209, .16);
+  transform: translateY(-50%) scale(1.18);
 }

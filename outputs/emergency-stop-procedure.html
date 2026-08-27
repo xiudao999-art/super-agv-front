@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f3f6f8">
+  <title>复合机器人调度系统 · 急停处置规程</title>
+  <link rel="stylesheet" href="assets/styles/tokens.css">
+  <link rel="stylesheet" href="assets/styles/base.css">
+  <link rel="stylesheet" href="assets/styles/components.css">
+  <link rel="stylesheet" href="assets/styles/tables.css">
+  <link rel="stylesheet" href="assets/styles/pages/exception-recovery.css">
+  <link rel="stylesheet" href="assets/styles/pages/exception-operations.css">
+  <script type="module" src="assets/components/register.js" blocking="render"></script>
+</head>
+<body data-exception-operations="procedures">
+  <agv-app-shell active-route="emergency-stop-procedure.html" section-title="急停处置规程" user-name="陈工">
+    <agv-page-header class="page-head">
+      <div><h1>急停处置规程</h1><p>本页定义须急停的异常场景与处置规程（静态规则，只读）。异常实际发生时自动生成工单，处置操作统一在「异常与恢复」中进行，工单上标注对应规则编号。</p></div>
+    </agv-page-header>
+    <main class="page-canvas">
+      <section class="recovery-panel">
+        <div class="module-content">
+          <div class="table-wrap">
+            <table class="data-table ops-table procedure-ops-table" aria-label="急停处置规程列表">
+              <colgroup><col class="col-rule"><col class="col-scene"><col class="col-scope"><col class="col-duty"><col class="col-ticket"></colgroup>
+              <thead><tr><th>规则编号</th><th>异常场景</th><th>急停范围</th><th>处置责任</th><th>当前关联工单</th></tr></thead>
+              <tbody id="procedureBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </agv-app-shell>
+
+  <div class="modal-overlay" id="procedureModal" hidden>
+    <section class="exception-modal ops-modal" role="dialog" aria-modal="true" aria-labelledby="procedureModalTitle">
+      <header class="modal-header"><div><h2 id="procedureModalTitle">急停处置规程</h2><p id="procedureModalSubtitle"></p></div><button class="modal-x" type="button" data-close-ops aria-label="关闭">×</button></header>
+      <div class="modal-body" id="procedureModalBody"></div>
+      <footer class="ops-modal-footer"><span class="footer-hint" id="procedureRole"></span><button class="modal-close" type="button" data-close-ops>关闭</button></footer>
+    </section>
+  </div>
+  <script src="assets/scripts/exception-operations.js"></script>
+</body>
+</html>
