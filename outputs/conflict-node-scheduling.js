@@ -25,6 +25,7 @@
   const selectAllOrders = document.getElementById('selectAllOrders');
   const clearSelectedOrders = document.getElementById('clearSelectedOrders');
   const rescheduleOrders = document.getElementById('rescheduleOrders');
+  const timelineCard = document.getElementById('timelineCard');
   const scheduleState = document.getElementById('scheduleState');
   const timelineResult = document.getElementById('timelineResult');
   const toggleOrderSchedule = document.getElementById('toggleOrderSchedule');
@@ -155,6 +156,8 @@
     scheduleState.textContent = '已重新排程 · ' + selectedOrderIds.length + ' 个订单';
     scheduleState.className = 'schedule-state done';
     timelineResult.textContent = '订单排程顺序：' + selectedOrderIds.map(function (id) { return orderById(id).agv; }).join(' → ');
+    timelineCard.hidden = false;
+    rescheduleOrders.setAttribute('aria-expanded', 'true');
     scheduleState.removeAttribute('title');
     showToast('已按当前优先级重新生成 AGV 时序');
   }
@@ -310,6 +313,8 @@
     syncEndTimeLimit(false);
     renderTimeAxis(defaultStart, defaultEnd);
     resetTimelineOrder();
+    timelineCard.hidden = true;
+    rescheduleOrders.setAttribute('aria-expanded', 'false');
     renderPriorityQueue();
     showToast('时间范围和订单排程已重置');
   });

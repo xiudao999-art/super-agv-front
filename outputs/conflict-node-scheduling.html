@@ -46,13 +46,13 @@
                 <div class="priority-empty" id="priorityEmpty"><span>尚未选择订单</span><small>从左侧勾选需要参与重新排程的订单</small></div>
                 <ol class="priority-list" id="priorityList"></ol>
               </div>
-              <footer><button class="schedule-btn" id="clearSelectedOrders" type="button" disabled>清空</button><button class="schedule-btn primary" id="rescheduleOrders" type="button" disabled>按当前顺序重新排程</button></footer>
+              <footer><button class="schedule-btn" id="clearSelectedOrders" type="button" disabled>清空</button><button class="schedule-btn primary" id="rescheduleOrders" type="button" aria-controls="timelineCard" aria-expanded="false" disabled>按当前顺序重新排程</button></footer>
             </aside>
           </div>
         </div>
       </section>
 
-      <section class="timeline-card">
+      <section class="timeline-card" id="timelineCard" hidden>
         <header class="timeline-head"><div><h2>AGV 时序表</h2><p id="timelineResult">当前按系统默认优先级展示</p></div><div class="timeline-legend" aria-label="排程状态图例"><span class="running">执行中</span><span class="reserved">已预约</span><span class="queued">排队</span><span class="released">已释放</span><span class="blocked">异常阻塞</span></div></header>
         <div class="resource-strip" aria-label="互斥资源"><span>贴标仪器</span><span>贴标机台·放料位01</span><span>窄通道C01</span><span>自动门-01</span><span>电梯-01W</span><span>手套箱</span><span>投料工作站</span><span>反应取样工作站</span></div>
 
@@ -77,6 +77,6 @@
   <div class="drawer-overlay" id="alertDrawer" hidden><aside class="drawer"><header><h2>异常提醒</h2><p>2 条资源冲突 · 1 条异常阻塞</p></header><div class="alert-feed"><article class="alert-card"><strong>电梯-01W 通信离线</strong><p>AGV-05 · 异常阻塞 · 09:28</p></article><article class="alert-card"><strong>自动门-01 等待占用资源释放</strong><p>AGV-01 · 排队 · 09:12</p></article></div><footer><a href="current-anomalies.html">进入异常与恢复</a></footer></aside></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="conflict-node-scheduling.js"></script>
+  <script src="conflict-node-scheduling.js?v=20260828"></script>
 </body>
 </html>
