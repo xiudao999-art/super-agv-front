@@ -181,8 +181,8 @@ onMounted(load)
 
 /* Controller-rendered states */
 .palette-card.action-card{position:relative;min-height:86px}.palette-card.action-card .action-label{display:grid;gap:3px;text-align:center}.palette-card.action-card small{max-width:88px;overflow:hidden;color:#7d8b97;font-size:9px;text-overflow:ellipsis;white-space:nowrap}.palette-card.action-draft{opacity:.5;cursor:not-allowed}.palette-card.action-draft:after{content:"草稿";position:absolute;right:4px;top:4px;padding:2px 4px;border-radius:5px;color:#9a6d00;background:#fff3c4;font-size:8px}
-
-
+</style>
+<style>
 /* Figma: template editor workspace (nodes 35209:14046 / 35227:18448 / 35209:17232). */
 body:has(.editor-shell) .editor-shell {
   gap: 20px;
