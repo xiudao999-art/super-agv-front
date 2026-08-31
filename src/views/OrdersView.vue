@@ -27,7 +27,7 @@ const workflows = ref([])
 const form = reactive({ upstreamOrderNo: '', source: 'MANUAL', priority: 1, tasks: [{ taskName: '任务 1', flowTemplateId: '' }] })
 
 const statusMeta = {
-  QUEUED: { label: '排队中', className: 'queued' },
+  QUEUED: { label: '排队中', className: 'waiting' },
   RUNNING: { label: '执行中', className: 'executing' },
   SUCCEEDED: { label: '已完成', className: 'completed' },
   FAILED: { label: '失败', className: 'failed' },
@@ -250,27 +250,27 @@ onUnmounted(() => {
           <button class="create-order-btn" type="button" @click="openCreate"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>新建</button>
         </div>
 
-        <div class="filters" data-agv-list-filters>
-          <label class="field-shell"><span>状态选择</span><select v-model="status" aria-label="订单状态" @change="page = 1"><option value="">全部状态</option><option v-for="(meta, key) in statusMeta" :key="key" :value="key">{{ meta.label }}</option></select></label>
-          <label class="field-shell"><span>查询订单</span><input v-model="keyword" type="search" placeholder="订单号/系统订单号" aria-label="查询订单" @keyup.enter="page = 1"></label>
-          <div class="filter-actions"><button class="filter-btn" type="button" @click="reset"><img class="filter-action-icon" src="/assets/list-icons/refresh.svg" alt="">重置</button><button class="filter-btn primary" type="button" @click="page = 1"><img class="filter-action-icon" src="/assets/list-icons/search.svg" alt="">搜索</button></div>
+        <div class="filters agv-filter-bar" data-agv-list-filters>
+          <label class="agv-filter-field"><span>状态选择</span><select v-model="status" aria-label="订单状态" @change="page = 1"><option value="">全部状态</option><option v-for="(meta, key) in statusMeta" :key="key" :value="key">{{ meta.label }}</option></select></label>
+          <label class="agv-filter-field"><span>查询订单</span><input v-model="keyword" type="search" placeholder="订单号/系统订单号" aria-label="查询订单" @keyup.enter="page = 1"></label>
+          <div class="agv-filter-actions"><button class="filter-btn" type="button" @click="reset"><img class="filter-action-icon" src="/assets/list-icons/refresh.svg" alt="">重置</button><button class="filter-btn primary" type="button" @click="page = 1"><img class="filter-action-icon" src="/assets/list-icons/search.svg" alt="">搜索</button></div>
         </div>
 
         <div class="table-wrap">
           <table class="agv-list-table" aria-label="订单列表">
             <colgroup><col style="width:13.65%"><col style="width:11.64%"><col style="width:11.64%"><col style="width:12.16%"><col style="width:11.64%"><col style="width:7.4%"><col style="width:11.21%"><col style="width:13.52%"><col style="width:7.14%"></colgroup>
-            <thead><tr><th>订单号</th><th>系统订单号</th><th>来源</th><th>状态</th><th>优先级</th><th>任务数</th><th>完成进度</th><th>下发时间</th><th>操作</th></tr></thead>
+            <thead><tr><th>订单号</th><th>系统订单号</th><th>来源</th><th>状态</th><th>优先级</th><th>任务数</th><th>完成进度</th><th>下发时间</th><th class="col-actions">操作</th></tr></thead>
             <tbody>
               <tr v-if="loading"><td class="order-loading-cell" colspan="9"><span class="order-loading">正在加载订单…</span></td></tr>
               <tr v-for="row in pageRows" v-else :key="row.id" @dblclick="openDetail(row, $event)">
                 <td :title="row.upstreamOrderNo">{{ row.upstreamOrderNo || '-' }}</td><td :title="row.systemOrderNo">{{ row.systemOrderNo || '-' }}</td><td>{{ row.source || '-' }}</td>
                 <td><span :class="['status-tag', `status-${statusInfo(row.status).className}`]">{{ statusInfo(row.status).label }}</span></td>
                 <td>{{ formatPriority(row.priority) }}</td><td>{{ row.taskCount ?? 0 }}</td><td>{{ progressText(row) }}</td><td>{{ row.issuedAt || '-' }}</td>
-                <td>
+                <td class="col-actions">
                   <div class="row-actions">
                     <button class="row-icon-button" type="button" aria-label="查看详情" title="查看详情" @click="openDetail(row, $event)"><img src="/assets/list-icons/file-detail.svg" alt=""></button>
                     <button class="row-icon-button" type="button" aria-label="查看任务" title="查看任务" @click="openTasks(row)"><img src="/assets/list-icons/document.svg" alt=""></button>
-                    <details class="order-more"><summary class="row-icon-button" aria-label="更多操作" title="更多操作"><img src="/assets/list-icons/more.svg" alt=""></summary><div class="order-more-menu"><button type="button" @click="removeOrder(row)">删除</button></div></details>
+                    <button class="row-icon-button danger" type="button" aria-label="删除" title="删除" @click="removeOrder(row)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
                   </div>
                 </td>
               </tr>
@@ -370,12 +370,6 @@ onUnmounted(() => {
     .create-order-btn:hover,.create-order-submit:hover:not(:disabled) { background: #176fb5; }
     .create-order-submit:disabled { opacity: .58; cursor: not-allowed; }
 
-    .filters { display: grid; grid-template-columns: minmax(190px, .75fr) minmax(180px, .7fr) minmax(300px, 1.2fr) auto; gap: 12px; align-items: center; margin: 17px 0 13px; }
-    .field-shell { min-width: 0; height: 42px; display: flex; align-items: center; gap: 12px; padding: 0 12px; border: 1px solid #dfe3e6; border-radius: 8px; background: #fff; }
-    .field-shell > span { flex: 0 0 auto; color: #959ba2; font-size: 12px; }
-    .field-shell select,.field-shell input { min-width: 0; flex: 1; height: 100%; border: 0; outline: 0; color: var(--ink); background: transparent; font-size: 13px; }
-    .field-shell select { cursor: pointer; }
-    .filter-actions { display: flex; gap: 10px; }
     .filter-btn { height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 0 14px; border: 0; border-radius: 8px; background: #f3f5f7; font-size: 13px; font-weight: 650; cursor: pointer; }
     .filter-btn.primary { min-width: 74px; color: #fff; background: var(--blue); }
     .filter-btn:hover { filter: brightness(.97); }
@@ -383,9 +377,7 @@ onUnmounted(() => {
     .table-wrap { overflow-x: auto; border: 1px solid #edf0f2; border-radius: 9px; }
     table { width: 100%; min-width: 1120px; border-collapse: separate; border-spacing: 0; font-size: 12px; }
     th,td { padding: 0 13px; height: 52px; text-align: left; white-space: nowrap; border-right: 1px solid #f0f2f4; border-bottom: 1px solid #edf0f2; }
-    th:last-child,td:last-child { border-right: 0; }
     tbody tr:last-child td { border-bottom: 0; }
-    th { height: 48px; background: #fafbfc; font-size: 12px; font-weight: 700; }
     tbody tr { transition: background .15s ease; }
     tbody tr:hover { background: #f9fcfe; }
     .order-detail-modal .status-tag { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid currentColor; border-radius: 999px; line-height: 1; }
@@ -473,10 +465,6 @@ onUnmounted(() => {
     .toast { position: fixed; left: 50%; bottom: 24px; z-index: 90; padding: 11px 16px; border-radius: 8px; color: #fff; background: rgba(12,29,47,.92); font-size: 13px; opacity: 0; pointer-events: none; transform: translate(-50%,20px); transition: .22s ease; }
     .toast.show { opacity: 1; transform: translate(-50%,0); }
 
-    @media (max-width: 1050px) {
-      .filters { grid-template-columns: 1fr 1fr; }
-      .filter-actions { grid-column: 1 / -1; justify-content: flex-end; }
-    }
     @media (max-width: 760px) {
       .page-head { align-items: flex-start; padding: 14px; }
       .page-head h1 { font-size: 18px; }
@@ -489,10 +477,6 @@ onUnmounted(() => {
       .list-content { padding: 16px 12px; }
       .list-heading { align-items: stretch; flex-direction: column; }
       .create-order-btn { align-self: flex-start; }
-      .filters { grid-template-columns: 1fr; gap: 9px; }
-      .filter-actions { grid-column: auto; }
-      .field-shell { height: 40px; }
-      .filter-actions .filter-btn { flex: 1; }
       .pagination { align-items: flex-start; flex-direction: column; }
       .page-controls { width: 100%; overflow-x: auto; padding-bottom: 4px; }
       .status-modal,.create-order-modal { padding: 18px; }
@@ -533,6 +517,7 @@ onUnmounted(() => {
 </style>
 <style scoped src="../styles/forms.css"></style>
 <style scoped src="../styles/tables.css"></style>
+<style scoped src="../styles/components.css"></style>
 <style scoped>
 .orders-canvas { width: 100%; color: #081829; --blue: #1677c8; --blue-strong: #1677c8; --muted: #768392; --line: #dfe5ea; --ink: #122235; --canvas: #f3f6f8; --red: #d84343; --green: #1f9d63; --yellow: #d99b00; --orange: #d96522; }
 .tabs-row { padding: 16px 16px 20px; }
@@ -540,17 +525,11 @@ onUnmounted(() => {
 .status-tag::before { width: 4px; height: 4px; border-radius: 50%; background: currentColor; content: ''; flex: 0 0 auto; }
 .status-executing { color: #28bd6b; border-color: #bfead3; background: rgb(40 189 107 / 8%); }
 .agv-list-table .status-executing::before { background: #1577d2; }
-.status-queued { color: #bc8300; border-color: #f7dfad; background: rgb(246 183 20 / 8%); }
 .status-completed { color: #2f9d68; border-color: #c9ead9; background: #f3fbf7; }
 .status-failed { color: #d84343; border-color: #f1cccc; background: #fff3f3; }
 .status-cancelled { color: #7f8a95; border-color: #dfe4e8; background: #f6f8f9; }
-.order-more { position: relative; }
-.order-more summary { display: grid; place-items: center; list-style: none; cursor: pointer; }
-.order-more summary::-webkit-details-marker { display: none; }
-.order-more-menu { position: absolute; top: 24px; right: 0; z-index: 12; min-width: 76px; padding: 4px; border: 1px solid #e5e8eb; border-radius: 7px; background: #fff; box-shadow: 0 6px 18px rgb(20 40 60 / 12%); }
-.order-more-menu button { width: 100%; padding: 6px 10px; border: 0; border-radius: 5px; color: #d84343; text-align: left; background: transparent; cursor: pointer; }
-.order-more-menu button:hover { background: #fff3f3; }
+.row-icon-button.danger { color: #d84343; }
+.row-icon-button.danger:hover { background: #fff3f3; }
 .order-detail-modal .status-tag { min-width: 0; min-height: 20px; padding: 2px 8px; font-size: 10px; }
 .modal-overlay { font-size: 14px; }
-@media (max-width: 760px) { .order-more-menu { right: auto; left: 0; } }
 </style>

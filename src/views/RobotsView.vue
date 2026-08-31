@@ -91,7 +91,7 @@ async function createRobot() {
         </div>
         <div v-if="rows.length" class="table-wrap">
           <table aria-label="机器人列表">
-            <thead><tr><th>机器人编号</th><th>工作地图</th><th>当前位置</th><th>连接状态</th><th>运行状态</th><th>正常 / 异常模组</th><th>电量</th><th>当前订单</th><th>操作</th></tr></thead>
+            <thead><tr><th>机器人编号</th><th>工作地图</th><th>当前位置</th><th>连接状态</th><th>运行状态</th><th>正常 / 异常模组</th><th>电量</th><th>当前订单</th><th class="col-actions">操作</th></tr></thead>
             <tbody>
               <tr v-for="robot in rows" :key="robot.id" tabindex="0" :aria-label="`查看 ${robot.id} 详情`" @click="showDetail(robot)" @keydown.enter="showDetail(robot)">
                 <td><div class="robot-cell"><span class="robot-mark"><svg viewBox="0 0 24 24"><rect x="5" y="7" width="14" height="11" rx="3"/><path d="M9 7V4h6v3M8.5 12h.01M15.5 12h.01M9 16h6"/></svg></span><strong>{{ robot.id }}</strong></div></td>
@@ -102,7 +102,7 @@ async function createRobot() {
                 <td><span class="module-health"><strong>{{ appState.hardwareModules.length - robot.abnormalModules }}</strong><em>/</em><strong :class="{ 'has-error': robot.abnormalModules }">{{ robot.abnormalModules }}</strong></span></td>
                 <td><div class="battery-cell"><span class="battery-track"><i :class="batteryClass(robot.battery)" :style="{ width: `${robot.battery}%` }" /></span><span>{{ robot.battery }}%</span></div></td>
                 <td :class="{ 'empty-order': robot.order === '—' }">{{ robot.order }}</td>
-                <td><button class="icon-action" type="button" :aria-label="`查看 ${robot.id}`" title="查看详情" @click.stop="showDetail(robot)"><svg viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg></button></td>
+                <td class="col-actions"><button class="icon-action" type="button" :aria-label="`查看 ${robot.id}`" title="查看详情" @click.stop="showDetail(robot)"><svg viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg></button></td>
               </tr>
             </tbody>
           </table>

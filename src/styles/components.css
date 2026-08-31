@@ -303,24 +303,8 @@ body:has(.editor-shell) .property-actions .tool-btn:focus-visible {
 }
 
 
-/* Semantic tag palette: one color family per business meaning across all pages. */
-:root {
-  --agv-tag-info: var(--agv-blue);
-  --agv-tag-info-border: #cde2f3;
-  --agv-tag-info-bg: #f1f8fd;
-  --agv-tag-success: var(--agv-green);
-  --agv-tag-success-border: #d1efdf;
-  --agv-tag-success-bg: #f4fcf7;
-  --agv-tag-warning: var(--agv-yellow);
-  --agv-tag-warning-border: #f7e8b8;
-  --agv-tag-warning-bg: #fffaf0;
-  --agv-tag-danger: var(--agv-red);
-  --agv-tag-danger-border: #f3d7d5;
-  --agv-tag-danger-bg: #fff5f4;
-  --agv-tag-neutral: #89939d;
-  --agv-tag-neutral-border: #e1e5e8;
-  --agv-tag-neutral-bg: #fafbfc;
-}
+/* Semantic tag palette: one color family per business meaning across all pages.
+   NOTE: :root CSS variables for --agv-tag-* are now defined globally in app.css. */
 .tag.info, .blue-state, .state-occupied, .status-executing, .badge-blue {
   color: var(--agv-tag-info);
   border-color: var(--agv-tag-info-border);

@@ -124,7 +124,7 @@ onMounted(load)
         <div class="content map-config-content">
           <div class="rule-banner"><svg class="icon"><use href="#i-info" /></svg><span>数据规则：一个实验室空间只对应一张当前发布的底盘地图，但该地图可以关联多个导航点。实验室空间是机台、库位、动作点位、路径和外围资源的统一归属对象。</span></div>
           <div class="list-head"><div><h2>地图信息列表</h2><p>点击编辑可维护实验室空间内地图信息，并通过导航点查看地图内已标记的目标位置。</p></div></div>
-          <div class="table-wrap"><table><thead><tr><th>实验室空间 / 编号</th><th>地图 / 版本</th><th>空间内对象</th><th>关联导航点</th><th>当前状态</th><th>操作</th></tr></thead><tbody>
+          <div class="table-wrap"><table><thead><tr><th>实验室空间 / 编号</th><th>地图 / 版本</th><th>空间内对象</th><th>关联导航点</th><th>当前状态</th><th class="col-actions">操作</th></tr></thead><tbody>
             <tr v-if="loading"><td colspan="6" class="empty-row">正在加载唯一实验室…</td></tr>
             <tr v-else-if="!lab"><td colspan="6" class="empty-row backend-warning">未获取到唯一实验室数据</td></tr>
             <tr v-else :class="{ 'clickable-map-row': currentConfig }" tabindex="0" @click.self="openPreview" @keydown.enter="openPreview">
@@ -133,7 +133,7 @@ onMounted(load)
               <td>机台 {{ counts.machineCount ?? 0 }} · 节点 {{ counts.nodeCount ?? 0 }} · 连线 {{ counts.linkCount ?? 0 }}</td>
               <td><span class="nav-count">{{ counts.pointCount ?? 0 }} 个点位</span></td>
               <td><span :class="['badge', currentStatus === '已发布' ? 'badge-green' : 'badge-blue']">{{ currentStatus }}<template v-if="currentConfig"> R{{ currentConfig.revision }}</template></span></td>
-              <td><div class="row-actions">
+              <td class="col-actions"><div class="row-actions">
                 <button class="icon-action" type="button" aria-label="编辑地图" title="编辑地图" :disabled="!currentConfig" @click="openEditor"><svg class="icon"><use href="#i-edit" /></svg></button>
                 <button class="icon-action" type="button" aria-label="查看地图" title="查看地图" :disabled="!currentConfig" @click="openPreview"><svg class="icon"><use href="#i-map" /></svg></button>
                 <button class="row-btn" type="button" :disabled="!currentConfig" @click="openPreview">配置详情</button>

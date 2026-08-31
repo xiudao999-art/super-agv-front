@@ -18,6 +18,7 @@
 
 /* Historical visual system fidelity overrides */
 :root {
+  --agv-topbar-height: 64px;
   --agv-blue: #1677c8;
   --agv-blue-hover: #0f69b5;
   --agv-blue-soft: #eaf4fd;
@@ -52,6 +53,22 @@
   --el-text-color-primary: var(--agv-ink);
   --el-text-color-regular: var(--agv-text-secondary);
   --el-fill-color-light: #f7f9fb;
+  /* Semantic tag palette (moved from components.css :root — scoped :root[data-v-xxx] won't match <html>) */
+  --agv-tag-info: var(--agv-blue);
+  --agv-tag-info-border: #cde2f3;
+  --agv-tag-info-bg: #f1f8fd;
+  --agv-tag-success: var(--agv-green);
+  --agv-tag-success-border: #d1efdf;
+  --agv-tag-success-bg: #f4fcf7;
+  --agv-tag-warning: var(--agv-yellow);
+  --agv-tag-warning-border: #f7e8b8;
+  --agv-tag-warning-bg: #fffaf0;
+  --agv-tag-danger: var(--agv-red);
+  --agv-tag-danger-border: #f3d7d5;
+  --agv-tag-danger-bg: #fff5f4;
+  --agv-tag-neutral: #89939d;
+  --agv-tag-neutral-border: #e1e5e8;
+  --agv-tag-neutral-bg: #fafbfc;
 }
 
 body { color: var(--agv-ink); background: var(--agv-canvas); }
@@ -536,4 +553,29 @@ a { color: inherit; text-decoration: none; }
   .login-page { grid-template-columns: 1fr; }
   .login-visual { display: none; }
   .login-panel { padding: 30px; }
+}
+
+/* Global table sticky action column — opt-in via class="col-actions" on th/td. */
+.table-wrap thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: #fafbfc;
+}
+.table-wrap th.col-actions {
+    position: sticky;
+    right: 0;
+    z-index: 4;
+    background: #fafbfc;
+    box-shadow: -2px 0 4px rgba(0, 0, 0, 0.04);
+}
+.table-wrap td.col-actions {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    background: #fff;
+    box-shadow: -2px 0 4px rgba(0, 0, 0, 0.04);
+}
+.table-wrap tbody tr:hover td.col-actions {
+    background: #f8fbff;
 }
