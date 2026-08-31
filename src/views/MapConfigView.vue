@@ -122,7 +122,7 @@ onMounted(load)
       <section class="page-panel map-config-panel">
         <div class="tabs-row"><nav class="tabs"><router-link class="tab-btn active" to="/config/map">地图信息</router-link><router-link class="tab-btn" to="/config/stations">机台与点位</router-link><router-link class="tab-btn" to="/config/peripherals">外围资源</router-link></nav></div>
         <div class="content map-config-content">
-          <div class="rule-banner"><svg class="icon"><use href="/assets/icons.svg#i-info" /></svg><span>数据规则：一个实验室空间只对应一张当前发布的底盘地图，但该地图可以关联多个导航点。实验室空间是机台、库位、动作点位、路径和外围资源的统一归属对象。</span></div>
+          <div class="rule-banner"><svg class="icon"><use href="#i-info" /></svg><span>数据规则：一个实验室空间只对应一张当前发布的底盘地图，但该地图可以关联多个导航点。实验室空间是机台、库位、动作点位、路径和外围资源的统一归属对象。</span></div>
           <div class="list-head"><div><h2>地图信息列表</h2><p>点击编辑可维护实验室空间内地图信息，并通过导航点查看地图内已标记的目标位置。</p></div></div>
           <div class="table-wrap"><table><thead><tr><th>实验室空间 / 编号</th><th>地图 / 版本</th><th>空间内对象</th><th>关联导航点</th><th>当前状态</th><th>操作</th></tr></thead><tbody>
             <tr v-if="loading"><td colspan="6" class="empty-row">正在加载唯一实验室…</td></tr>
@@ -134,8 +134,8 @@ onMounted(load)
               <td><span class="nav-count">{{ counts.pointCount ?? 0 }} 个点位</span></td>
               <td><span :class="['badge', currentStatus === '已发布' ? 'badge-green' : 'badge-blue']">{{ currentStatus }}<template v-if="currentConfig"> R{{ currentConfig.revision }}</template></span></td>
               <td><div class="row-actions">
-                <button class="icon-action" type="button" aria-label="编辑地图" title="编辑地图" :disabled="!currentConfig" @click="openEditor"><svg class="icon"><use href="/assets/icons.svg#i-edit" /></svg></button>
-                <button class="icon-action" type="button" aria-label="查看地图" title="查看地图" :disabled="!currentConfig" @click="openPreview"><svg class="icon"><use href="/assets/icons.svg#i-map" /></svg></button>
+                <button class="icon-action" type="button" aria-label="编辑地图" title="编辑地图" :disabled="!currentConfig" @click="openEditor"><svg class="icon"><use href="#i-edit" /></svg></button>
+                <button class="icon-action" type="button" aria-label="查看地图" title="查看地图" :disabled="!currentConfig" @click="openPreview"><svg class="icon"><use href="#i-map" /></svg></button>
                 <button class="row-btn" type="button" :disabled="!currentConfig" @click="openPreview">配置详情</button>
                 <router-link v-if="currentConfig" class="row-btn blue" :to="{ path:'/config/passage-rules', query:{ configId:configId(currentConfig) } }">配置通行/机台</router-link>
                 <button v-if="draftConfig" class="row-btn" type="button" @click="validateDraft">校验</button><button v-if="draftConfig" class="row-btn blue" type="button" @click="publishDraft">发布</button>
@@ -147,14 +147,14 @@ onMounted(load)
         </div>
       </section>
       <section class="summary-grid map-summary-grid">
-        <article class="summary-card"><span>实验室空间与当前地图</span><div class="summary-icon"><svg class="icon"><use href="/assets/icons.svg#i-map" /></svg></div><strong>{{ lab ? `${lab.name || '-'} / ${mapInfo.name || '-'}` : '-' }}</strong><p>{{ lab ? '当前实验室空间与其发布地图' : '暂无实验室数据' }}</p></article>
-        <article class="summary-card"><span>地图与导航点</span><div class="summary-icon blue"><svg class="icon"><use href="/assets/icons.svg#i-flow" /></svg></div><strong>{{ currentConfig ? `1 : ${counts.pointCount ?? 0}` : '-' }}</strong><p>一张地图可定义多个导航点</p></article>
-        <article class="summary-card"><span>引用关系</span><div class="summary-icon purple"><svg class="icon"><use href="/assets/icons.svg#i-link" /></svg></div><strong>{{ counts.machineCount ?? 0 }} / {{ counts.nodeCount ?? 0 }} / {{ counts.pointCount ?? 0 }}</strong><p>机台 / 通行节点 / 导航点</p></article>
+        <article class="summary-card"><span>实验室空间与当前地图</span><div class="summary-icon"><svg class="icon"><use href="#i-map" /></svg></div><strong>{{ lab ? `${lab.name || '-'} / ${mapInfo.name || '-'}` : '-' }}</strong><p>{{ lab ? '当前实验室空间与其发布地图' : '暂无实验室数据' }}</p></article>
+        <article class="summary-card"><span>地图与导航点</span><div class="summary-icon blue"><svg class="icon"><use href="#i-flow" /></svg></div><strong>{{ currentConfig ? `1 : ${counts.pointCount ?? 0}` : '-' }}</strong><p>一张地图可定义多个导航点</p></article>
+        <article class="summary-card"><span>引用关系</span><div class="summary-icon purple"><svg class="icon"><use href="#i-link" /></svg></div><strong>{{ counts.machineCount ?? 0 }} / {{ counts.nodeCount ?? 0 }} / {{ counts.pointCount ?? 0 }}</strong><p>机台 / 通行节点 / 导航点</p></article>
       </section>
     </div>
 
     <div v-if="previewVisible" class="modal-overlay open" @click.self="previewVisible = false"><section class="modal-card map-preview-modal" role="dialog" aria-modal="true"><h2>{{ lab?.name || '实验室' }} · 查看地图</h2>
-      <div class="map-preview"><div class="map-preview-stage"><img v-if="mapInfo.imageUrl && !imageFailed" :src="mapInfo.imageUrl" :alt="mapInfo.name" @error="imageFailed = true"><div v-else class="map-preview-empty"><svg class="icon"><use href="/assets/icons.svg#i-map" /></svg><strong>{{ mapInfo.imageUrl ? '地图图片加载失败' : '暂无地图图片' }}</strong><span>{{ mapInfo.imageUrl ? '请检查图片地址或后端文件服务' : '请先编辑地图并上传图片' }}</span></div></div><div class="map-preview-caption"><div><span>当前地图</span><strong>{{ mapInfo.name || '未命名地图' }}</strong></div><span>{{ mapInfo.version ? `版本 ${mapInfo.version}` : '未设置版本' }}</span></div></div>
+      <div class="map-preview"><div class="map-preview-stage"><img v-if="mapInfo.imageUrl && !imageFailed" :src="mapInfo.imageUrl" :alt="mapInfo.name" @error="imageFailed = true"><div v-else class="map-preview-empty"><svg class="icon"><use href="#i-map" /></svg><strong>{{ mapInfo.imageUrl ? '地图图片加载失败' : '暂无地图图片' }}</strong><span>{{ mapInfo.imageUrl ? '请检查图片地址或后端文件服务' : '请先编辑地图并上传图片' }}</span></div></div><div class="map-preview-caption"><div><span>当前地图</span><strong>{{ mapInfo.name || '未命名地图' }}</strong></div><span>{{ mapInfo.version ? `版本 ${mapInfo.version}` : '未设置版本' }}</span></div></div>
       <div class="detail-grid"><article class="detail-item"><span>实验室</span><strong>唯一实验室</strong></article><article class="detail-item"><span>configId / 状态</span><strong>{{ configId(currentConfig) }} / {{ currentConfig?.status || currentStatus }} · R{{ currentConfig?.revision ?? '-' }}</strong></article><article class="detail-item wide"><span>地图 / 版本</span><strong>{{ mapInfo.name || '-' }} / {{ mapInfo.version || '-' }}</strong></article><article class="detail-item wide"><span>地图图片</span><strong class="map-url">{{ mapInfo.imageUrl || '-' }}</strong></article><article class="detail-item wide"><span>配置对象</span><strong>机台 {{ counts.machineCount ?? 0 }} · 节点 {{ counts.nodeCount ?? 0 }} · 连线 {{ counts.linkCount ?? 0 }} · 点位 {{ counts.pointCount ?? 0 }}</strong></article></div>
       <div class="modal-actions"><button class="modal-close" type="button" @click="previewVisible = false">关闭</button></div></section></div>
 
