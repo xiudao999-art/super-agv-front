@@ -148,7 +148,7 @@ export async function updateResource(name, id, payload) {
   if (useMockApi || !resources[name]) return updateRecord(name, id, payload)
   const endpoint = name === 'workflows' ? resources[name].create : `${resources[name].create}/${encodeURIComponent(id)}`
   const method = name === 'workflows' ? 'post' : 'put'
-  return unwrap(await http[method](endpoint, { ...payload, id }))
+  return unwrap(await http[method](endpoint, payload))
 }
 
 export async function deleteResource(name, id) {

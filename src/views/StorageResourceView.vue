@@ -114,8 +114,8 @@ function resetFilters() {
 
 function clearForm() {
   Object.keys(form).forEach((key) => delete form[key])
-  if (props.resourceKey === 'locations') Object.assign(form, { locationCode: '', locationName: '', locationType: '', ownerName: '', spaceName: '', mapName: '', coordinateType: '', navPointCode: '', operationPoint: '', mapX: '', mapY: '', mapYaw: '', compatibleCarrierType: '', statusSource: '', occupancyStatus: 0, currentCarrierCode: '', lastCheckTime: '', remark: '', enabled: 1 })
-  if (props.resourceKey === 'carriers') Object.assign(form, { carrierCode: '', barcode: '', carrierTypeId: '', carrierStatus: 'IDLE', currentLocationId: '', relatedOrderCode: '', lastScanTime: '', remark: '', enabled: 1 })
+  if (props.resourceKey === 'locations') Object.assign(form, { locationCode: '', locationName: '', locationType: '', ownerName: '', spaceName: '', mapName: '', coordinateType: '', navPointCode: '', operationPoint: '', mapX: '', mapY: '', mapYaw: '', compatibleCarrierType: '', statusSource: '', occupancyStatus: 0, currentCarrierCode: '', remark: '', enabled: 1 })
+  if (props.resourceKey === 'carriers') Object.assign(form, { carrierCode: '', barcode: '', carrierTypeId: '', carrierStatus: 'IDLE', currentLocationId: '', relatedOrderCode: '', remark: '', enabled: 1 })
   if (props.resourceKey === 'storageTypes') Object.assign(form, { typeCode: '', typeName: '', capacity: 1, compatibleCarrierTypes: '', statusSource: '', mutexRule: '', remark: '', status: 1 })
   if (props.resourceKey === 'carrierTypes') Object.assign(form, { typeCode: '', typeName: '', dimension: '', maxWeight: '', barcodeRule: '', status: 'DRAFT', remark: '' })
 }
@@ -166,17 +166,64 @@ async function openMap(item) {
 function numeric(value) { return value === '' || value == null ? null : Number(value) }
 
 function payload() {
-  const result = { ...form }
   if (props.resourceKey === 'locations') {
-    result.mapX = numeric(result.mapX); result.mapY = numeric(result.mapY); result.mapYaw = numeric(result.mapYaw); result.occupancyStatus = Number(result.occupancyStatus)
+    return {
+      locationCode: form.locationCode,
+      locationName: form.locationName,
+      locationType: form.locationType,
+      ownerName: form.ownerName,
+      spaceName: form.spaceName,
+      mapName: form.mapName,
+      coordinateType: form.coordinateType,
+      navPointCode: form.navPointCode,
+      operationPoint: form.operationPoint,
+      mapX: numeric(form.mapX),
+      mapY: numeric(form.mapY),
+      mapYaw: numeric(form.mapYaw),
+      compatibleCarrierType: form.compatibleCarrierType,
+      statusSource: form.statusSource,
+      occupancyStatus: Number(form.occupancyStatus),
+      currentCarrierCode: form.currentCarrierCode,
+      lastCheckTime: form.lastCheckTime,
+      remark: form.remark,
+      enabled: form.enabled,
+    }
   }
   if (props.resourceKey === 'carriers') {
-    result.carrierTypeId = result.carrierTypeId === '' ? null : Number(result.carrierTypeId)
-    result.currentLocationId = result.currentLocationId === '' ? null : Number(result.currentLocationId)
+    return {
+      carrierCode: form.carrierCode,
+      barcode: form.barcode,
+      carrierTypeId: form.carrierTypeId === '' ? null : Number(form.carrierTypeId),
+      carrierStatus: form.carrierStatus,
+      currentLocationId: form.currentLocationId === '' ? null : Number(form.currentLocationId),
+      relatedOrderCode: form.relatedOrderCode,
+      lastScanTime: form.lastScanTime,
+      remark: form.remark,
+      enabled: form.enabled,
+    }
   }
-  if (props.resourceKey === 'storageTypes') result.capacity = numeric(result.capacity)
-  if (props.resourceKey === 'carrierTypes') result.maxWeight = numeric(result.maxWeight)
-  return result
+  if (props.resourceKey === 'storageTypes') {
+    return {
+      typeCode: form.typeCode,
+      typeName: form.typeName,
+      capacity: numeric(form.capacity),
+      compatibleCarrierTypes: form.compatibleCarrierTypes,
+      statusSource: form.statusSource,
+      mutexRule: form.mutexRule,
+      remark: form.remark,
+      status: form.status,
+    }
+  }
+  // carrierTypes
+  return {
+    typeCode: form.typeCode,
+    typeName: form.typeName,
+    dimension: form.dimension,
+    maxWeight: numeric(form.maxWeight),
+    barcodeRule: form.barcodeRule,
+    status: form.status,
+    remark: form.remark,
+  }
 }
 
 async function save() {
@@ -297,5 +344,5 @@ onUnmounted(() => { document.removeEventListener('keydown', onKeydown); window.c
 </style>
 <style scoped src="../styles/forms.css"></style>
 <style scoped>
-.storage-resource-page{min-height:100%;color:#122235;background:#f3f6f8;--blue:#1677c8;--blue-strong:#1677c8;--blue-pale:#eaf4fd;--green:#1f9d63;--yellow:#d99b00;--orange:#d96522;--red:#d84343;--ink:#122235;--muted:#768392;--line:#dfe5ea;--canvas:#f3f6f8;--agv-topbar-height:56px}.storage-resource-page .page-head{min-height:92px;display:flex;align-items:center;padding:16px 20px}.storage-resource-page .page-head h1{margin:0 0 8px;font-size:20px;line-height:26px}.storage-resource-page .page-head p{margin:0;color:#596675;font-size:13px;line-height:20.15px}.storage-resource-page .icon{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.storage-resource-page .page-panel{min-height:760px}.storage-resource-page .agv-filter-bar{margin:0 0 14px!important}.storage-resource-page .table-wrap>table{table-layout:auto}.storage-resource-page tbody tr.selected{background:#f2f8fd}.storage-resource-page .action-btn{height:38px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border:0;border-radius:8px;color:#fff;background:#1677c8;font-size:13px;font-weight:650;cursor:pointer}.storage-resource-page .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.storage-resource-page .form-field{display:grid;gap:7px}.storage-resource-page .form-field.wide{grid-column:1/-1}.storage-resource-page .form-field span{color:#65707a;font-size:11px}.storage-resource-page .form-field input,.storage-resource-page .form-field select{width:100%;height:39px;padding:0 11px;border:1px solid #dfe3e6;border-radius:8px;outline:0;background:#fff;font-size:12px}.storage-resource-page .form-field textarea{min-height:76px;padding:10px 11px;resize:vertical;border:1px solid #dfe3e6;border-radius:8px;outline:0;background:#fff;font:inherit;font-size:12px}.carriers-page table{min-width:1100px}.carriers-page td{height:53px}.carriers-page tbody tr{cursor:pointer}.carriers-page .status-tag{min-width:78px;height:24px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:4px 12px;border:1px solid currentColor;border-radius:999px;font-size:12px;line-height:16px}.carriers-page .status-tag::before{width:4px;height:4px}.status-executing{color:#28bd6b;border-color:#bfead3;background:rgba(40,189,107,.08)}.status-executing::before{background:#1577d2!important}.status-completed{color:#2f9d68;border-color:#c9ead9;background:#f3fbf7}.status-waiting{color:#bc8300;border-color:#f7dfad;background:rgba(246,183,20,.08)}.status-failed{color:#d84343;border-color:#f1cccc;background:#fff3f3}.status-cancelled{color:#7f8a95;border-color:#dfe4e8;background:#f6f8f9}.carrier-actions,.location-type-actions{display:flex;gap:7px}.carrier-row-btn,.location-type-row-btn{height:27px;padding:0 10px;border:1px solid #cde2f3;border-radius:15px;color:#1677c8;background:#f1f8fd;font-size:11px;font-weight:650;cursor:pointer}.carrier-row-btn.delete,.location-type-row-btn.delete{color:#d84343;border-color:#f3d7d5;background:#fff5f4}.storageTypes-page table{min-width:1160px}.carrierTypes-page table{min-width:1120px}.storageTypes-page td,.carrierTypes-page td{height:53px}.storageTypes-page tbody tr,.carrierTypes-page tbody tr{cursor:pointer}.carrierTypes-page .status-tag{min-width:66px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:5px 9px;border:1px solid currentColor;border-radius:18px;font-size:11px;line-height:1}.carrierTypes-page .status-tag::before{width:5px;height:5px}.state-published{color:#1f9d63;border-color:#d1efdf;background:#f4fcf7}.state-disabled{color:#8d949c;border-color:#e1e5e8;background:#f7f8f9}.location-empty,.carrier-empty,.location-type-empty{text-align:center;color:#768392}.storage-resource-page #locationFormModal .modal-card{width:min(720px,calc(100vw - 32px));max-height:calc(100vh - 48px)}.storage-resource-page #locationFormModal .location-form-body{max-height:calc(100vh - 170px);overflow:auto}.carriers-page #locationFormModal .location-form-body,.storageTypes-page #locationFormModal .location-form-body,.carrierTypes-page #locationFormModal .location-form-body{padding:0 3px 0 0}.carriers-page #locationFormModal .modal-card,.storageTypes-page #locationFormModal .modal-card,.carrierTypes-page #locationFormModal .modal-card{width:min(590px,calc(100vw - 32px))}@media(max-width:760px){.storage-resource-page .page-head{min-height:75px;padding:14px}.storage-resource-page .page-head h1{margin-bottom:6px;font-size:18px;line-height:1.25}.storage-resource-page .page-head p{font-size:12px;line-height:normal}.storage-resource-page .form-grid{grid-template-columns:1fr}.storage-resource-page .form-field.wide{grid-column:auto}.storage-resource-page .page-panel{min-height:calc(100vh - 152px)}}
+.storage-resource-page{min-height:100%;color:#122235;background:#f3f6f8;--blue:#1677c8;--blue-strong:#1677c8;--blue-pale:#eaf4fd;--green:#1f9d63;--yellow:#d99b00;--orange:#d96522;--red:#d84343;--ink:#122235;--muted:#768392;--line:#dfe5ea;--canvas:#f3f6f8;--agv-topbar-height:56px}.storage-resource-page .page-head{min-height:92px;display:flex;align-items:center;padding:16px 20px}.storage-resource-page .page-head h1{margin:0 0 8px;font-size:20px;line-height:26px}.storage-resource-page .page-head p{margin:0;color:#596675;font-size:13px;line-height:20.15px}.storage-resource-page .icon{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.storage-resource-page .page-panel{min-height:760px}.storage-resource-page .agv-filter-bar{margin:0 0 14px!important}.storage-resource-page .table-wrap>table{table-layout:auto}.storage-resource-page tbody tr.selected{background:#f2f8fd}.storage-resource-page .action-btn{height:38px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border:0;border-radius:8px;color:#fff;background:#1677c8;font-size:13px;font-weight:650;cursor:pointer}.storage-resource-page .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.storage-resource-page .form-field{display:grid;gap:7px}.storage-resource-page .form-field.wide{grid-column:1/-1}.storage-resource-page .form-field span{color:#65707a;font-size:11px}.storage-resource-page .form-field input,.storage-resource-page .form-field select{width:100%;height:39px;padding:0 11px;border:1px solid #dfe3e6;border-radius:8px;outline:0;background:#fff;font-size:12px}.storage-resource-page .form-field textarea{min-height:76px;padding:10px 11px;resize:vertical;border:1px solid #dfe3e6;border-radius:8px;outline:0;background:#fff;font:inherit;font-size:12px}.carriers-page table{min-width:1100px}.carriers-page th.col-actions,.carriers-page td.col-actions{min-width:200px}.carriers-page td{height:53px}.carriers-page tbody tr{cursor:pointer}.carriers-page .status-tag{min-width:78px;height:24px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:4px 12px;border:1px solid currentColor;border-radius:999px;font-size:12px;line-height:16px}.carriers-page .status-tag::before{width:4px;height:4px}.status-executing{color:#28bd6b;border-color:#bfead3;background:rgba(40,189,107,.08)}.status-executing::before{background:#1577d2!important}.status-completed{color:#2f9d68;border-color:#c9ead9;background:#f3fbf7}.status-waiting{color:#bc8300;border-color:#f7dfad;background:rgba(246,183,20,.08)}.status-failed{color:#d84343;border-color:#f1cccc;background:#fff3f3}.status-cancelled{color:#7f8a95;border-color:#dfe4e8;background:#f6f8f9}.carrier-actions,.location-type-actions{display:flex;gap:7px}.carrier-row-btn,.location-type-row-btn{height:27px;padding:0 10px;border:1px solid #cde2f3;border-radius:15px;color:#1677c8;background:#f1f8fd;font-size:11px;font-weight:650;cursor:pointer}.carrier-row-btn.delete,.location-type-row-btn.delete{color:#d84343;border-color:#f3d7d5;background:#fff5f4}.storageTypes-page table{min-width:1160px}.carrierTypes-page table{min-width:1120px}.storageTypes-page td,.carrierTypes-page td{height:53px}.storageTypes-page tbody tr,.carrierTypes-page tbody tr{cursor:pointer}.carrierTypes-page .status-tag{min-width:66px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:5px 9px;border:1px solid currentColor;border-radius:18px;font-size:11px;line-height:1}.carrierTypes-page .status-tag::before{width:5px;height:5px}.state-published{color:#1f9d63;border-color:#d1efdf;background:#f4fcf7}.state-disabled{color:#8d949c;border-color:#e1e5e8;background:#f7f8f9}.location-empty,.carrier-empty,.location-type-empty{text-align:center;color:#768392}.storage-resource-page #locationFormModal .modal-card{width:min(720px,calc(100vw - 32px));max-height:calc(100vh - 48px)}.storage-resource-page #locationFormModal .location-form-body{max-height:calc(100vh - 170px);overflow:auto}.carriers-page #locationFormModal .location-form-body,.storageTypes-page #locationFormModal .location-form-body,.carrierTypes-page #locationFormModal .location-form-body{padding:0 3px 0 0}.carriers-page #locationFormModal .modal-card,.storageTypes-page #locationFormModal .modal-card,.carrierTypes-page #locationFormModal .modal-card{width:min(590px,calc(100vw - 32px))}@media(max-width:760px){.storage-resource-page .page-head{min-height:75px;padding:14px}.storage-resource-page .page-head h1{margin-bottom:6px;font-size:18px;line-height:1.25}.storage-resource-page .page-head p{font-size:12px;line-height:normal}.storage-resource-page .form-grid{grid-template-columns:1fr}.storage-resource-page .form-field.wide{grid-column:auto}.storage-resource-page .page-panel{min-height:calc(100vh - 152px)}}
 </style>
