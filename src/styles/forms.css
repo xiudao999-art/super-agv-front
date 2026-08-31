@@ -1,0 +1,685 @@
+input,
+select,
+textarea {
+    color: var(--agv-ink);
+}
+
+input,
+select {
+    min-height: var(--agv-control);
+}
+
+textarea {
+    line-height: 1.55;
+}
+
+/* 原生 select 保持业务兼容，同时统一为 Ant Design 风格的视觉与交互。 */
+select:not([multiple]):not([size]) {
+    min-height: var(--agv-control, 40px);
+    padding: 0 34px 0 11px;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    outline: 0;
+    background-color: #fff;
+    background-image: linear-gradient(45deg, transparent 50%, #8c8c8c 50%), linear-gradient(135deg, #8c8c8c 50%, transparent 50%);
+    background-position: calc(100% - 15px) calc(50% - 1px), calc(100% - 11px) calc(50% - 1px);
+    background-repeat: no-repeat;
+    background-size: 4px 4px;
+    box-shadow: none;
+    color: var(--agv-ink, #1f1f1f);
+    font: inherit;
+    line-height: 1.5;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+/* 原生下拉选项：以 Ant Design 的留白、白底和浅蓝选中态为基准。
+   下拉面板仍由浏览器/系统渲染，无法在所有平台完全覆盖系统高亮。 */
+select:not([multiple]):not([size]),
+select:not([multiple]):not([size]) option {
+    color-scheme: light;
+}
+
+select:not([multiple]):not([size]) option {
+    min-height: 36px;
+    padding: 8px 12px;
+    background: #fff;
+    color: rgba(0, 0, 0, 0.88);
+    font-size: 14px;
+    line-height: 20px;
+}
+
+select:not([multiple]):not([size]) option:checked {
+    background: #e6f4ff linear-gradient(0deg, #e6f4ff, #e6f4ff);
+    color: #1677ff;
+    font-weight: 500;
+}
+
+select:not([multiple]):not([size]) option:hover,
+select:not([multiple]):not([size]) option:focus {
+    background: #f5f5f5;
+    color: rgba(0, 0, 0, 0.88);
+}
+
+/* 可访问的下拉面板：用于替代各浏览器无法统一的原生 option 弹层。 */
+select.agv-select-native {
+    position: absolute !important;
+    width: 1px !important;
+    min-width: 1px !important;
+    height: 1px !important;
+    min-height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    border: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.agv-select-trigger {
+    position: relative;
+    display: inline-flex;
+    min-width: 0;
+    min-height: var(--agv-control, 40px);
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 34px 0 11px;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    outline: 0;
+    background: #fff;
+    color: rgba(0, 0, 0, 0.88);
+    font: inherit;
+    line-height: 1.5;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+.agv-select-trigger::after {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    width: 6px;
+    height: 6px;
+    border-right: 1.5px solid rgba(8, 24, 41, 0.48);
+    border-bottom: 1.5px solid rgba(8, 24, 41, 0.48);
+    content: '';
+    pointer-events: none;
+    transform: translateY(-65%) rotate(45deg);
+}
+.agv-select-trigger:hover { border-color: #4096ff; }
+.agv-select-trigger:focus-visible,
+.agv-select-trigger[aria-expanded='true'] { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.12); }
+.agv-select-trigger:disabled { border-color: #d9d9d9; background: rgba(0, 0, 0, 0.04); color: rgba(0, 0, 0, 0.25); cursor: not-allowed; }
+.agv-select-trigger:disabled::after { border-color: rgba(0, 0, 0, 0.25); }
+
+.agv-select-menu {
+    position: fixed;
+    z-index: 10001;
+    display: grid;
+    gap: 2px;
+    overflow: auto;
+    padding: 4px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+}
+.agv-select-option {
+    display: flex;
+    width: 100%;
+    min-height: 36px;
+    align-items: center;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 4px;
+    background: #fff;
+    color: rgba(0, 0, 0, 0.88);
+    font: inherit;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: left;
+    cursor: pointer;
+}
+.agv-select-option:hover,
+.agv-select-option:focus-visible { outline: 0; background: #f5f5f5; }
+.agv-select-option.is-selected { background: #e6f4ff; color: #1677ff; font-weight: 500; }
+.agv-select-option:disabled { color: rgba(0, 0, 0, 0.25); cursor: not-allowed; }
+
+.agv-select-menu.is-searchable { grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; }
+.agv-select-search { width: 100%; height: 38px; padding: 0 11px; border: 1px solid #d9d9d9; border-radius: 6px; outline: 0; color: var(--agv-ink, #1f1f1f); background: #fff; font: inherit; font-size: 13px; }
+.agv-select-search:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.1); }
+.agv-select-options { min-height: 0; display: grid; gap: 2px; overflow-y: auto; overscroll-behavior: contain; }
+.agv-select-empty { padding: 12px; color: rgba(0, 0, 0, 0.45); font-size: 12px; text-align: center; }
+
+.field-shell > .agv-select-trigger { flex: 1; height: 100%; min-height: 0; padding: 0 28px 0 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.field-shell > .agv-select-trigger:hover,
+.field-shell > .agv-select-trigger:focus-visible,
+.field-shell > .agv-select-trigger[aria-expanded='true'] { border: 0; box-shadow: none; }
+.field-shell > .agv-select-trigger::after { right: 10px; }
+.agv-filter-field > .agv-select-trigger { width: 100%; }
+
+select:not([multiple]):not([size]):hover {
+    border-color: #4096ff;
+}
+
+select:not([multiple]):not([size]):focus,
+select:not([multiple]):not([size]):focus-visible {
+    border-color: #1677ff;
+    outline: 0;
+    box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.12);
+}
+
+select:not([multiple]):not([size]):disabled {
+    border-color: #d9d9d9;
+    background-color: rgba(0, 0, 0, 0.04);
+    background-image: linear-gradient(45deg, transparent 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(135deg, rgba(0, 0, 0, 0.25) 50%, transparent 50%);
+    color: rgba(0, 0, 0, 0.25);
+    cursor: not-allowed;
+}
+
+select:not([multiple]):not([size])[aria-invalid="true"],
+select:not([multiple]):not([size]).is-error {
+    border-color: #ff4d4f;
+}
+
+select:not([multiple]):not([size])[aria-invalid="true"]:focus,
+select:not([multiple]):not([size]).is-error:focus {
+    box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.1);
+}
+
+select.page-size,
+.pagination select,
+.table-pagination select {
+    min-height: 32px;
+    height: 32px;
+    padding-left: 9px;
+    padding-right: 30px;
+    background-position: calc(100% - 13px) calc(50% - 1px), calc(100% - 9px) calc(50% - 1px);
+}
+
+button,
+a {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+/* 列表页筛选条：先统一为 Ant Design 式字段、控件与按钮节奏。 */
+.agv-filter-bar {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)) !important;
+    gap: 12px !important;
+    align-items: end !important;
+    margin: 16px 0 !important;
+    padding: 14px !important;
+    border: 1px solid #f0f0f0 !important;
+    border-radius: 8px !important;
+    background: #fafafa !important;
+}
+
+.agv-filter-field {
+    display: grid !important;
+    grid-template-rows: 20px 40px !important;
+    gap: 6px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+}
+
+.agv-filter-field > span {
+    display: block !important;
+    margin: 0 !important;
+    color: rgba(0, 0, 0, 0.65) !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    line-height: 20px !important;
+    white-space: nowrap;
+}
+
+.agv-filter-field > input,
+.agv-filter-field > select {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    margin: 0 !important;
+    border: 1px solid #d9d9d9 !important;
+    border-radius: 6px !important;
+    outline: 0 !important;
+    background-color: #fff !important;
+    color: rgba(0, 0, 0, 0.88) !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+    box-shadow: none !important;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease !important;
+}
+
+.agv-filter-field > input {
+    padding: 8px 11px !important;
+}
+
+.agv-filter-field > select {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: 11px !important;
+    padding-right: 34px !important;
+}
+
+.agv-filter-field > input::placeholder,
+.agv-filter-search > input::placeholder {
+    color: rgba(0, 0, 0, 0.25) !important;
+}
+
+.agv-filter-field > input:hover,
+.agv-filter-field > select:hover,
+.agv-filter-search:hover {
+    border-color: #4096ff !important;
+}
+
+.agv-filter-field > input:focus,
+.agv-filter-field > input:focus-visible,
+.agv-filter-field > select:focus,
+.agv-filter-field > select:focus-visible,
+.agv-filter-search:focus-within {
+    border-color: #1677ff !important;
+    outline: 0 !important;
+    box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.12) !important;
+}
+
+.agv-filter-field > input:disabled,
+.agv-filter-field > select:disabled {
+    border-color: #d9d9d9 !important;
+    background-color: rgba(0, 0, 0, 0.04) !important;
+    color: rgba(0, 0, 0, 0.25) !important;
+    cursor: not-allowed;
+}
+
+.agv-filter-actions {
+    display: flex !important;
+    min-height: 40px;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    align-self: end;
+    gap: 8px !important;
+}
+
+.agv-filter-actions > button {
+    display: inline-flex !important;
+    height: 40px !important;
+    min-width: 72px;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 0 15px !important;
+    border: 1px solid #d9d9d9 !important;
+    border-radius: 6px !important;
+    background: #fff !important;
+    color: rgba(0, 0, 0, 0.88) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.02);
+    cursor: pointer;
+    transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease !important;
+}
+
+.agv-filter-actions > button:hover {
+    border-color: #4096ff !important;
+    color: #1677ff !important;
+    filter: none !important;
+}
+
+.agv-filter-actions > button.primary {
+    border-color: #1677ff !important;
+    background: #1677ff !important;
+    color: #fff !important;
+}
+
+.agv-filter-actions > button.primary:hover {
+    border-color: #4096ff !important;
+    background: #4096ff !important;
+    color: #fff !important;
+}
+
+.agv-filter-bar--single {
+    grid-template-columns: minmax(240px, 380px) !important;
+}
+
+.agv-filter-bar--search {
+    grid-template-columns: minmax(240px, 420px) !important;
+}
+
+.agv-filter-search {
+    display: flex !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 40px !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 11px !important;
+    border: 1px solid #d9d9d9 !important;
+    border-radius: 6px !important;
+    background: #fff !important;
+    transition: border-color 160ms ease, box-shadow 160ms ease !important;
+}
+
+.agv-filter-search > span {
+    margin: 0 !important;
+    color: rgba(0, 0, 0, 0.45) !important;
+    font-size: 15px !important;
+}
+
+.agv-filter-search > input {
+    min-width: 0 !important;
+    height: 100% !important;
+    flex: 1;
+    padding: 0 !important;
+    border: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    color: rgba(0, 0, 0, 0.88) !important;
+    font-size: 13px !important;
+    box-shadow: none !important;
+}
+
+@media (max-width: 1100px) {
+    .agv-filter-bar {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .agv-filter-actions {
+        grid-column: 1 / -1;
+    }
+
+    .agv-filter-bar--single,
+    .agv-filter-bar--search {
+        grid-template-columns: minmax(240px, 380px) !important;
+    }
+}
+
+@media (max-width: 760px) {
+    .agv-filter-bar,
+    .agv-filter-bar--single,
+    .agv-filter-bar--search {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        margin: 12px 0 !important;
+        padding: 12px !important;
+    }
+
+    .agv-filter-actions {
+        grid-column: auto;
+    }
+
+    .agv-filter-actions > button {
+        flex: 1;
+    }
+}
+
+/* Figma-aligned inline filters for shared list pages. */
+[data-agv-list-filters].agv-filter-bar {
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    margin: 16px 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+}
+
+[data-agv-list-filters] .agv-filter-field {
+    display: flex !important;
+    flex: 0 0 480px !important;
+    grid-template-rows: none !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 0 12px !important;
+    border: 1px solid rgba(8, 24, 41, 0.1) !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+}
+
+[data-agv-list-filters] .agv-filter-field > span {
+    flex: 0 0 auto;
+    color: rgba(8, 24, 41, 0.48) !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 20px !important;
+}
+
+[data-agv-list-filters] .agv-filter-field > input,
+[data-agv-list-filters] .agv-filter-field > select {
+    height: 38px !important;
+    min-height: 38px !important;
+    flex: 1;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #081829 !important;
+    font-size: 14px !important;
+    line-height: 20px !important;
+    box-shadow: none !important;
+}
+
+[data-agv-list-filters] .agv-filter-field > select {
+    padding-right: 28px !important;
+    background-image: url('/assets/list-icons/arrow-down.svg') !important;
+    background-position: right 10px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px 16px !important;
+}
+[data-agv-list-filters] .agv-filter-actions { min-height: 36px; margin-left: auto; gap: 12px !important; }
+[data-agv-list-filters] .agv-filter-actions > button { min-width: 84px; height: 36px !important; min-height: 36px; padding: 0 16px !important; border: 0 !important; border-radius: 8px !important; box-shadow: none !important; font-size: 14px !important; }
+[data-agv-list-filters] .agv-filter-actions > button:not(.primary) { background: rgba(8, 24, 41, 0.04) !important; color: #081829 !important; }
+[data-agv-list-filters] .agv-filter-actions > button.primary { background: #1577d2 !important; color: #fff !important; }
+[data-agv-list-filters] .agv-filter-actions .icon { width: 18px; height: 18px; }
+[data-agv-list-filters] .agv-filter-actions .filter-action-icon { width: 18px; height: 18px; }
+
+@media (max-width: 1120px) {
+    [data-agv-list-filters].agv-filter-bar { flex-wrap: wrap; }
+    [data-agv-list-filters] .agv-filter-actions { margin-left: 0; }
+}
+
+@media (max-width: 760px) {
+    [data-agv-list-filters] .agv-filter-field { flex-basis: 100% !important; }
+    [data-agv-list-filters] .agv-filter-actions { width: 100%; }
+    [data-agv-list-filters] .agv-filter-actions > button { flex: 1; }
+}
+
+.agv-filter-field--capacity {
+    width: min(550px, 100%) !important;
+}
+
+/* Attribute hook keeps the shared list treatment available before component JS upgrades. */
+[data-agv-list-filters] { display: flex !important; align-items: center !important; gap: 16px !important; margin: 16px 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; }
+[data-agv-list-filters] .field-shell { display: flex !important; flex: 0 0 480px !important; height: 40px !important; min-height: 40px !important; align-items: center !important; gap: 12px !important; padding: 0 12px !important; border: 1px solid rgba(8,24,41,.1) !important; border-radius: 8px !important; background: #fff !important; }
+[data-agv-list-filters] .field-shell > span { flex: 0 0 auto; color: rgba(8,24,41,.48) !important; font-size: 14px !important; font-weight: 400 !important; line-height: 20px !important; }
+[data-agv-list-filters] .field-shell > input,
+[data-agv-list-filters] .field-shell > select { height: 38px !important; min-height: 38px !important; flex: 1; padding: 0 !important; border: 0 !important; background-color: transparent !important; color: #081829 !important; font-size: 14px !important; line-height: 20px !important; box-shadow: none !important; }
+[data-agv-list-filters] .field-shell > select { padding-right: 28px !important; background-image: url('/assets/list-icons/arrow-down.svg') !important; background-position: right 10px center !important; background-repeat: no-repeat !important; background-size: 16px 16px !important; }
+[data-agv-list-filters] .filter-actions { min-height: 36px; margin-left: auto; gap: 12px !important; }
+[data-agv-list-filters] .filter-actions > button { min-width: 84px; height: 36px !important; min-height: 36px; padding: 0 16px !important; border: 0 !important; border-radius: 8px !important; box-shadow: none !important; font-size: 14px !important; }
+[data-agv-list-filters] .filter-actions > button:not(.primary) { background: rgba(8,24,41,.04) !important; color: #081829 !important; }
+[data-agv-list-filters] .filter-actions > button.primary { background: #1577d2 !important; color: #fff !important; }
+[data-agv-list-filters] .filter-actions .filter-action-icon { width: 18px; height: 18px; }
+
+@media (max-width:1120px) { [data-agv-list-filters] { flex-wrap: wrap; } [data-agv-list-filters] .filter-actions { margin-left: 0; } }
+@media (max-width:760px) { [data-agv-list-filters] .field-shell { flex-basis: 100% !important; } [data-agv-list-filters] .filter-actions { width: 100%; } [data-agv-list-filters] .filter-actions > button { flex: 1; } }
+
+/* Global list-filter system, aligned with the order list. */
+.agv-filter-bar {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center !important;
+    gap: 16px !important;
+    margin: 16px 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+}
+
+.agv-filter-bar .agv-filter-field {
+    display: flex !important;
+    flex: 1 1 320px !important;
+    grid-template-rows: none !important;
+    width: auto !important;
+    max-width: 660px;
+    height: 40px !important;
+    min-height: 40px !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    border: 1px solid rgba(8, 24, 41, 0.1) !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+}
+
+.agv-filter-bar .agv-filter-field > span {
+    display: block !important;
+    flex: 0 0 auto;
+    margin: 0 !important;
+    color: rgba(8, 24, 41, 0.48) !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 20px !important;
+}
+
+.agv-filter-bar .agv-filter-field > input,
+.agv-filter-bar .agv-filter-field > select {
+    width: auto !important;
+    min-width: 0 !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    flex: 1;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    outline: 0 !important;
+    background-color: transparent !important;
+    color: #081829 !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 20px !important;
+    box-shadow: none !important;
+}
+
+.agv-filter-bar .agv-filter-field > select {
+    padding-right: 28px !important;
+    background-image: url('/assets/list-icons/arrow-down.svg') !important;
+    background-position: right 10px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px 16px !important;
+}
+
+.agv-filter-bar .agv-filter-field:focus-within {
+    border-color: #1577d2 !important;
+    box-shadow: 0 0 0 2px rgba(21, 119, 210, 0.1) !important;
+}
+
+.agv-filter-bar .agv-filter-search {
+    display: flex !important;
+    flex: 1 1 320px !important;
+    width: auto !important;
+    max-width: 480px;
+    height: 40px !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    border: 1px solid rgba(8, 24, 41, 0.1) !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+}
+
+.agv-filter-bar .agv-filter-search > span { color: rgba(8, 24, 41, 0.48) !important; font-size: 14px !important; }
+.agv-filter-bar .agv-filter-search > input { color: #081829 !important; font-size: 14px !important; }
+.agv-filter-bar .agv-filter-search:focus-within { border-color: #1577d2 !important; box-shadow: 0 0 0 2px rgba(21, 119, 210, 0.1) !important; }
+
+.agv-filter-bar .agv-filter-actions {
+    display: flex !important;
+    min-height: 36px;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    align-self: center;
+    gap: 12px !important;
+    margin-left: auto;
+}
+
+.agv-filter-bar .agv-filter-actions > button {
+    display: inline-flex !important;
+    min-width: 84px;
+    height: 36px !important;
+    min-height: 36px;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 0 16px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: rgba(8, 24, 41, 0.04) !important;
+    color: #081829 !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    box-shadow: none !important;
+}
+
+.agv-filter-bar .agv-filter-actions > button.primary {
+    background: #1577d2 !important;
+    color: #fff !important;
+}
+
+.agv-filter-bar .agv-filter-actions > button:hover { filter: brightness(.97) !important; }
+.agv-filter-bar .agv-filter-actions .filter-action-icon { width: 18px; height: 18px; }
+.agv-filter-bar--single .agv-filter-field,
+.agv-filter-bar--search .agv-filter-search { flex: 0 1 660px !important; max-width: 660px; }
+
+@media (max-width: 760px) {
+    .agv-filter-bar { gap: 10px !important; margin: 12px 0 !important; }
+    .agv-filter-bar .agv-filter-field { max-width: none; flex-basis: 100% !important; }
+    .agv-filter-bar .agv-filter-actions { width: 100%; margin-left: 0; }
+    .agv-filter-bar .agv-filter-actions > button { flex: 1; }
+}
+
+
+/* Custom select triggers share the order-list filter single-border treatment. */
+.agv-filter-bar .agv-filter-field > .agv-select-trigger {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 28px 0 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  color: #081829 !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 20px !important;
+  box-shadow: none !important;
+}
+.agv-filter-bar .agv-filter-field > .agv-select-trigger:hover,
+.agv-filter-bar .agv-filter-field > .agv-select-trigger:focus-visible,
+.agv-filter-bar .agv-filter-field > .agv-select-trigger[aria-expanded=true] {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.agv-filter-bar .agv-filter-field > .agv-select-trigger::after { right: 10px; }

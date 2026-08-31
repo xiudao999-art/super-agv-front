@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <script src="mock-api.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>复合机器人调度系统 · 角色权限管理</title>
+  <link rel="stylesheet" href="assets/styles/pages/role-permissions.css">
+  <link rel="stylesheet" href="assets/styles/tokens.css">
+  <link rel="stylesheet" href="assets/styles/base.css">
+  <link rel="stylesheet" href="assets/styles/components.css">
+  <script type="module" src="assets/components/register.js" blocking="render"></script>
+</head>
+<body>
+  <agv-app-shell active-route="role-permissions.html" section-title="角色权限管理" user-name="陈工">
+    <div class="agv-legacy-hooks" hidden><aside id="sidebar"></aside><div id="scrim"></div><button id="menuBtn" type="button"></button><button id="statusInfoBtn" type="button"></button><button id="statusBtn" type="button"></button><button id="alertInfoBtn" type="button"></button><button id="alertBtn" type="button"></button></div>
+    <agv-page-header class="page-head">
+      <div><h1>角色权限管理</h1><p>维护系统角色及菜单、页面和操作权限</p></div>
+      <button class="primary-btn" id="openRoleModal" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>新建角色</span></button>
+    </agv-page-header>
+
+    <main class="page-canvas role-page">
+      <section class="role-summary" aria-label="角色统计">
+        <article><span class="summary-icon blue"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 13a5 5 0 0 1 4 5"/></svg></span><div><strong id="roleCount">4</strong><span>角色总数</span></div></article>
+        <article><span class="summary-icon cyan"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg></span><div><strong>12</strong><span>已分配用户</span></div></article>
+        <article><span class="summary-icon green"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span><div><strong>4</strong><span>启用角色</span></div></article>
+        <article><span class="summary-icon orange"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v5c0 5 3.4 8.3 8 10 4.6-1.7 8-5 8-10V6l-8-3Z"/></svg></span><div><strong>15</strong><span>权限项</span></div></article>
+      </section>
+
+      <section class="permission-workspace">
+        <aside class="roles-panel">
+          <header class="panel-heading"><div><h2>角色列表</h2><p>选择角色后配置对应权限</p></div><span class="count-badge" id="roleCountBadge">4 个角色</span></header>
+          <label class="role-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="roleSearch" placeholder="搜索角色名称或编码"></label>
+          <div class="role-list" id="roleList">
+            <button class="role-item" type="button" data-role="admin"><span class="role-avatar navy">管</span><span class="role-copy"><strong>系统管理员</strong><small>SUPER_ADMIN · 2 名用户</small></span><span class="role-state">启用</span></button>
+            <button class="role-item active" type="button" data-role="dispatcher"><span class="role-avatar blue">调</span><span class="role-copy"><strong>调度管理员</strong><small>DISPATCHER · 4 名用户</small></span><span class="role-state">启用</span></button>
+            <button class="role-item" type="button" data-role="operator"><span class="role-avatar cyan">运</span><span class="role-copy"><strong>运维工程师</strong><small>OPERATOR · 5 名用户</small></span><span class="role-state">启用</span></button>
+            <button class="role-item" type="button" data-role="viewer"><span class="role-avatar gray">访</span><span class="role-copy"><strong>只读访客</strong><small>VIEWER · 1 名用户</small></span><span class="role-state">启用</span></button>
+          </div>
+        </aside>
+
+        <section class="permission-panel">
+          <header class="permission-heading">
+            <div class="role-title"><span class="role-avatar blue" id="selectedAvatar">调</span><div><h2 id="selectedRoleName">调度管理员</h2><p id="selectedRoleMeta">DISPATCHER · 可管理订单、流程及现场调度</p></div></div>
+            <label class="status-switch"><span>角色状态</span><input id="roleStatus" type="checkbox" checked><i aria-hidden="true"></i><b>已启用</b></label>
+          </header>
+          <div class="permission-toolbar">
+            <div><h3>功能权限</h3><p>勾选该角色可以访问和操作的功能模块</p></div>
+            <label class="check-all"><input id="checkAll" type="checkbox"><span>全选</span></label>
+          </div>
+          <div class="permission-groups" id="permissionGroups">
+            <section class="permission-group">
+              <header><span class="group-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span><div><h4>运行调度</h4><p>现场任务与资源调度</p></div></header>
+              <div class="permission-options"><label><input type="checkbox" value="dashboard"><span>运行总览</span></label><label><input type="checkbox" value="orders"><span>订单管理</span></label><label><input type="checkbox" value="storage"><span>库位与载具</span></label></div>
+            </section>
+            <section class="permission-group">
+              <header><span class="group-icon"><svg viewBox="0 0 24 24"><path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2V5Z"/><path d="M9 3v16M15 5v16"/></svg></span><div><h4>配置中心</h4><p>实验室与流程基础配置</p></div></header>
+              <div class="permission-options"><label><input type="checkbox" value="robots"><span>机器人与设备</span></label><label><input type="checkbox" value="map"><span>地图信息</span></label><label><input type="checkbox" value="stations"><span>机台与点位</span></label><label><input type="checkbox" value="peripheral"><span>外围资源</span></label><label><input type="checkbox" value="charging"><span>充电桩与电池配置</span></label><label><input type="checkbox" value="process"><span>流程与动作</span></label></div>
+            </section>
+            <section class="permission-group">
+              <header><span class="group-icon"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v5c0 5 3.4 8.3 8 10 4.6-1.7 8-5 8-10V6l-8-3Z"/><path d="M12 8v4M12 16h.01"/></svg></span><div><h4>运维与数据</h4><p>异常、日志及产能数据</p></div></header>
+              <div class="permission-options"><label><input type="checkbox" value="anomaly"><span>异常与恢复</span></label><label><input type="checkbox" value="logs"><span>系统日志</span></label><label><input type="checkbox" value="capacity"><span>AGV产能</span></label></div>
+            </section>
+            <section class="permission-group">
+              <header><span class="group-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 13a5 5 0 0 1 4 5"/></svg></span><div><h4>系统管理</h4><p>角色与用户安全配置</p></div></header>
+              <div class="permission-options"><label><input type="checkbox" value="user-management"><span>用户管理</span></label><label><input type="checkbox" value="role-view"><span>查看角色</span></label><label><input type="checkbox" value="role-edit"><span>编辑权限</span></label><label><input type="checkbox" value="user-assign"><span>分配用户</span></label></div>
+            </section>
+          </div>
+          <footer class="permission-actions"><span id="permissionCount">已选择 0 / 16 项权限</span><div><button class="secondary-btn" id="resetPermission" type="button">重置</button><button class="primary-btn save-btn" id="savePermission" type="button">保存权限</button></div></footer>
+        </section>
+      </section>
+    </main>
+  </agv-app-shell>
+
+  <div class="modal-overlay role-modal" id="roleModal" hidden>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="roleModalTitle">
+      <div class="modal-title-row"><div><h2 id="roleModalTitle">新建角色</h2><p>创建后可继续配置菜单及操作权限</p></div><button class="modal-x" type="button" data-close="roleModal" aria-label="关闭">×</button></div>
+      <form id="roleForm" class="form-grid">
+        <label class="form-field"><span>角色名称</span><input id="newRoleName" placeholder="例如：产线负责人" required></label>
+        <label class="form-field"><span>角色编码</span><input id="newRoleCode" placeholder="例如：LINE_MANAGER" required></label>
+        <label class="form-field wide"><span>角色说明</span><textarea id="newRoleDescription" placeholder="填写该角色的职责范围"></textarea></label>
+        <div class="modal-actions wide"><button class="modal-close" type="button" data-close="roleModal">取消</button><button class="modal-primary" type="submit">创建角色</button></div>
+      </form>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    const allPermissions = ['dashboard','orders','storage','robots','map','stations','peripheral','charging','process','anomaly','logs','capacity','user-management','role-view','role-edit','user-assign'];
+    const roleData = {
+      admin: { name: '系统管理员', code: 'SUPER_ADMIN', description: '拥有系统全部功能及管理权限', avatar: '管', color: 'navy', permissions: [...allPermissions], enabled: true },
+      dispatcher: { name: '调度管理员', code: 'DISPATCHER', description: '可管理订单、流程及现场调度', avatar: '调', color: 'blue', permissions: ['dashboard','orders','storage','robots','map','stations','peripheral','charging','process','anomaly','capacity'], enabled: true },
+      operator: { name: '运维工程师', code: 'OPERATOR', description: '负责异常处理、设备维护和日志排查', avatar: '运', color: 'cyan', permissions: ['dashboard','robots','map','stations','peripheral','charging','anomaly','logs','capacity'], enabled: true },
+      viewer: { name: '只读访客', code: 'VIEWER', description: '仅可查看运行数据和基础配置', avatar: '访', color: 'gray', permissions: ['dashboard','orders','storage','robots','map','stations','peripheral','charging','process','capacity','role-view'], enabled: true }
+    };
+    let activeRole = 'dispatcher';
+    let savedPermissions = {};
+    let toastTimer;
+    const permissionInputs = [...document.querySelectorAll('#permissionGroups input[type="checkbox"]')];
+    const roleList = document.getElementById('roleList');
+    const toast = document.getElementById('toast');
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+    function updatePermissionCount() {
+      const checked = permissionInputs.filter(input => input.checked).length;
+      document.getElementById('permissionCount').textContent = `已选择 ${checked} / ${permissionInputs.length} 项权限`;
+      const checkAll = document.getElementById('checkAll');
+      checkAll.checked = checked === permissionInputs.length;
+      checkAll.indeterminate = checked > 0 && checked < permissionInputs.length;
+    }
+    function selectRole(key) {
+      activeRole = key;
+      const role = roleData[key];
+      roleList.querySelectorAll('.role-item').forEach(item => item.classList.toggle('active', item.dataset.role === key));
+      const avatar = document.getElementById('selectedAvatar');
+      avatar.textContent = role.avatar;
+      avatar.className = `role-avatar ${role.color}`;
+      document.getElementById('selectedRoleName').textContent = role.name;
+      document.getElementById('selectedRoleMeta').textContent = `${role.code} · ${role.description}`;
+      document.getElementById('roleStatus').checked = role.enabled;
+      document.querySelector('.status-switch b').textContent = role.enabled ? '已启用' : '已停用';
+      permissionInputs.forEach(input => input.checked = role.permissions.includes(input.value));
+      savedPermissions = { ...savedPermissions, [key]: [...role.permissions] };
+      updatePermissionCount();
+    }
+    roleList.addEventListener('click', event => {
+      const item = event.target.closest('.role-item');
+      if (item) selectRole(item.dataset.role);
+    });
+    permissionInputs.forEach(input => input.addEventListener('change', updatePermissionCount));
+    document.getElementById('checkAll').addEventListener('change', event => {
+      permissionInputs.forEach(input => input.checked = event.target.checked);
+      updatePermissionCount();
+    });
+    document.getElementById('roleStatus').addEventListener('change', event => {
+      roleData[activeRole].enabled = event.target.checked;
+      document.querySelector('.status-switch b').textContent = event.target.checked ? '已启用' : '已停用';
+      showToast(event.target.checked ? '角色已启用' : '角色已停用');
+    });
+    document.getElementById('savePermission').addEventListener('click', () => {
+      roleData[activeRole].permissions = permissionInputs.filter(input => input.checked).map(input => input.value);
+      savedPermissions[activeRole] = [...roleData[activeRole].permissions];
+      showToast(`${roleData[activeRole].name}的权限已保存`);
+    });
+    document.getElementById('resetPermission').addEventListener('click', () => {
+      const values = savedPermissions[activeRole] || roleData[activeRole].permissions;
+      permissionInputs.forEach(input => input.checked = values.includes(input.value));
+      updatePermissionCount();
+      showToast('已恢复到上次保存状态');
+    });
+    document.getElementById('roleSearch').addEventListener('input', event => {
+      const keyword = event.target.value.trim().toLowerCase();
+      roleList.querySelectorAll('.role-item').forEach(item => {
+        item.hidden = !item.textContent.toLowerCase().includes(keyword);
+      });
+    });
+
+    function openModal() {
+      const modal = document.getElementById('roleModal');
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      requestAnimationFrame(() => modal.classList.add('open'));
+      setTimeout(() => document.getElementById('newRoleName').focus(), 100);
+    }
+    function closeModal() {
+      const modal = document.getElementById('roleModal');
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      setTimeout(() => modal.hidden = true, 180);
+    }
+    document.getElementById('openRoleModal').addEventListener('click', openModal);
+    document.querySelectorAll('[data-close="roleModal"]').forEach(button => button.addEventListener('click', closeModal));
+    document.getElementById('roleModal').addEventListener('click', event => { if (event.target.id === 'roleModal') closeModal(); });
+    document.getElementById('roleForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const name = document.getElementById('newRoleName').value.trim();
+      const code = document.getElementById('newRoleCode').value.trim().toUpperCase();
+      const description = document.getElementById('newRoleDescription').value.trim() || '暂未填写角色说明';
+      const key = `custom-${Date.now()}`;
+      roleData[key] = { name, code, description, avatar: name.slice(0, 1), color: 'blue', permissions: [], enabled: true };
+      const item = document.createElement('button');
+      item.className = 'role-item';
+      item.type = 'button';
+      item.dataset.role = key;
+      item.innerHTML = `<span class="role-avatar blue"></span><span class="role-copy"><strong></strong><small></small></span><span class="role-state">启用</span>`;
+      item.querySelector('.role-avatar').textContent = name.slice(0, 1);
+      item.querySelector('strong').textContent = name;
+      item.querySelector('small').textContent = `${code} · 0 名用户`;
+      roleList.appendChild(item);
+      const count = Object.keys(roleData).length;
+      document.getElementById('roleCount').textContent = count;
+      document.getElementById('roleCountBadge').textContent = `${count} 个角色`;
+      closeModal();
+      event.target.reset();
+      selectRole(key);
+      showToast('角色已创建，可继续配置权限');
+    });
+    selectRole(activeRole);
+  </script>
+</body>
+</html>

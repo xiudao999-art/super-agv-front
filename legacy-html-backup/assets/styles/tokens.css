@@ -1,0 +1,56 @@
+:root {
+  --agv-blue: #1677c8;
+  --agv-blue-hover: #0f69b5;
+  --agv-blue-soft: #eaf4fd;
+  --agv-cyan: #078fb7;
+  --agv-green: #1f9d63;
+  --agv-yellow: #d99b00;
+  --agv-orange: #d96522;
+  --agv-red: #d84343;
+  --agv-ink: #122235;
+  --agv-text-secondary: #596675;
+  --agv-text-muted: #768392;
+  --agv-line: #dfe5ea;
+  --agv-line-soft: #e9edf1;
+  --agv-canvas: #f3f6f8;
+  --agv-panel: #ffffff;
+
+  --agv-text-caption: 12px;
+  --agv-text-small: 13px;
+  --agv-text-body: 14px;
+  --agv-text-subtitle: 16px;
+  --agv-text-title: 20px;
+
+  --agv-space-1: 4px;
+  --agv-space-2: 8px;
+  --agv-space-3: 12px;
+  --agv-space-4: 16px;
+  --agv-space-5: 20px;
+  --agv-space-6: 24px;
+  --agv-space-8: 32px;
+
+  --agv-control-sm: 32px;
+  --agv-control: 40px;
+  --agv-control-lg: 44px;
+  --agv-radius-control: 8px;
+  --agv-radius-panel: 12px;
+  --agv-sidebar-width: 220px;
+  --agv-topbar-height: 56px;
+  --agv-page-padding: 20px;
+
+  /* Backward-compatible aliases used by existing page CSS. */
+  --blue: var(--agv-blue);
+  --blue-strong: var(--agv-blue);
+  --blue-pale: var(--agv-blue-soft);
+  --cyan: var(--agv-cyan);
+  --green: var(--agv-green);
+  --yellow: var(--agv-yellow);
+  --orange: var(--agv-orange);
+  --red: var(--agv-red);
+  --ink: var(--agv-ink);
+  --muted: var(--agv-text-muted);
+  --line: var(--agv-line);
+  --canvas: var(--agv-canvas);
+  --panel: var(--agv-panel);
+  --sidebar: var(--agv-sidebar-width);
+}

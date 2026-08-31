@@ -1,0 +1,425 @@
+@import url('./layout.css');
+@import url('./tables.css');
+@import url('./forms.css');
+@import url('./feedback.css');
+
+.page-head, agv-page-header {
+  min-height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--agv-space-5);
+  padding: var(--agv-space-4) var(--agv-page-padding);
+  background: var(--agv-panel);
+}
+.page-head h1, agv-page-header h1 {
+  margin: 0 0 var(--agv-space-2);
+  color: var(--agv-ink);
+  font-size: var(--agv-text-title);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+.page-head p, agv-page-header p {
+  margin: 0;
+  color: var(--agv-text-secondary);
+  font-size: var(--agv-text-small);
+  line-height: 1.55;
+}
+.page-canvas { padding: var(--agv-page-padding); }
+.page-panel { border-radius: var(--agv-radius-panel); background: var(--agv-panel); }
+
+.action-btn, .head-btn, .modal-primary, .alert-primary {
+  min-height: var(--agv-control);
+  border-radius: var(--agv-radius-control);
+  font-size: var(--agv-text-small);
+  white-space: nowrap;
+}
+.action-btn:active, .head-btn:active, .modal-primary:active, .alert-primary:active { transform: translateY(1px); }
+input, select, textarea { font-size: var(--agv-text-small); }
+.form-field input, .form-field select { min-height: var(--agv-control); }
+
+table { font-size: var(--agv-text-small); }
+th { color: var(--agv-ink); font-size: var(--agv-text-small); }
+td { color: var(--agv-ink); font-size: var(--agv-text-small); }
+.status-tag { font-size: var(--agv-text-caption); }
+.list-heading p, .list-head p, .list-head small { font-size: var(--agv-text-caption); }
+
+.tabs { min-height: var(--agv-control); }
+.tab-btn { min-height: calc(var(--agv-control) - 4px); font-size: var(--agv-text-small); }
+
+.modal-card { border-radius: var(--agv-radius-panel); }
+.modal-card h2 { font-size: var(--agv-text-title); }
+.modal-close, .row-btn { min-height: var(--agv-control-sm); font-size: var(--agv-text-caption); }
+
+.agv-legacy-hooks { display: none !important; }
+
+@media (max-width: 760px) {
+  .page-head, agv-page-header { min-height: auto; align-items: flex-start; padding: 14px var(--agv-page-padding); }
+  .page-head h1, agv-page-header h1 { font-size: 19px; }
+  .page-head p, agv-page-header p { font-size: var(--agv-text-caption); }
+}
+
+
+/* Shared dialogs: compact, neutral Ant Design-like rhythm across business pages. */
+.modal-overlay, .alert-overlay { background: rgba(0, 0, 0, .45); }
+.modal-overlay { padding: 24px; }
+.modal-card, .status-modal {
+  max-height: calc(100vh - 48px);
+  padding: 24px;
+  border-radius: 8px;
+  background: #fff;
+  color: rgba(0, 0, 0, .88);
+  box-shadow: 0 6px 16px 0 rgba(0, 0, 0, .08), 0 3px 6px -4px rgba(0, 0, 0, .12), 0 9px 28px 8px rgba(0, 0, 0, .05);
+}
+.modal-card h2, .status-modal h2 {
+  margin: 0 0 20px;
+  color: rgba(0, 0, 0, .88);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+.modal-card p, .status-modal p { line-height: 1.5715; }
+.modal-card .form-grid, .status-modal .form-grid { gap: 16px; }
+.modal-card .form-field, .status-modal .form-field { gap: 8px; }
+.modal-card .form-field > span, .status-modal .form-field > span {
+  color: rgba(0, 0, 0, .88);
+  font-size: 14px;
+  line-height: 20px;
+}
+.modal-card .form-field input, .modal-card .form-field select, .modal-card .form-field textarea,
+.status-modal .form-field input, .status-modal .form-field select, .status-modal .form-field textarea {
+  border-color: #d9d9d9;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 20px;
+}
+.modal-card .form-field input, .modal-card .form-field select,
+.status-modal .form-field input, .status-modal .form-field select { min-height: 32px; }
+.modal-card .form-field textarea, .status-modal .form-field textarea { min-height: 72px; }
+.modal-card .form-field input:focus, .modal-card .form-field select:focus, .modal-card .form-field textarea:focus,
+.status-modal .form-field input:focus, .status-modal .form-field select:focus, .status-modal .form-field textarea:focus {
+  border-color: #4096ff;
+  box-shadow: 0 0 0 2px rgba(5, 145, 255, .1);
+}
+.modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+.modal-actions .modal-close, .modal-actions .modal-primary, .modal-actions > button {
+  min-height: 32px;
+  height: 32px;
+  padding: 0 15px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 30px;
+}
+.modal-close, .modal-actions > button:not(.modal-primary) {
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  color: rgba(0, 0, 0, .88);
+}
+.modal-primary {
+  border: 1px solid #1677ff;
+  background: #1677ff;
+  color: #fff;
+}
+.modal-close:hover, .modal-actions > button:not(.modal-primary):hover {
+  border-color: #4096ff;
+  color: #4096ff;
+}
+.modal-primary:hover { border-color: #4096ff; background: #4096ff; }
+.modal-close:focus-visible, .modal-primary:focus-visible, .modal-actions > button:focus-visible {
+  outline: 2px solid rgba(5, 145, 255, .25);
+  outline-offset: 1px;
+}
+.modal-close:disabled, .modal-primary:disabled, .modal-actions > button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+@media (max-width: 760px) {
+  .modal-overlay { padding: 16px; }
+  .modal-card, .status-modal { max-height: calc(100vh - 32px); padding: 20px 16px; }
+  .modal-card h2, .status-modal h2 { margin-bottom: 16px; }
+  .modal-actions { margin-top: 20px; padding-top: 12px; }
+}
+
+
+/* Detail surfaces and action groups: shared Ant Design-aligned visual hierarchy. */
+.detail-grid { gap: 16px; }
+.detail-item, .detail-box {
+  padding: 16px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  background: #fafafa;
+}
+.detail-item span, .detail-box > span, .detail-box > strong {
+  display: block;
+  color: rgba(0, 0, 0, .45);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+}
+.detail-item strong, .detail-box strong:not(:first-child) {
+  display: block;
+  margin-top: 4px;
+  color: rgba(0, 0, 0, .88);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+.detail-box p {
+  margin: 4px 0 0;
+  color: rgba(0, 0, 0, .65);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* Order task detail: distinguish the back action from the primary search action. */
+body:has(.detail-canvas) .page-head .primary-btn {
+  min-height: 32px;
+  height: 32px;
+  padding: 0 15px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  color: rgba(0, 0, 0, .88);
+  background: #fff;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 30px;
+}
+body:has(.detail-canvas) .page-head .primary-btn:hover {
+  border-color: #4096ff;
+  color: #4096ff;
+  background: #fff;
+}
+body:has(.detail-canvas) .toolbar {
+  gap: 16px;
+  margin: 20px 0 16px;
+}
+body:has(.detail-canvas) .toolbar-actions,
+body:has(.detail-canvas) .card-actions { gap: 8px; }
+body:has(.detail-canvas) .filter-btn,
+body:has(.detail-canvas) .soft-btn {
+  min-height: 32px;
+  height: 32px;
+  padding: 0 15px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  color: rgba(0, 0, 0, .88);
+  background: #fff;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 30px;
+}
+body:has(.detail-canvas) .filter-btn.primary {
+  border-color: #1677ff;
+  color: #fff;
+  background: #1677ff;
+}
+body:has(.detail-canvas) .filter-btn:hover,
+body:has(.detail-canvas) .soft-btn:hover {
+  border-color: #4096ff;
+  color: #4096ff;
+  background: #fff;
+}
+body:has(.detail-canvas) .filter-btn.primary:hover {
+  border-color: #4096ff;
+  color: #fff;
+  background: #4096ff;
+}
+body:has(.detail-canvas) .card-head { margin-bottom: 20px; }
+
+/* Template editor: header, canvas and property-panel actions use the same control scale. */
+body:has(.editor-shell) .page-head .tools { gap: 8px; }
+body:has(.editor-shell) .page-head .tool-btn,
+body:has(.editor-shell) .page-head .head-btn,
+body:has(.editor-shell) .property-actions .tool-btn,
+body:has(.editor-shell) .property-block > .tool-btn.primary {
+  min-height: 32px;
+  height: 32px;
+  padding: 0 15px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 30px;
+}
+body:has(.editor-shell) .page-head .tool-btn,
+body:has(.editor-shell) .property-actions .tool-btn:not(.danger) {
+  color: rgba(0, 0, 0, .88);
+  background: #fff;
+}
+body:has(.editor-shell) .page-head .head-btn,
+body:has(.editor-shell) .property-block > .tool-btn.primary {
+  border-color: #1677ff;
+  color: #fff;
+  background: #1677ff;
+}
+body:has(.editor-shell) .property-actions .tool-btn.danger {
+  border-color: #ffccc7;
+  color: #ff4d4f;
+  background: #fff2f0;
+}
+body:has(.editor-shell) .page-head .tool-btn:hover,
+body:has(.editor-shell) .property-actions .tool-btn:not(.danger):hover {
+  border-color: #4096ff;
+  color: #4096ff;
+  background: #fff;
+}
+body:has(.editor-shell) .page-head .head-btn:hover,
+body:has(.editor-shell) .property-block > .tool-btn.primary:hover {
+  border-color: #4096ff;
+  background: #4096ff;
+}
+body:has(.editor-shell) .property-actions .tool-btn.danger:hover {
+  border-color: #ff7875;
+  color: #ff4d4f;
+  background: #fff1f0;
+}
+body:has(.detail-canvas) .filter-btn:focus-visible,
+body:has(.detail-canvas) .soft-btn:focus-visible,
+body:has(.editor-shell) .page-head .tool-btn:focus-visible,
+body:has(.editor-shell) .page-head .head-btn:focus-visible,
+body:has(.editor-shell) .property-actions .tool-btn:focus-visible {
+  outline: 2px solid rgba(5, 145, 255, .25);
+  outline-offset: 1px;
+}
+
+@media (max-width: 760px) {
+  .detail-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .detail-item, .detail-box { padding: 12px; }
+  body:has(.detail-canvas) .page-head .primary-btn { width: auto; min-width: 32px; }
+  body:has(.detail-canvas) .toolbar-actions { width: 100%; }
+  body:has(.detail-canvas) .toolbar-actions .filter-btn { flex: 1 1 0; }
+  body:has(.detail-canvas) .card-actions { margin-top: 16px; }
+  body:has(.editor-shell) .page-head .tools { width: 100%; }
+}
+
+
+/* Semantic tag palette: one color family per business meaning across all pages. */
+:root {
+  --agv-tag-info: var(--agv-blue);
+  --agv-tag-info-border: #cde2f3;
+  --agv-tag-info-bg: #f1f8fd;
+  --agv-tag-success: var(--agv-green);
+  --agv-tag-success-border: #d1efdf;
+  --agv-tag-success-bg: #f4fcf7;
+  --agv-tag-warning: var(--agv-yellow);
+  --agv-tag-warning-border: #f7e8b8;
+  --agv-tag-warning-bg: #fffaf0;
+  --agv-tag-danger: var(--agv-red);
+  --agv-tag-danger-border: #f3d7d5;
+  --agv-tag-danger-bg: #fff5f4;
+  --agv-tag-neutral: #89939d;
+  --agv-tag-neutral-border: #e1e5e8;
+  --agv-tag-neutral-bg: #fafbfc;
+}
+.tag.info, .blue-state, .state-occupied, .status-executing, .badge-blue {
+  color: var(--agv-tag-info);
+  border-color: var(--agv-tag-info-border);
+  background: var(--agv-tag-info-bg);
+}
+.tag.success, .valid, .state-empty, .state-enabled, .state-published, .status-completed, .badge-green {
+  color: var(--agv-tag-success);
+  border-color: var(--agv-tag-success-border);
+  background: var(--agv-tag-success-bg);
+}
+.tag.warning, .draft, .standby, .state-reserved, .status-waiting, .severity-tag.severity-warning, .severity.warning {
+  color: var(--agv-tag-warning);
+  border-color: var(--agv-tag-warning-border);
+  background: var(--agv-tag-warning-bg);
+}
+.tag.error, .status-failed, .state-conflict, .severity, .severity.severe,
+.title-status--danger, .anomaly-count, .severity-tag.severity-critical {
+  color: var(--agv-tag-danger);
+  border-color: var(--agv-tag-danger-border);
+  background: var(--agv-tag-danger-bg);
+}
+.tag.gray, .gray-state, .state-disabled, .status-cancelled {
+  color: var(--agv-tag-neutral);
+  border-color: var(--agv-tag-neutral-border);
+  background: var(--agv-tag-neutral-bg);
+}
+.status-item.normal strong { color: var(--agv-tag-success); }
+.status-item.limited strong { color: var(--agv-tag-warning); }
+.status-item.abnormal strong { color: var(--agv-tag-danger); }
+.status-item.maintenance strong { color: var(--agv-tag-neutral); }
+
+/* Keep status tags in configuration pages visually consistent. */
+body .page-canvas :is(.badge, .status-tag, .resource-status) {
+  min-width: 0;
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+}
+body .page-canvas :is(.badge, .status-tag, .resource-status)::before {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+body .page-canvas .editor-meta-head .status-tag {
+  padding: 3px 10px;
+  line-height: 18px;
+}
+body .page-canvas .editor-meta-head .status-tag::before {
+  display: block;
+}
+
+/* Configuration center table actions: blue edit icon and red delete icon. */
+body .page-canvas table button.agv-config-action-icon {
+  width: 28px !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  display: inline-grid !important;
+  place-items: center;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  cursor: pointer;
+}
+body .page-canvas table button.agv-config-action-icon svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body .page-canvas table button.agv-config-action-edit { color: var(--agv-blue) !important; }
+body .page-canvas table button.agv-config-action-delete { color: var(--agv-red) !important; }
+body .page-canvas table button.agv-config-action-edit:hover { background: #edf6ff !important; }
+body .page-canvas table button.agv-config-action-delete:hover { background: #fff1ef !important; }
+body .page-canvas table button.agv-config-action-icon:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+body .page-canvas table button.agv-config-action-icon:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}

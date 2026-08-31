@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <script src="mock-api.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>复合机器人调度系统 · AGV产能</title>
+  <link rel="stylesheet" href="assets/styles/pages/lab-capacity.css">
+  <link rel="stylesheet" href="assets/styles/tokens.css">
+  <link rel="stylesheet" href="assets/styles/base.css">
+  <link rel="stylesheet" href="assets/styles/components.css">
+  <script type="module" src="assets/components/register.js" blocking="render"></script>
+</head>
+<body>
+  <agv-app-shell active-route="lab-capacity.html" section-title="AGV产能" user-name="陈工">
+    <div class="agv-legacy-hooks" hidden><aside id="sidebar"></aside><div id="scrim"></div><button id="menuBtn" type="button"></button><button id="statusInfoBtn" type="button"></button><button id="statusBtn" type="button"></button><button id="alertInfoBtn" type="button"></button><button id="alertBtn" type="button"></button></div>
+    <agv-page-header class="page-head"><div><h1>AGV产能</h1><p>分析任务量、机台等待、路径耗时和异常影响</p></div></agv-page-header>
+    <main class="page-canvas capacity-page">
+      <section class="capacity-filter-card"><div class="capacity-filter-copy"><h2>统计条件</h2><p>默认查询近 7 天，切换时间范围后页面指标和趋势图同步刷新</p></div><label class="field-shell capacity-range-field"><span>时间范围</span><select id="capacityRange"><option>近7天</option><option>近30天</option><option>今日</option></select></label></section>
+      <section class="capacity-kpis" aria-label="产能指标">
+        <article class="capacity-kpi capacity-kpi-success"><div><span>近7天完成订单</span><strong id="capacityOrders">512</strong><span class="tag success">统计周期内已完成</span></div><span class="kpi-icon"><img src="assets/lab-capacity/kpi-completed.svg" alt=""></span></article>
+        <article class="capacity-kpi capacity-kpi-info"><div><span>近7天完成订单</span><strong>4分32秒</strong><span class="tag info">不含仪器处理</span></div><span class="kpi-icon"><img src="assets/lab-capacity/kpi-time.svg" alt=""></span></article>
+        <article class="capacity-kpi capacity-kpi-warning"><div><span>机台等待占比</span><strong>18.4%</strong><span class="tag warning">主要为贴标机台</span></div><span class="kpi-icon"><img src="assets/lab-capacity/kpi-wait.svg" alt=""></span></article>
+        <article class="capacity-kpi capacity-kpi-error"><div><span>异常影响时长</span><strong>23分钟</strong><span class="tag error">主要为贴标机台</span></div><span class="kpi-icon"><img src="assets/lab-capacity/kpi-warning.svg" alt=""></span></article>
+      </section>
+      <section class="capacity-analytics">
+        <article class="bar-panel"><div class="capacity-card-head"><h2>节点属性</h2><span class="tag info">单位：单</span></div><div class="bar-chart"><div class="y-axis"><span style="bottom:0%">0</span><span style="bottom:10%">10</span><span style="bottom:20%">20</span><span style="bottom:30%">30</span><span style="bottom:40%">40</span><span style="bottom:50%">50</span><span style="bottom:60%">60</span><span style="bottom:70%">70</span><span style="bottom:80%">80</span><span style="bottom:90%">90</span><span style="bottom:100%">100</span></div><div class="plot" id="capacityPlot"><i class="bar" style="--height:34%" title="34 单"></i><i class="bar" style="--height:59%" title="59 单"></i><i class="bar" style="--height:58%" title="58 单"></i><i class="bar" style="--height:70%" title="70 单"></i><i class="bar" style="--height:70%" title="70 单"></i><i class="bar" style="--height:89%" title="89 单"></i><i class="bar" style="--height:59%" title="59 单"></i></div><div class="x-axis"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div></div></article>
+        <aside class="duration-panel"><div class="capacity-card-head"><h2>耗时构成</h2><span class="tag info">近7天</span></div><div class="duration-list"><article class="duration-item"><div class="duration-item-head"><span>机台等待</span><strong>50秒</strong></div><div class="duration-progress"><i style="--progress:32%"></i><b>32%</b></div></article><article class="duration-item"><div class="duration-item-head"><span>机台等待</span><strong>50秒</strong></div><div class="duration-progress"><i style="--progress:18%"></i><b>进度18%</b></div></article><article class="duration-item"><div class="duration-item-head"><span>取放与扫码</span><strong>1分24秒</strong></div><p>42%</p><div class="duration-progress"><i style="--progress:42%"></i><b>进度42%</b></div></article><article class="duration-item"><div class="duration-item-head"><span>异常与恢复</span><strong>24秒</strong></div><div class="duration-progress"><i style="--progress:42%"></i><b>进度42%</b></div></article></div></aside>
+      </section>
+    </main>
+  </agv-app-shell>
+  <div class="modal-overlay" id="statusModal" hidden><section class="modal-card"><h2>系统运行状态</h2><div class="status-list"><article class="status-item normal"><strong>绿色 · 系统正常</strong><p>核心服务、数据库、任务引擎和机器人连接正常。</p></article><article class="status-item limited"><strong>黄色 · 受限运行</strong><p>部分非核心设备或上游接口异常，系统仍可继续部分业务。</p></article><article class="status-item abnormal"><strong>红色 · 系统异常</strong><p>核心能力异常，系统暂停接收和分配新任务。</p></article></div><div class="modal-actions"><button class="modal-close" data-close="statusModal">关闭</button></div></section></div>
+  <div class="drawer-overlay" id="alertDrawer" hidden><aside class="drawer"><header><h2>异常提醒</h2><p>3 条未完成 · 1 条严重</p></header><div class="alert-feed"><article class="alert-card"><strong>机台允许进样事件等待超过流程配置的 30 秒</strong><p>ALM-20260817-0042 · 待处理</p></article><article class="alert-card"><strong>系统记录为空，但库位传感器检测有物</strong><p>ALM-20260817-0041 · 处理中</p></article><article class="alert-card"><strong>视觉设备出现短时断连</strong><p>ALM-20260817-0040 · 已确认</p></article></div><footer><a href="current-anomalies.html">进入异常与恢复</a></footer></aside></div>
+  <div class="toast" id="toast"></div>
+  <script>
+    const toast=document.getElementById('toast');let toastTimer;
+    function showToast(message){toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2200)}
+    function openLayer(id){const layer=document.getElementById(id);if(!layer)return;layer.hidden=false;requestAnimationFrame(()=>layer.classList.add('open'))}
+    function closeLayer(id){const layer=document.getElementById(id);if(!layer)return;layer.classList.remove('open');setTimeout(()=>layer.hidden=true,220)}
+    document.getElementById('statusBtn').addEventListener('click',()=>openLayer('statusModal'));document.getElementById('alertBtn').addEventListener('click',()=>openLayer('alertDrawer'));document.querySelectorAll('[data-close]').forEach(button=>button.addEventListener('click',()=>closeLayer(button.dataset.close)));document.querySelectorAll('.modal-overlay,.drawer-overlay').forEach(layer=>layer.addEventListener('click',event=>{if(event.target===layer)closeLayer(layer.id)}));
+    const sidebar=document.getElementById('sidebar'),scrim=document.getElementById('scrim');document.getElementById('menuBtn').addEventListener('click',()=>{sidebar.classList.toggle('open');scrim.classList.toggle('show')});scrim.addEventListener('click',()=>{sidebar.classList.remove('open');scrim.classList.remove('show')});
+    document.getElementById('capacityRange').addEventListener('change',event=>{const range=event.target.value,values=range==='今日'?[22,38,30,42,49,61,55]:range==='近30天'?[72,84,78,91,86,96,90]:[34,59,58,70,70,89,59];document.querySelectorAll('#capacityPlot .bar').forEach((bar,index)=>{bar.style.setProperty('--height',values[index]+'%');bar.title=values[index]+' 单'});document.getElementById('capacityOrders').textContent=range==='今日'?'76':range==='近30天'?'2,184':'512';showToast('已切换统计范围：'+range)});
+  </script>
+</body>
+</html>

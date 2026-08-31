@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <script src="mock-api.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>复合机器人调度系统 · 外围资源</title>
+  <link rel="stylesheet" href="assets/styles/pages/peripheral-resources.css">
+  <link rel="stylesheet" href="assets/styles/tokens.css">
+  <link rel="stylesheet" href="assets/styles/base.css">
+  <link rel="stylesheet" href="assets/styles/components.css">
+  <script type="module" src="assets/components/register.js" blocking="render"></script>
+  <script src="lab-peripheral-api.js" defer></script>
+</head>
+<body>
+  <agv-app-shell active-route="peripheral-resources.html" section-title="外围资源" user-name="陈工">
+    <div class="agv-legacy-hooks" hidden>
+      <aside id="sidebar"></aside><div id="scrim"></div><button id="menuBtn" type="button"></button>
+      <button id="statusInfoBtn" type="button"></button><button id="statusBtn" type="button"></button>
+      <button id="alertInfoBtn" type="button"></button><button id="alertBtn" type="button"></button>
+    </div>
+    <agv-page-header class="page-head"><div><h1>外围资源</h1></div></agv-page-header>
+    <main class="page-canvas resource-page">
+      <section class="page-panel resource-panel">
+        <div class="content">
+          <div class="list-head resource-head">
+            <div><h2>门与电梯</h2></div>
+            <div class="tools">
+              <button class="tool-btn primary" id="addPeripheral" type="button">
+                <svg class="icon"><use href="assets/icons.svg#i-plus"/></svg>新增外围资源
+              </button>
+              <button class="tool-btn test-btn" id="testAllPeripheral" type="button">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12h8M12 8v8"/><circle cx="12" cy="12" r="9"/></svg>连接测试
+              </button>
+            </div>
+          </div>
+          <div class="table-wrap resource-table-wrap">
+            <table class="resource-table" aria-label="外围资源列表">
+              <thead><tr><th>资源编号</th><th>类型</th><th>所属 / 连接空间（地图）</th><th>地图坐标或两端连接点</th><th>关联导航点</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody id="resourceRows"></tbody>
+            </table>
+          </div>
+          <div class="total" id="resourceTotal">共计 0 条数据</div>
+        </div>
+      </section>
+    </main>
+  </agv-app-shell>
+
+  <div class="modal-overlay" id="peripheralModal" hidden>
+    <section class="modal-card peripheral-modal-card" role="dialog" aria-modal="true" aria-labelledby="peripheralModalTitle">
+      <header class="resource-modal-head">
+        <div><h2 id="peripheralModalTitle">新增外围资源</h2><p>维护资源类型、空间位置、连接点与当前状态</p></div>
+        <button class="modal-x" id="peripheralModalClose" type="button" aria-label="关闭">×</button>
+      </header>
+      <form id="peripheralForm">
+        <div class="form-grid">
+          <label class="form-field"><span>资源编号</span><input id="resourceCode" maxlength="64" placeholder="例如：D-01" required></label>
+          <label class="form-field"><span>资源类型</span><select id="resourceType" required><option value="自动门">自动门</option><option value="电梯">电梯</option></select></label>
+          <label class="form-field wide"><span>所属 / 连接空间（地图）</span><input id="resourceSpace" placeholder="例如：空间 A / 总览地图 V3.2" required></label>
+          <label class="form-field wide"><span>地图坐标或两端连接点</span><textarea id="resourceCoordinate" placeholder="例如：X 18.400 / Y 3.200 / θ 90.0°" required></textarea></label>
+          <label class="form-field"><span>关联导航点</span><input id="resourceNavPoint" placeholder="例如：DOOR-A-01" required></label>
+          <label class="form-field"><span>状态</span><select id="resourceStatus"><option value="在线">在线</option><option value="可用">可用</option><option value="备用">备用</option><option value="离线">离线</option></select></label>
+          <label class="form-field wide"><span>备注</span><textarea id="resourceRemark" placeholder="可填写通信方式、预约规则等说明"></textarea></label>
+        </div>
+        <div class="modal-actions"><button class="modal-close" id="peripheralCancel" type="button">取消</button><button class="modal-primary" type="submit">保存</button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+</body>
+</html>

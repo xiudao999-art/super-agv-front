@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <script src="mock-api.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>登录</title>
+  <link rel="stylesheet" href="assets/styles/tokens.css">
+  <link rel="stylesheet" href="assets/styles/base.css">
+  <link rel="stylesheet" href="assets/styles/pages/login.css">
+</head>
+<body class="login-body">
+  <main class="login-page">
+    <section class="login-visual" aria-label="系统介绍">
+      <div class="visual-copy">
+        <span class="visual-kicker">SMART AGV CONTROL</span>
+        <h1>让每一台设备<br>高效协同运行</h1>
+        <p>统一管理订单、流程、地图与机器人任务，实时掌握现场运行状态。</p>
+      </div>
+      <div class="route-visual" aria-hidden="true">
+        <svg viewBox="0 0 720 350" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="routeGlow" x1="0" x2="1"><stop offset="0" stop-color="#59b9ff"/><stop offset="1" stop-color="#86e3ff"/></linearGradient>
+            <filter id="softGlow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <path class="grid-line" d="M40 64H680M40 134H680M40 204H680M40 274H680M112 30V320M232 30V320M352 30V320M472 30V320M592 30V320"/>
+          <path class="route-line" d="M83 270H232V120H466V216H630"/>
+          <g class="route-point"><circle cx="83" cy="270" r="16"/><circle cx="83" cy="270" r="5"/></g>
+          <g class="route-point"><circle cx="232" cy="120" r="16"/><circle cx="232" cy="120" r="5"/></g>
+          <g class="route-point"><circle cx="466" cy="216" r="16"/><circle cx="466" cy="216" r="5"/></g>
+          <g class="route-point active"><circle cx="630" cy="216" r="21"/><circle cx="630" cy="216" r="7"/></g>
+          <g class="agv-vehicle" transform="translate(320 94)"><rect width="82" height="50" rx="12"/><path d="M19 18h44M24 32h34"/><circle cx="18" cy="48" r="5"/><circle cx="64" cy="48" r="5"/></g>
+        </svg>
+      </div>
+      <p class="visual-foot">AGV · ROBOT · WORKFLOW · DIGITAL MAP</p>
+    </section>
+
+    <section class="login-panel">
+      <div class="login-card">
+        <header class="login-heading">
+          <span class="login-eyebrow">欢迎回来</span>
+          <h2>登录系统</h2>
+          <p>请输入账号信息进入管理平台</p>
+        </header>
+        <form id="loginForm" class="login-form">
+          <label class="login-field">
+            <span>账号</span>
+            <span class="input-shell">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+              <input id="loginAccount" name="account" autocomplete="username" value="admin" placeholder="请输入账号" required>
+            </span>
+          </label>
+          <label class="login-field">
+            <span>密码</span>
+            <span class="input-shell">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 15v2"/></svg>
+              <input id="loginPassword" name="password" type="password" autocomplete="current-password" value="123456" placeholder="请输入密码" required>
+              <button class="password-toggle" id="passwordToggle" type="button" aria-label="显示密码">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </span>
+          </label>
+          <div class="login-options">
+            <label class="remember"><input type="checkbox" checked><span>记住账号</span></label>
+            <button class="text-button" id="forgotPassword" type="button">忘记密码</button>
+          </div>
+          <button class="login-submit" id="loginSubmit" type="submit"><span>登录</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5"/></svg></button>
+          <p class="login-demo">静态演示：输入任意账号和密码即可登录</p>
+        </form>
+      </div>
+      <p class="login-copyright">© 2026 · v2.3</p>
+    </section>
+  </main>
+  <div class="login-toast" id="loginToast" role="status"></div>
+  <script>
+    const form = document.getElementById('loginForm');
+    const password = document.getElementById('loginPassword');
+    const toggle = document.getElementById('passwordToggle');
+    const submit = document.getElementById('loginSubmit');
+    const toast = document.getElementById('loginToast');
+    let toastTimer;
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+    toggle.addEventListener('click', () => {
+      const visible = password.type === 'text';
+      password.type = visible ? 'password' : 'text';
+      toggle.setAttribute('aria-label', visible ? '显示密码' : '隐藏密码');
+      toggle.classList.toggle('visible', !visible);
+    });
+    document.getElementById('forgotPassword').addEventListener('click', () => showToast('请联系系统管理员重置密码'));
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      submit.disabled = true;
+      submit.querySelector('span').textContent = '登录中…';
+      setTimeout(() => location.href = 'robot-dispatch-dashboard.html', 450);
+    });
+  </script>
+</body>
+</html>

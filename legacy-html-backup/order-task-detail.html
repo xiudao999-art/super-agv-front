@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <script src="mock-api.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f5f7f9" />
+  <title>复合机器人调度系统 · 订单任务详情</title>
+  <link rel="stylesheet" href="assets/styles/pages/order-task-detail.css">
+  <link rel="stylesheet" href="assets/styles/tokens.css">
+  <link rel="stylesheet" href="assets/styles/base.css">
+  <link rel="stylesheet" href="assets/styles/components.css">
+  <script type="module" src="assets/components/register.js" blocking="render"></script>
+  
+</head>
+<body>
+
+  <agv-app-shell active-route="order-task-detail.html" section-title="订单任务详情" user-name="陈工"><div class="agv-legacy-hooks" hidden><aside id="sidebar"></aside><div id="scrim"></div><button id="menuBtn" type="button"></button><button id="statusInfoBtn" type="button"></button><button id="statusBtn" type="button"></button><button id="alertInfoBtn" type="button"></button><button id="alertBtn" type="button"></button></div>
+    <agv-page-header class="page-head"><div><h1>订单任务详情</h1><p>查看订单拆分后的搬运任务与动作执行链</p></div><a class="primary-btn" href="order-management.html"><svg class="icon"><use href="assets/icons.svg#i-arrow"/></svg><span>返回订单列表</span></a></agv-page-header>
+
+    <div class="detail-canvas">
+      <section class="detail-panel">
+        <div class="tabs-row"><agv-tabs class="tabs" role="tablist"><a class="tab-btn" role="tab" aria-selected="false" href="order-management.html">订单列表</a><a class="tab-btn active" role="tab" aria-selected="true" href="#task-list">订单任务详情</a></agv-tabs></div>
+        <div class="task-list-section" id="task-list">
+          <div class="section-heading"><h2>订单任务列表</h2><p>点击任意一行切换下方订单信息、动作链和执行配置</p></div>
+          <div class="toolbar"><label class="field-shell"><span>选择订单</span><select id="orderSelect" aria-label="选择订单" data-agv-select-searchable data-agv-select-search-placeholder="筛选订单号/系统订单号" data-agv-select-menu-min-width="580"></select></label><div class="toolbar-actions"><button class="filter-btn" id="resetOrder"><svg class="icon"><use href="assets/icons.svg#i-refresh"/></svg>重置</button><button class="filter-btn primary" id="searchOrder"><svg class="icon"><use href="assets/icons.svg#i-search"/></svg>搜索</button></div></div>
+          <div class="table-wrap"><table class="task-table" aria-label="订单任务列表"><thead><tr><th>任务编号</th><th>流程编号</th><th>订单号</th><th>系统订单号</th><th>当前状态</th><th>当前步骤</th><th>下发时间</th></tr></thead><tbody id="taskBody"></tbody></table></div>
+          <div class="table-summary" id="taskSummary">共计 0 条数据</div>
+        </div>
+      </section>
+
+      <section class="summary-grid" aria-label="订单任务摘要">
+        <article class="summary-card"><div class="summary-card-label">订单号</div><strong id="summaryOrder">--</strong></article>
+        <article class="summary-card"><div class="summary-card-label">系统订单号</div><strong id="summarySystem">--</strong></article>
+        <article class="summary-card"><div class="summary-card-label"><span>当前任务状态</span><span class="status-tag status-waiting current-step" id="stepBadge">加载中…</span></div><strong id="summaryStatus">加载中…</strong></article>
+      </section>
+
+      <section class="lower-grid">
+        <article class="card action-card">
+          <div class="card-head"><div><h2>动作链详情</h2><p>查看所选任务的动作、地图、路径和关联资源</p></div><div class="card-actions"><button class="soft-btn" data-demo="实时调度">查看实时调度</button><button class="soft-btn" data-demo="路径配置">查看路径配置</button><button class="soft-btn" data-demo="关联资源">查看关联资源</button></div></div>
+          <div class="table-wrap"><table class="action-table" aria-label="动作链详情"><thead><tr><th>序号</th><th>动作名称</th><th>点位/资源</th><th>当前状态</th><th>完成证据</th></tr></thead><tbody id="actionBody"></tbody></table></div>
+          <div class="table-summary" id="actionSummary">共计 0 条数据</div>
+        </article>
+        <aside class="card config-card"><h2>本次任务执行配置</h2><div class="config-list" id="configList"></div><div class="warning-note" id="orderErrorNote">取料、放料等可能改变物理状态的动作超时后，先查询现场证据，不直接重复执行。</div></aside>
+      </section>
+    </div>
+  </agv-app-shell>
+
+  <div class="modal-overlay" id="statusModal" hidden><section class="status-modal" role="dialog" aria-modal="true" aria-labelledby="statusTitle" tabindex="-1"><h2 id="statusTitle">系统运行状态</h2><div class="status-list"><article class="status-item normal"><strong>绿色·系统正常</strong><p>核心服务、数据库、任务引擎和机器人连接正常。</p></article><article class="status-item limited"><strong>黄色·受限运行</strong><p>部分非核心设备或上游接口异常，系统仍可继续部分业务。</p></article><article class="status-item abnormal"><strong>红色·系统异常</strong><p>核心能力异常，系统暂停接收和分配新任务。</p></article><article class="status-item maintenance"><strong>灰色·维护模式</strong><p>系统处于人工维护、升级或硬件调试状态。</p></article></div><div class="modal-actions"><button class="modal-close" id="statusClose">关闭</button></div></section></div>
+  <div class="alert-overlay" id="alertDrawer" hidden><aside class="alert-drawer" role="dialog" aria-modal="true" aria-labelledby="alertTitle" tabindex="-1"><header class="alert-header"><h2 id="alertTitle">异常提醒</h2><p>3条未完成·1条严重</p></header><div class="alert-feed"><div class="alert-list"><article class="alert-card"><span class="severity">严重</span><strong>机台允许进样事件等待超过流程配置的30秒</strong><p>ALM-20260817-0042 · 待处理 · 负责人：陈工</p></article><article class="alert-card"><strong>系统记录为空，但库位传感器检测有物</strong><p>ALM-20260817-0041 · 处理中 · 负责人：王工</p></article><article class="alert-card"><strong>视觉设备在60秒内出现3次短时断连</strong><p>ALM-20260817-0040 · 已确认 · 负责人：李工</p></article></div></div><footer class="alert-footer"><button class="alert-primary" id="recoveryBtn">进入异常与恢复</button></footer></aside></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const orders = [];
+    const actionTemplate = [];
+    const orderSelect = document.getElementById('orderSelect');
+    const taskBody = document.getElementById('taskBody');
+    const actionBody = document.getElementById('actionBody');
+    const toast = document.getElementById('toast');
+    let toastTimer;
+    let selectedTask = 0;
+
+    function showToast(message){toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){toast.classList.remove('show')},2300)}
+    function orderSuffix(systemNo){return systemNo.slice(-4)}
+    function getSelectedOrder(){return orders.find(function(item){return item[0]===orderSelect.value})||orders[0]}
+    function getTasks(){
+      const order=getSelectedOrder(); const suffix=orderSuffix(order[1]);
+      return [
+        {id:'TRN-'+suffix+'-01',flow:'FLOW-WH-LABEL',status:'executing',label:'执行中',step:'移动到贴标机台',time:'2026-08-16 08:42'},
+        {id:'TRN-'+suffix+'-02',flow:'FLOW-WH-FEED',status:'waiting',label:'待执行',step:'等待前序任务完成',time:'2026-08-16 08:47'}
+      ];
+    }
+    function renderTasks(){
+      const order=getSelectedOrder(); const tasks=getTasks(); selectedTask=Math.min(selectedTask,tasks.length-1);
+      taskBody.innerHTML=tasks.map(function(task,index){return '<tr class="'+(index===selectedTask?'selected':'')+'" data-index="'+index+'"><td>'+task.id+'</td><td>'+task.flow+'</td><td>'+order[0]+'</td><td>'+order[1]+'</td><td><span class="status-tag status-'+task.status+'">'+task.label+'</span></td><td>'+task.step+'</td><td>'+task.time+'</td></tr>'}).join('');
+      taskBody.querySelectorAll('tr').forEach(function(row){row.addEventListener('click',function(){selectedTask=Number(row.dataset.index);renderTasks()})});
+      document.getElementById('summaryOrder').textContent=order[0];document.getElementById('summarySystem').textContent=order[1];
+      const task=tasks[selectedTask]; document.getElementById('summaryStatus').textContent=task.label; const badge=document.getElementById('stepBadge'); badge.textContent=task.step;badge.className='status-tag status-'+task.status+' current-step';
+      renderActions(task); renderConfig(task); history.replaceState(null,'','?order='+encodeURIComponent(order[0])+'&task='+encodeURIComponent(task.id));
+    }
+    function renderActions(task){
+      actionBody.innerHTML=actionTemplate.map(function(action,index){let status=action[3],label=action[4],evidence=action[5];if(task.status==='waiting'){status='waiting';label='待执行';evidence='-'}return '<tr><td>'+action[0]+'</td><td>'+action[1]+'</td><td>'+action[2]+'</td><td><span class="status-tag status-'+status+'">'+label+'</span></td><td>'+evidence+'</td></tr>'}).join('');
+    }
+    function renderConfig(task){
+      const route=task.flow==='FLOW-WH-LABEL'?'PATH-A-B V2.0':'PATH-B-C V1.6';
+      document.getElementById('configList').innerHTML='<article class="config-item"><strong>流程</strong><p>'+task.flow+' · 智能仓储→贴标机台</p></article><article class="config-item"><strong>流程模板</strong><p>智能仓储-贴标模板</p></article><article class="config-item"><strong>完整路径</strong><p>'+route+'</p></article><article class="config-item"><strong>点位配置</strong><p>POINT-B V1.8</p></article><article class="config-item"><strong>异常策略</strong><p>机台级重试3次，失败后挂起</p></article>';
+    }
+    document.querySelectorAll('[data-demo]').forEach(function(button){button.addEventListener('click',function(){showToast('正在查看'+button.dataset.demo)})});
+
+    const sidebar=document.getElementById('sidebar'),scrim=document.getElementById('scrim'),menuBtn=document.getElementById('menuBtn');function setSidebar(open){sidebar.classList.toggle('open',open);scrim.classList.toggle('show',open)}menuBtn.addEventListener('click',function(){setSidebar(!sidebar.classList.contains('open'))});scrim.addEventListener('click',function(){setSidebar(false)});document.querySelectorAll('.demo-link').forEach(function(link){link.addEventListener('click',function(event){event.preventDefault();showToast(link.dataset.page+' 模块尚未创建独立页面');if(innerWidth<=760)setSidebar(false)})});
+    const statusModal=document.getElementById('statusModal'),statusInfoBtn=document.getElementById('statusInfoBtn'),statusClose=document.getElementById('statusClose');function openStatus(){statusModal.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(function(){statusModal.classList.add('open');statusClose.focus()})}function closeStatus(){statusModal.classList.remove('open');document.body.style.overflow='';setTimeout(function(){statusModal.hidden=true;statusInfoBtn.focus()},200)}statusInfoBtn.addEventListener('click',openStatus);statusClose.addEventListener('click',closeStatus);statusModal.addEventListener('click',function(event){if(event.target===statusModal)closeStatus()});
+    const alertDrawer=document.getElementById('alertDrawer'),alertInfoBtn=document.getElementById('alertInfoBtn'),alertPanel=alertDrawer.querySelector('.alert-drawer');function openAlert(){alertDrawer.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(function(){alertDrawer.classList.add('open');alertPanel.focus()})}function closeAlert(){alertDrawer.classList.remove('open');document.body.style.overflow='';setTimeout(function(){alertDrawer.hidden=true;alertInfoBtn.focus()},240)}alertInfoBtn.addEventListener('click',openAlert);alertDrawer.addEventListener('click',function(event){if(event.target===alertDrawer)closeAlert()});document.getElementById('recoveryBtn').addEventListener('click',function(){closeAlert();location.href='current-anomalies.html'});document.addEventListener('keydown',function(event){if(event.key==='Escape'){if(!alertDrawer.hidden)closeAlert();else if(!statusModal.hidden)closeStatus();else setSidebar(false)}});
+  </script>
+  <script type="module" src="order-detail-api.js"></script>
+</body>
+</html>

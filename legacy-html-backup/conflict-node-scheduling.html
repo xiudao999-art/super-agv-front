@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <script src="mock-api.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>复合机器人调度系统 · 冲突节点排程</title>
+  <link rel="stylesheet" href="assets/styles/pages/conflict-node-scheduling.css">
+  <link rel="stylesheet" href="assets/styles/tokens.css">
+  <link rel="stylesheet" href="assets/styles/base.css">
+  <link rel="stylesheet" href="assets/styles/components.css">
+  <script type="module" src="assets/components/register.js" blocking="render"></script>
+</head>
+<body>
+  <agv-app-shell active-route="conflict-node-scheduling.html" section-title="冲突节点排程" user-name="陈工">
+    <div class="agv-legacy-hooks" hidden><aside id="sidebar"></aside><div id="scrim"></div><button id="menuBtn" type="button"></button><button id="statusInfoBtn" type="button"></button><button id="statusBtn" type="button"></button><button id="alertInfoBtn" type="button"></button><button id="alertBtn" type="button"></button></div>
+
+    <agv-page-header class="page-head"><div><h1>多 AGV 冲突节点排程</h1><p>只编排会争抢同一物理资源的关键节点，普通动作由流程正常执行</p></div></agv-page-header>
+
+    <main class="page-canvas conflict-page">
+      <section class="schedule-overview" aria-label="排程规则说明">
+        <article class="overview-card resource-card">
+          <h2>进入排程的互斥资源</h2>
+          <div class="resource-tags"><span>取料位/放料位</span><span>窄通道/交叉口</span><span>自动门</span><span>电梯</span><span>共享充电桩</span><span>单容量机台交互位</span><span class="muted">普通动作不排程</span></div>
+        </article>
+        <article class="overview-card priority-card">
+          <h2>默认冲突优先级</h2>
+          <ol class="priority-steps" id="conflictPrioritySteps"><li><b>1</b><span>紧急任务</span></li><li><b>2</b><span>正在占用</span></li><li><b>3</b><span>任务优先级</span></li><li><b>4</b><span>先申请</span></li><li><b>5</b><span>AGV 编号</span></li></ol>
+        </article>
+      </section>
+
+      <section class="schedule-filters" aria-label="冲突排程筛选">
+        <label class="schedule-field schedule-range-field"><span>时间范围</span><span class="range-inputs"><input id="rangeStart" type="datetime-local" value="2026-08-26T09:00" aria-label="开始时间"><i>至</i><input id="rangeEnd" type="datetime-local" value="2026-08-26T09:40" aria-label="结束时间"></span></label>
+        <div class="filter-actions"><button class="schedule-btn" id="resetSchedule" type="button"><img src="assets/list-icons/refresh.svg" alt="">重置</button><button class="schedule-btn primary" id="searchSchedule" type="button"><img src="assets/list-icons/search.svg" alt="">搜索</button></div>
+      </section>
+
+      <section class="order-schedule-card" aria-labelledby="orderScheduleTitle">
+        <header class="order-schedule-head">
+          <div><h2 id="orderScheduleTitle">订单优先级排程</h2><p>勾选至少 2 个订单，在右侧调整顺序后重新计算互斥资源的占用时序</p></div>
+          <div class="order-schedule-head-actions"><span class="schedule-state" id="scheduleState">等待选择订单</span><button class="collapse-schedule" id="toggleOrderSchedule" type="button" aria-expanded="true" aria-controls="orderScheduleBody"><span>收起</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></button></div>
+        </header>
+        <div class="order-schedule-body" id="orderScheduleBody">
+          <div class="order-schedule-workspace">
+            <div class="order-pool">
+              <div class="order-table-head"><label><input id="selectAllOrders" type="checkbox"><span>全选</span></label><span>订单 / 执行 AGV</span><span>主要冲突资源</span><span>业务优先级</span></div>
+              <div class="order-rows" id="orderRows"></div>
+            </div>
+            <aside class="priority-queue" aria-label="订单与冲突优先级">
+              <header><div><h3>已选订单优先级</h3><p>拖拽或使用上下按钮调整，序号越小越先占用资源</p></div><strong id="selectedOrderCount">0 个</strong></header>
+              <div class="priority-content">
+                <div class="priority-empty" id="priorityEmpty"><span>尚未选择订单</span><small>从左侧勾选需要参与重新排程的订单</small></div>
+                <ol class="priority-list" id="priorityList"></ol>
+                <section class="conflict-priority-editor" aria-labelledby="conflictPriorityTitle"><header><div><h3 id="conflictPriorityTitle">冲突优先级</h3><p>当前规则从上到下依次判定，可独立调整</p></div><span>5 条规则</span></header><ol class="conflict-priority-list" id="conflictPriorityList"></ol></section>
+              </div>
+              <footer><button class="schedule-btn" id="clearSelectedOrders" type="button" disabled>清空</button><button class="schedule-btn primary" id="rescheduleOrders" type="button" disabled>按当前顺序重新排程</button></footer>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="timeline-card">
+        <header class="timeline-head"><div><h2>AGV 时序表</h2><p id="timelineResult">当前按系统默认优先级展示</p></div><div class="timeline-legend" aria-label="排程状态图例"><span class="running">执行中</span><span class="reserved">已预约</span><span class="queued">排队</span><span class="released">已释放</span><span class="blocked">异常阻塞</span></div></header>
+        <div class="resource-strip" aria-label="互斥资源"><span>贴标仪器</span><span>贴标机台·放料位01</span><span>窄通道C01</span><span>自动门-01</span><span>电梯-01W</span><span>手套箱</span><span>投料工作站</span><span>反应取样工作站</span></div>
+
+        <div class="timeline-scroll">
+          <div class="timeline" id="scheduleTimeline">
+            <div class="time-axis" id="timeAxis"><span class="axis-spacer"></span></div>
+            <div class="now-line" aria-label="当前时间 09:12"><span>09:12</span></div>
+
+            <div class="timeline-row" data-agv="AGV-01"><strong>AGV-01</strong><div class="timeline-track"><button class="task released" style="--start:.4;--span:1.15" data-detail="AGV-01 · 贴标仪器 · 取料 · 已释放"><b>贴标仪器</b><small>取料</small></button><button class="task reserved" style="--start:2.35;--span:1.45" data-detail="AGV-01 · 贴标机台-放料位01 · 取料 · 已预约"><b>贴标机台·放料位01</b><small>取料</small></button><button class="task queued conflict" style="--start:3.82;--span:.92" data-detail="AGV-01 · 自动门-01 · 取料 · 排队"><b>自动门-01</b><small>取料</small></button></div></div>
+            <div class="timeline-row" data-agv="AGV-02"><strong>AGV-02</strong><div class="timeline-track"><button class="task running" style="--start:5.65;--span:1.15" data-detail="AGV-02 · 手套箱 · 取料 · 执行中"><b>手套箱</b><small>取料</small></button><button class="task queued" style="--start:6.8;--span:1.05" data-detail="AGV-02 · 投料工作站 · 取料 · 排队"><b>投料工作站</b><small>取料</small></button></div></div>
+            <div class="timeline-row" data-agv="AGV-03"><strong>AGV-03</strong><div class="timeline-track"><button class="task reserved" style="--start:3.7;--span:1.02" data-detail="AGV-03 · 窄通道C01 · 东向西 · 已预约"><b>窄通道C01</b><small>东 → 西</small></button><button class="task queued" style="--start:4.88;--span:.92" data-detail="AGV-03 · 自动门-01 · 西向东 · 排队"><b>自动门-01</b><small>西 → 东</small></button></div></div>
+            <div class="timeline-row" data-agv="AGV-04"><strong>AGV-04</strong><div class="timeline-track"><button class="task reserved" style="--start:3.35;--span:1.05" data-detail="AGV-04 · 电梯-01W · 开门并通过 · 已预约"><b>电梯-01W</b><small>开门并通过</small></button><button class="task queued" style="--start:4.4;--span:1.18" data-detail="AGV-04 · 窄通道C01 · 等待门区释放 · 排队"><b>窄通道C01</b><small>等待门区释放</small></button></div></div>
+            <div class="timeline-row" data-agv="AGV-05"><strong>AGV-05</strong><div class="timeline-track"><button class="task reserved" style="--start:5.55;--span:1.05" data-detail="AGV-05 · 投料工作站 · 1F到2F · 已预约"><b>投料工作站</b><small>1F → 2F</small></button><button class="task blocked" style="--start:7.28;--span:1.05" data-detail="AGV-05 · 电梯 · 通信离线 · 异常阻塞"><b>电梯离线</b><small>通信异常</small></button></div></div>
+            <div class="timeline-row" data-agv="AGV-06"><strong>AGV-06</strong><div class="timeline-track"><button class="task reserved" style="--start:1.2;--span:1.02" data-detail="AGV-06 · 窄通道C01 · 东向西 · 已预约"><b>窄通道C01</b><small>东 → 西</small></button><button class="task queued" style="--start:2.28;--span:.92" data-detail="AGV-06 · 自动门-01 · 西向东 · 排队"><b>自动门-01</b><small>西 → 东</small></button></div></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </agv-app-shell>
+
+  <div class="modal-overlay" id="statusModal" hidden><section class="modal-card"><h2>系统运行状态</h2><div class="status-list"><article class="status-item normal"><strong>绿色 · 系统正常</strong><p>核心服务、数据库、调度引擎和机器人连接正常。</p></article><article class="status-item limited"><strong>黄色 · 受限运行</strong><p>部分互斥资源正在排队，任务按冲突优先级执行。</p></article><article class="status-item abnormal"><strong>红色 · 系统异常</strong><p>关键资源异常阻塞，相关 AGV 任务暂停执行。</p></article></div><div class="modal-actions"><button class="modal-close" data-close="statusModal">关闭</button></div></section></div>
+  <div class="drawer-overlay" id="alertDrawer" hidden><aside class="drawer"><header><h2>异常提醒</h2><p>2 条资源冲突 · 1 条异常阻塞</p></header><div class="alert-feed"><article class="alert-card"><strong>电梯-01W 通信离线</strong><p>AGV-05 · 异常阻塞 · 09:28</p></article><article class="alert-card"><strong>自动门-01 等待占用资源释放</strong><p>AGV-01 · 排队 · 09:12</p></article></div><footer><a href="current-anomalies.html">进入异常与恢复</a></footer></aside></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="conflict-node-scheduling.js"></script>
+</body>
+</html>

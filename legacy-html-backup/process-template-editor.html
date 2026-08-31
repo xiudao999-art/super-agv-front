@@ -1,0 +1,450 @@
+<!doctype html><html lang="zh-CN"><head>
+  <script src="mock-api.js"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>复合机器人调度系统 · 流程模板配置</title>
+  <link rel="stylesheet" href="assets/styles/pages/process-template-editor.css?v=2.3.1">
+  <link rel="stylesheet" href="assets/styles/tokens.css">
+  <link rel="stylesheet" href="assets/styles/base.css">
+  <link rel="stylesheet" href="assets/styles/components.css">
+  <script type="module" src="assets/components/register.js" blocking="render"></script></head><body><agv-app-shell active-route="process-template-editor.html" section-title="流程模板" user-name="陈工"><div class="agv-legacy-hooks" hidden><aside id="sidebar"></aside><div id="scrim"></div><button id="menuBtn" type="button"></button><button id="statusInfoBtn" type="button"></button><button id="statusBtn" type="button"></button><button id="alertInfoBtn" type="button"></button><button id="alertBtn" type="button"></button></div><agv-page-header class="page-head"><div><h1>流程模板</h1><p>通过模板列表管理可复用的流程节点、参数和连线，业务流程只选择已经定义的模板</p></div><div class="tools"><a class="tool-btn" href="process-templates.html">‹ 返回模板列表</a><button class="head-btn" id="saveTemplate">保存模板</button></div></agv-page-header><div class="page-canvas editor-shell"><section class="page-panel editor-meta"><div class="editor-meta-head"><div><h2>编辑模板</h2><p>模板由一组有顺序的受控动作组成；每个动作的具体参数仍待技术确认</p></div><span class="status-tag" style="color:var(--blue);background:#f1f8fd;border-color:#cfe3f3">新增</span></div><div class="editor-fields"><label class="editor-field"><span>模板编号</span><input value="TPL-WH-LABEL"></label><label class="editor-field"><span>模板名称</span><input value="智能仓储-贴标模板"></label><label class="editor-field"><span>适用对象</span><select><option>贴标工作站</option><option>手套箱</option><option>后处理机台</option></select></label></div></section><section class="page-panel editor-layout"><div class="editor-canvas-heading"><h2>Canvas &#21160;&#20316;&#32452;&#21512;&#30011;&#24067;</h2><p>&#20174;&#24038;&#20391;&#21160;&#20316;&#28165;&#21333;&#25302;&#20837;&#33410;&#28857;&#65307;&#20998;&#31867;&#26631;&#39064;&#19981;&#33021;&#25302;&#21160;&#12290;&#28857;&#20987;&#30011;&#24067;&#20013;&#30340;&#33410;&#28857;&#21518;&#65292;&#21487;&#22312;&#21491;&#20391;&#35774;&#32622;&#21517;&#31216;&#12289;&#21442;&#25968;&#12289;&#39034;&#24207;&#20197;&#21450;&#23427;&#35201;&#36830;&#25509;&#21040;&#30340;&#21518;&#32493;&#33410;&#28857;&#12290;</p></div><div class="editor-workspace"><button class="panel-reopen panel-reopen-left" type="button" data-panel-toggle="palette" aria-label="展开动作清单">动作清单 <span>⌄</span></button><button class="panel-reopen panel-reopen-right" type="button" data-panel-toggle="properties" aria-label="展开节点属性">节点属性 <span>⌄</span></button><aside class="palette"><h2>动作清单 <button class="panel-collapse" type="button" data-panel-toggle="palette" aria-label="收起动作清单">⌃</button></h2><p>模板主节点和子节点选择自动切换</p><div class="subflow-palette-content"><section class="subflow-palette-section"><div class="palette-label">通用节点</div><div class="subflow-palette-grid"><button class="sub-palette-card child-palette-card" type="button" draggable="true" data-sub-name="开始" data-sub-icon="➤"><span class="child-palette-icon">➤</span><span>开始</span></button><button class="sub-palette-card child-palette-card" type="button" draggable="true" data-sub-name="结束" data-sub-icon="♟"><span class="child-palette-icon">♟</span><span>结束</span></button></div></section><section class="subflow-palette-section"><div class="palette-label">子节点</div><div class="subflow-palette-grid"><button class="sub-palette-card child-palette-card" type="button" draggable="true" data-sub-name="机械臂运动" data-sub-icon="↪"><span class="child-palette-icon">↪</span><span>机械臂运动</span></button><button class="sub-palette-card child-palette-card" type="button" draggable="true" data-sub-name="夹抓" data-sub-icon="⬇"><span class="child-palette-icon">⬇</span><span>夹抓</span></button><button class="sub-palette-card child-palette-card" type="button" draggable="true" data-sub-name="视觉" data-sub-icon="⊙"><span class="child-palette-icon">⊙</span><span>视觉</span></button></div></section></div><div class="palette-section"><div class="palette-label">通用节点</div><div class="palette-grid"><button class="palette-card" draggable="true" data-node-name="开始" data-node-icon="开" data-node-type="通用节点"><span class="palette-icon start">开</span><span>开始</span></button><button class="palette-card" draggable="true" data-node-name="结束" data-node-icon="结" data-node-type="通用节点"><span class="palette-icon end">结</span><span>结束</span></button></div></div><div class="palette-section"><div class="palette-label">主节点</div><div class="palette-grid"><button class="palette-card" draggable="true" data-node-name="移动" data-node-icon="↔" data-node-type="AGV 节点"><span class="palette-icon">↔</span><span>移动</span></button><button class="palette-card" draggable="true" data-node-name="单次取料" data-node-icon="↑" data-node-type="AGV 节点"><span class="palette-icon">↑</span><span>单次取料</span></button><button class="palette-card" draggable="true" data-node-name="单次放料" data-node-icon="↓" data-node-type="AGV 节点"><span class="palette-icon">↓</span><span>单次放料</span></button><button class="palette-card" draggable="true" data-node-name="复合取料" data-node-icon="⇈" data-node-type="AGV 节点"><span class="palette-icon">⇈</span><span>复合取料</span></button><button class="palette-card" draggable="true" data-node-name="复合放料" data-node-icon="⇊" data-node-type="AGV 节点"><span class="palette-icon">⇊</span><span>复合放料</span></button><button class="palette-card" draggable="true" data-node-name="协作臂归零" data-node-icon="↻" data-node-type="AGV 节点"><span class="palette-icon">↻</span><span>协作臂归零</span></button><button class="palette-card" draggable="true" data-node-name="现场拍照" data-node-icon="▣" data-node-type="AGV 节点"><span class="palette-icon">▣</span><span>现场拍照</span></button></div></div><div class="palette-section"><div class="palette-label">其他节点</div><div class="palette-grid"><button class="palette-card" draggable="true" data-node-name="自动门" data-node-icon="▯" data-node-type="设备节点"><span class="palette-icon">▯</span><span>自动门</span></button><button class="palette-card" draggable="true" data-node-name="手套箱" data-node-icon="●" data-node-type="设备节点"><span class="palette-icon">●</span><span>手套箱</span></button><button class="palette-card" draggable="true" data-node-name="贴标机台" data-node-icon="▤" data-node-type="设备节点"><span class="palette-icon">▤</span><span>贴标机台</span></button><button class="palette-card" draggable="true" data-node-name="后处理机台" data-node-icon="▥" data-node-type="设备节点"><span class="palette-icon">▥</span><span>后处理机台</span></button></div></div></aside><section class="canvas-column" id="canvasArea"><div class="canvas-heading"><h2>Canvas 动作组合画布</h2><p>从左侧动作清单拖入节点；点击节点后在右侧维护属性，也可使用下方工具缩放画布。</p></div><div class="canvas-board" id="flowCanvas"><div class="canvas-stage" id="canvasStage"></div></div><div class="canvas-controls"><button class="canvas-control canvas-expand-control" id="canvasFullscreen" title="放大画布" aria-pressed="false">⛶<span>放大画布</span></button><button class="canvas-control" id="zoomOut">−</button><strong id="zoomValue" style="min-width:45px;text-align:center;font-size:12px">100%</strong><button class="canvas-control" id="zoomIn">＋</button></div><section class="subflow-panel" id="subflowPanel" hidden><header class="subflow-head"><button class="subflow-back" id="exitSubflow" type="button">← <span id="subflowBackLabel">返回主节点：2 · 移动</span></button><button class="subflow-save" id="saveSubflow" type="button">保存并返回</button><div class="subflow-meta" aria-live="polite"><h3 id="subflowTitle">2 · 移动 - 子节点流程</h3><p>子流程不设置开始和结束节点；节点按照连线顺序执行</p><span id="subflowCount">0 个子节点</span></div></header><div class="subflow-workspace"><aside class="subflow-palette"><h4>子节点</h4><p>拖入右侧窗口画布</p><button class="sub-palette-card" type="button" draggable="true" data-sub-name="机械臂运动" data-sub-icon="↔">机械臂运动</button><button class="sub-palette-card" type="button" draggable="true" data-sub-name="夹抓" data-sub-icon="●">夹抓</button><button class="sub-palette-card" type="button" draggable="true" data-sub-name="视觉" data-sub-icon="▣">视觉</button></aside><div class="subflow-canvas" id="subflowCanvas"><div class="subflow-stage" id="subflowStage"></div><p class="subflow-note">拖入子节点后自动按顺序连接；点击子节点后可在最右侧设置属性和后续顺序。</p></div></div><div class="subflow-controls"><button type="button" id="subflowFullscreen" aria-label="放大子流程画布">⛶</button><button type="button" id="subflowZoomOut" aria-label="缩小子流程画布">−</button><strong id="subflowZoomValue">100%</strong><button type="button" id="subflowZoomIn" aria-label="放大子流程画布">＋</button></div></section></section><aside class="properties"><h2>节点属性 <button class="panel-collapse" type="button" data-panel-toggle="properties" aria-label="收起节点属性">⌃</button></h2><p>根据主节点或子节点选择自动切换</p><div class="property-fields"><div class="property-field"><span>选择节点</span><div class="property-note" id="selectedNodeLabel">当前节点：开始</div></div><label class="property-field"><span>节点名称</span><input class="property-input" id="nodeNameInput" value="开始"></label><label class="property-field"><span>节点分类</span><input class="property-input" id="nodeTypeInput" value="通用节点" disabled></label><label class="property-field"><span>执行参数</span><input class="property-input" value="参数待确认"></label><label class="property-field"><span>失败策略</span><select class="property-input"><option>按策略重试后挂起</option><option>立即挂起</option><option>跳过并记录</option></select></label><label class="property-field"><span>完成依据</span><input class="property-input" value="设备反馈 + 状态校验，待技术确认"></label></div><details class="property-advanced" hidden><summary>连线与节点操作</summary><div class="property-block connection-block"><h2>节点连线</h2><p>连接到后续节点</p><select class="property-input" id="connectTarget"></select><button class="tool-btn primary" id="addLink" style="width:100%;justify-content:center"><svg class="icon"><use href="assets/icons.svg#i-plus"/></svg>添加连线</button><div class="link-card"><strong id="linkSummary">1 → 2</strong><small id="linkNames">开始 → 移动</small></div></div><div class="property-block property-actions"><button class="tool-btn" id="movePrev">‹ 前移</button><button class="tool-btn" id="moveNext">后移 ›</button><button class="tool-btn danger" id="deleteNode">删除当前节点</button></div></details></aside></div></section></div></agv-app-shell><div class="modal-overlay" id="statusModal" hidden><section class="modal-card"><h2>系统运行状态</h2><div class="status-list"><article class="status-item normal"><strong>绿色·系统正常</strong><p>核心服务、数据库、任务引擎和机器人连接正常。</p></article><article class="status-item limited"><strong>黄色·受限运行</strong><p>部分非核心设备或上游接口异常，系统仍可继续部分业务。</p></article><article class="status-item abnormal"><strong>红色·系统异常</strong><p>核心能力异常，系统暂停接收和分配新任务。</p></article><article class="status-item maintenance"><strong>灰色·维护模式</strong><p>系统处于人工维护、升级或硬件调试状态。</p></article></div><div class="modal-actions"><button class="modal-close" data-close="statusModal">关闭</button></div></section></div><div class="alert-overlay" id="alertDrawer" hidden><aside class="alert-drawer"><header class="alert-header"><h2>异常提醒</h2><p>3条未完成·1条严重</p></header><div class="alert-feed"><article class="alert-card"><strong>机台允许进样事件等待超过流程配置的30秒</strong><p>ALM-20260817-0042 · 待处理</p></article><article class="alert-card"><strong>系统记录为空，但库位传感器检测有物</strong><p>ALM-20260817-0041 · 处理中</p></article></div><footer class="alert-footer"><button class="alert-primary" id="recoveryBtn">进入异常与恢复</button></footer></aside></div><div class="toast" id="toast"></div><script>const toast=document.getElementById('toast');let toastTimer;function showToast(message){toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2200)}function openModal(id){const modal=document.getElementById(id);if(!modal)return;modal.hidden=false;document.body.style.overflow='hidden';requestAnimationFrame(()=>modal.classList.add('open'))}function closeModal(id){const modal=document.getElementById(id);if(!modal)return;modal.classList.remove('open');document.body.style.overflow='';setTimeout(()=>modal.hidden=true,200)}document.querySelectorAll('[data-close]').forEach(button=>button.addEventListener('click',()=>closeModal(button.dataset.close)));document.querySelectorAll('.modal-overlay').forEach(modal=>modal.addEventListener('click',event=>{if(event.target===modal)closeModal(modal.id)}));document.getElementById('statusInfoBtn')?.addEventListener('click',()=>openModal('statusModal'));const drawer=document.getElementById('alertDrawer');document.getElementById('alertInfoBtn')?.addEventListener('click',()=>{drawer.hidden=false;requestAnimationFrame(()=>drawer.classList.add('open'))});drawer?.addEventListener('click',event=>{if(event.target===drawer){drawer.classList.remove('open');setTimeout(()=>drawer.hidden=true,220)}});document.getElementById('recoveryBtn')?.addEventListener('click',()=>location.href='current-anomalies.html');document.querySelectorAll('.demo-link').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();showToast(link.dataset.page+'模块将使用独立 HTML 页面')}));const sidebar=document.getElementById('sidebar'),scrim=document.getElementById('scrim');document.getElementById('menuBtn')?.addEventListener('click',()=>{sidebar.classList.toggle('open');scrim.classList.toggle('show')});scrim?.addEventListener('click',()=>{sidebar.classList.remove('open');scrim.classList.remove('show')});
+let editorNodesV2=[
+  {id:1,name:'开始',type:'通用节点',icon:'start',x:40,y:135},
+  {id:2,name:'移动',type:'AGV 节点',icon:'move',actionKey:'MOVE',x:310,y:125},
+  {id:3,name:'单次取料',type:'AGV 节点',icon:'pick',actionKey:'ARM.PICK',x:580,y:125},
+  {id:4,name:'现场拍照',type:'AGV 节点',icon:'camera',actionKey:'VISION.CAPTURE',x:580,y:345},
+  {id:5,name:'移动',type:'AGV 节点',icon:'move',actionKey:'MOVE',x:310,y:345},
+  {id:6,name:'单次放料',type:'AGV 节点',icon:'place',actionKey:'ARM.PLACE',x:40,y:345},
+  {id:7,name:'结束',type:'通用节点',icon:'end',x:40,y:555}
+];
+let editorConnectionsV2=[
+  {id:1,from:1,to:2},{id:2,from:2,to:3},{id:3,from:3,to:4},
+  {id:4,from:4,to:5},{id:5,from:5,to:6},{id:6,from:6,to:7}
+];
+let selectedNodeIdV2=1,selectedConnectionIdV2=null,nextNodeIdV2=8,nextConnectionIdV2=7,zoomV2=1,canvasPanXV2=0,canvasPanYV2=0,canvasPanV2=null,canvasPanSuppressClickV2=false,nodeDragV2=null,connectionDragV2=null,paletteDraggedV2=false;
+const subflowDataV2=new Map();
+const subflowConnectionsV2=new Map();
+const stageV2=document.getElementById('canvasStage');
+const boardV2=document.getElementById('flowCanvas');
+const selectedLabelV2=document.getElementById('selectedNodeLabel');
+const nodeNameInputV2=document.getElementById('nodeNameInput');
+const nodeTypeInputV2=document.getElementById('nodeTypeInput');
+const connectTargetV2=document.getElementById('connectTarget');
+const linkSummaryV2=document.getElementById('linkSummary');
+const linkNamesV2=document.getElementById('linkNames');
+const deleteConnectionV2=document.createElement('button');
+deleteConnectionV2.type='button';deleteConnectionV2.id='deleteConnection';deleteConnectionV2.className='row-btn delete connection-delete';deleteConnectionV2.textContent='删除选中连线';
+deleteConnectionV2.hidden=true;
+document.querySelector('.link-card').appendChild(deleteConnectionV2);
+const deleteNodeButtonV2=document.getElementById('deleteNode');deleteNodeButtonV2.hidden=true;
+const subflowEntryFieldV2=document.createElement('div');subflowEntryFieldV2.className='property-field subflow-entry-field';subflowEntryFieldV2.hidden=true;
+const subflowEntryButtonV2=document.createElement('button');subflowEntryButtonV2.type='button';subflowEntryButtonV2.className='subflow-entry-button';
+const propertyFieldsV2=document.querySelector('.property-fields');subflowEntryFieldV2.innerHTML='<span>子节点流程</span>';subflowEntryFieldV2.appendChild(subflowEntryButtonV2);propertyFieldsV2.insertBefore(subflowEntryFieldV2,propertyFieldsV2.children[1]||null);
+const tipV2=document.createElement('div');tipV2.className='canvas-tip';tipV2.textContent='连线固定右侧出、左侧进；拖到目标节点时会自动吸附到左侧入口';
+document.querySelector('.canvas-heading').appendChild(tipV2);
+function nodeV2(id){return editorNodesV2.find(item=>item.id===Number(id))}
+function clampV2(value,min,max){return Math.max(min,Math.min(max,value))}
+function stagePositionV2(stage,x,y,element=null,fallbackWidth=0,fallbackHeight=0){const width=element?.offsetWidth||fallbackWidth,height=element?.offsetHeight||fallbackHeight,maxX=Math.max(0,stage.offsetWidth-width),maxY=Math.max(0,stage.offsetHeight-height);return{x:clampV2(x,0,maxX),y:clampV2(y,0,maxY)}}
+function retainMainCanvasExtentV2(){const width=editorNodesV2.reduce((extent,node)=>Math.max(extent,node.x+nodeWidthV2(node)),stageV2.offsetWidth),height=editorNodesV2.reduce((extent,node)=>Math.max(extent,node.y+64),stageV2.offsetHeight);stageV2.style.width=width+'px';stageV2.style.height=height+'px'}
+function fitFullscreenCanvasV2(){const contentWidth=editorNodesV2.reduce((extent,node)=>Math.max(extent,node.x+nodeWidthV2(node)),0),contentHeight=editorNodesV2.reduce((extent,node)=>Math.max(extent,node.y+64),0),viewportWidth=Math.ceil(boardV2.clientWidth/zoomV2),viewportHeight=Math.ceil(boardV2.clientHeight/zoomV2),height=Math.max(viewportHeight,contentHeight);stageV2.style.width=Math.max(viewportWidth,contentWidth)+'px';stageV2.style.height=height+'px';stageV2.style.minHeight=height+'px'}
+function terminalNodeNameV2(value){const name=String(typeof value==='object'?value?.name:value||'').trim();return name==='开始'||name==='结束'?name:''}
+function nodeWidthV2(node){return terminalNodeNameV2(node)?64:180}
+function terminalNodeCountV2(name,excludeId=null){return editorNodesV2.filter(node=>node.id!==excludeId&&terminalNodeNameV2(node)===name).length}
+function canUseTerminalNodeV2(name,excludeId=null){const terminalName=terminalNodeNameV2(name);if(!terminalName||terminalNodeCountV2(terminalName,excludeId)===0)return true;showToast('同一个流程只能有一个'+terminalName+'节点');return false}
+function isSubflowParentV2(node){if(!node||terminalNodeNameV2(node))return false;const type=String(node.type||"").trim(),category=String(node.nodeCategory||"").trim().toUpperCase();return type==="AGV 节点"||type==="主节点"||category==="MAIN"}
+function workflowIconKeyV2(value,name=''){
+  const raw=String(value||'').trim().toLowerCase(),label=String(name||'').trim();
+  const known=new Set(['start','end','move','pick','place','multi-pick','multi-place','reset','camera','door','glovebox','labeler','post-process','arm','gripper','action']);
+  if(known.has(raw))return raw;
+  if(label==='开始'||raw==='startevent')return 'start';
+  if(label==='结束'||raw==='endevent')return 'end';
+  if(raw.includes('vision')||label.includes('拍照')||label.includes('视觉')||label.includes('相机'))return 'camera';
+  if(raw.includes('pick')||label.includes('取料')||label.includes('抓取'))return raw.includes('batch')||label.includes('复合')?'multi-pick':'pick';
+  if(raw.includes('place')||label.includes('放料')||label.includes('放置'))return raw.includes('batch')||label.includes('复合')?'multi-place':'place';
+  if(raw.includes('home')||raw.includes('reset')||label.includes('归零'))return 'reset';
+  if(raw.includes('door')||label.includes('自动门'))return 'door';
+  if(raw.includes('glove')||label.includes('手套箱'))return 'glovebox';
+  if(raw.includes('label')||label.includes('贴标'))return 'labeler';
+  if(raw.includes('post')||label.includes('后处理'))return 'post-process';
+  if(label.includes('机械臂'))return 'arm';
+  if(label.includes('夹抓')||label.includes('夹具'))return 'gripper';
+  if(raw.includes('move')||label.includes('移动'))return 'move';
+  return 'action';
+}
+function workflowIconMarkupV2(value,name=''){
+  const key=workflowIconKeyV2(value,name),open='<svg class="flow-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">',close='</svg>';
+  const icons={
+    start:'<path class="icon-solid" d="M3.3 10.1 20.2 4.2c.9-.3 1.7.6 1.3 1.4l-7.2 15.1c-.4.9-1.7.8-2-.1l-1.9-6.2-6.2-2c-1-.3-1-1.9-.1-2.3Z"></path><path class="icon-cut" d="m10.5 14.1 4.8-4.6"></path>',
+    end:'<ellipse cx="12" cy="19" rx="6.8" ry="2.4"></ellipse><path d="M12 17V9.5"></path><circle class="icon-solid" cx="12" cy="6.8" r="4.1"></circle>',
+    move:'<path d="M12 3v18M3 12h18M12 3 9 6m3-3 3 3m-3 15-3-3m3 3 3-3M3 12l3-3m-3 3 3 3m15-3-3-3m3 3-3 3"></path>',
+    pick:'<circle class="icon-solid" cx="12" cy="12" r="9.5"></circle><path class="icon-cut" d="M12 17V7m0 0-3.2 3.2M12 7l3.2 3.2"></path>',
+    place:'<circle class="icon-solid" cx="12" cy="12" r="9.5"></circle><path class="icon-cut" d="M12 7v10m0 0-3.2-3.2M12 17l3.2-3.2"></path>',
+    'multi-pick':'<path d="m5 14 7-7 7 7M5 20l7-7 7 7"></path>',
+    'multi-place':'<path d="m5 4 7 7 7-7M5 10l7 7 7-7"></path>',
+    reset:'<path d="M20 7v5h-5"></path><path d="M19.2 12a7.5 7.5 0 1 1-2.1-5.2L20 9.6"></path>',
+    camera:'<path class="icon-solid" d="M4 7h3l1.4-2h7.2L17 7h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"></path><circle class="icon-cut-fill" cx="12" cy="13.2" r="3.3"></circle><circle class="icon-cut-fill" cx="18.5" cy="9.5" r=".8"></circle>',
+    door:'<path class="icon-solid" d="M5 3.5h12.5v17H5z"></path><path class="icon-cut" d="M14 12h.01"></path><path d="M17.5 5.5H20v15h-2.5"></path>',
+    glovebox:'<path d="M4 5h16v14H4zM4 10h16"></path><path class="icon-solid" d="M7.2 12.2c.7-.4 1.5.1 1.5.9v1.1-2.8c0-.7 1-.8 1.1-.1l.2 2.3v-2.9c0-.7 1-.7 1.1 0l.2 2.8.1-2.1c0-.7 1-.7 1.1 0l.1 3c.6-.8 1.2-1.3 1.8-.9.7.5-.3 2.2-1 3.1-.8 1.1-1.7 1.5-3.1 1.5-1.7 0-2.6-.9-3.2-2.2l-.8-1.9c-.4-.9.2-1.4.9-1.8Z"></path>',
+    labeler:'<path d="M5 4h12v6H5zM4 10h16v8H4zM8 18v2h8v-2"></path><path d="M8 7h6M8 13h8M8 16h5"></path>',
+    'post-process':'<rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M4 9h16M4 15h16M8 6h8M8 12h8M8 18h8"></path><circle class="icon-solid" cx="6.5" cy="6" r=".8"></circle><circle class="icon-solid" cx="6.5" cy="12" r=".8"></circle><circle class="icon-solid" cx="6.5" cy="18" r=".8"></circle>',
+    arm:'<circle cx="6" cy="18" r="2.2"></circle><circle cx="11" cy="10" r="2.2"></circle><path d="m7.5 16.4 2.3-4.5m2.8-3.2L17 5l2 2-4.2 4.4M4 21h6"></path>',
+    gripper:'<path d="M12 3v7M7 6h10M7 6v5l3 3v6M17 6v5l-3 3v6M10 20h4"></path>',
+    action:'<path d="m12 3 8 5v8l-8 5-8-5V8z"></path><circle class="icon-solid" cx="12" cy="12" r="2.6"></circle>'
+  };
+  return open+(icons[key]||icons.action)+close;
+}
+function terminalIconMarkupV2(name){const key=workflowIconKeyV2('',name);return key==='start'||key==='end'?workflowIconMarkupV2(key,name):''}
+function nodeIconMarkupV2(node){return workflowIconMarkupV2(node?.icon||node?.actionKey||node?.downstreamActionType,node?.name)}
+function childCountV2(nodeId){return(subflowDataV2.get(nodeId)||[]).length}
+function syncTerminalPaletteV2(){
+  document.querySelectorAll('.palette-card,.child-palette-card').forEach(card=>{
+    const name=card.dataset.nodeName||card.dataset.subName||'',source=card.dataset.nodeIcon||card.dataset.subIcon||'',key=workflowIconKeyV2(source,name),icon=card.querySelector('.palette-icon,.child-palette-icon');
+    if(icon)icon.innerHTML=workflowIconMarkupV2(key,name);
+    if(card.dataset.nodeName)card.dataset.nodeIcon=key;
+    if(card.dataset.subName)card.dataset.subIcon=key;
+  });
+  document.querySelectorAll('.palette-card[data-node-name="开始"],.palette-card[data-node-name="结束"]').forEach(card=>{const reached=terminalNodeCountV2(card.dataset.nodeName)>0;card.classList.toggle('limit-reached',reached);card.setAttribute('aria-disabled',String(reached));card.draggable=!reached;card.title=reached?'画布中已存在'+card.dataset.nodeName+'节点':''});
+}
+function orthogonalRouteV2(sx,sy,tx,ty){
+  const terminalGap=28;
+  let points;
+  if(tx-sx>=terminalGap*2){
+    const bendX=(sx+tx)/2;
+    points=[{x:sx,y:sy},{x:bendX,y:sy},{x:bendX,y:ty},{x:tx,y:ty}];
+  }else{
+    const exitX=sx+terminalGap,entryX=tx-terminalGap,upperLane=Math.min(sy,ty)-76,laneY=upperLane>=24?upperLane:Math.max(sy,ty)+76;
+    points=[{x:sx,y:sy},{x:exitX,y:sy},{x:exitX,y:laneY},{x:entryX,y:laneY},{x:entryX,y:ty},{x:tx,y:ty}];
+  }
+  const route=points.filter((point,index)=>index===0||point.x!==points[index-1].x||point.y!==points[index-1].y);
+  const segments=[];
+  let d='M '+route[0].x+' '+route[0].y;
+  for(let index=1;index<route.length;index+=1){const previous=route[index-1],current=route[index];d+=(previous.y===current.y?' H '+current.x:' V '+current.y);segments.push({length:Math.abs(current.x-previous.x)+Math.abs(current.y-previous.y),point:{x:(previous.x+current.x)/2,y:(previous.y+current.y)/2}})}
+  const deletePoint=segments.reduce((longest,current)=>current.length>longest.length?current:longest,segments[0]).point;
+  return{d,deletePoint,points:route};
+}
+function orthogonalPathV2(sx,sy,tx,ty){return orthogonalRouteV2(sx,sy,tx,ty).d}
+function connectionPathV2(connection){const from=nodeV2(connection.from),to=nodeV2(connection.to);if(!from||!to)return '';return orthogonalPathV2(from.x+nodeWidthV2(from),from.y+32,to.x,to.y+32)}
+function connectionMidpointV2(connection){const from=nodeV2(connection.from),to=nodeV2(connection.to);if(!from||!to)return null;return orthogonalRouteV2(from.x+nodeWidthV2(from),from.y+32,to.x,to.y+32).deletePoint}
+function canConnectNodesV2(fromId,toId,notify=false){
+  const from=nodeV2(fromId),to=nodeV2(toId);
+  let message='';
+  if(!from||!to)message='请选择有效的目标节点';
+  else if(from.id===to.id)message='节点不能连接到自身';
+  else if(terminalNodeNameV2(from)==='结束')message='结束节点不能再连接后续节点';
+  else if(terminalNodeNameV2(to)==='开始')message='开始节点不能作为连线目标';
+  if(message&&notify)showToast(message);
+  return !message;
+}
+function clearMainConnectionTargetV2(){stageV2.querySelectorAll('.connection-target').forEach(element=>element.classList.remove('connection-target'))}
+function mainConnectionTargetAtPointV2(clientX,clientY){
+  clearMainConnectionTargetV2();
+  const targetElement=document.elementFromPoint(clientX,clientY)?.closest('.flow-node'),to=Number(targetElement?.dataset.nodeId);
+  if(!connectionDragV2||!canConnectNodesV2(connectionDragV2.from,to))return null;
+  targetElement.classList.add('connection-target');
+  return nodeV2(to);
+}
+function openSubflowForNodeV2(nodeId){
+  const node=nodeV2(nodeId);
+  if(!isSubflowParentV2(node))return false;
+  selectedNodeIdV2=node.id;selectedConnectionIdV2=null;subflowViewActiveV2=true;renderCanvasV2();showToast('已进入 '+node.name+' 的子节点配置');return true;
+}
+function renderConnectionsV2(){
+  stageV2.querySelector('.flow-lines')?.remove();
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('class','flow-lines');svg.setAttribute('width',String(stageV2.offsetWidth));svg.setAttribute('height',String(stageV2.offsetHeight));
+  svg.innerHTML='<defs><marker id="flowArrowV2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#87919a"/></marker><marker id="flowArrowSelectedV2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#e1473f"/></marker></defs>';
+  editorConnectionsV2.forEach(connection=>{const selected=connection.id===selectedConnectionIdV2,path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('class','flow-path'+(selected?' selected':''));path.setAttribute('d',connectionPathV2(connection));path.setAttribute('marker-end',selected?'url(#flowArrowSelectedV2)':'url(#flowArrowV2)');path.dataset.connectionId=connection.id;path.addEventListener('click',event=>{event.stopPropagation();selectedNodeIdV2=null;selectedConnectionIdV2=connection.id;subflowViewActiveV2=false;renderCanvasV2()});svg.appendChild(path);if(selected){const midpoint=connectionMidpointV2(connection);if(midpoint){const remove=document.createElementNS('http://www.w3.org/2000/svg','g');remove.setAttribute('class','flow-line-delete');remove.setAttribute('transform','translate('+midpoint.x+' '+midpoint.y+')');remove.setAttribute('role','button');remove.setAttribute('tabindex','0');remove.setAttribute('aria-label','删除选中连线');remove.innerHTML='<circle r="12"></circle><path d="M -4 -4 L 4 4 M 4 -4 L -4 4"></path>';remove.addEventListener('pointerdown',event=>{event.stopPropagation();event.preventDefault()});remove.addEventListener('click',event=>{event.stopPropagation();selectedConnectionIdV2=connection.id;deleteSelectedConnectionV2()});remove.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();selectedConnectionIdV2=connection.id;deleteSelectedConnectionV2()}});svg.appendChild(remove)}}});
+  if(connectionDragV2){const from=nodeV2(connectionDragV2.from);if(from){const preview=document.createElementNS('http://www.w3.org/2000/svg','path');preview.setAttribute('class','flow-preview');preview.setAttribute('d',orthogonalPathV2(from.x+nodeWidthV2(from),from.y+32,connectionDragV2.x,connectionDragV2.y));svg.appendChild(preview)}}
+  stageV2.prepend(svg);
+}
+function nodeMarkupV2(node){
+  const isTerminal=Boolean(terminalNodeNameV2(node)),role=isTerminal?'通用节点':(node.type==='AGV 节点'?'主节点':node.type),childCount=isTerminal?0:childCountV2(node.id);
+  if(isTerminal)return '<span class="flow-node-delete" role="button" aria-label="删除节点" title="删除节点">×</span><span class="node-handle handle-in" data-handle="in" title="连接到此节点"></span><span class="flow-node-icon" title="'+node.name+'节点">'+nodeIconMarkupV2(node)+'</span><span class="node-handle handle-out" data-handle="out" title="拖动创建连线"></span>';
+  const subflowEntry=isSubflowParentV2(node)?'<span class="flow-node-subflow-entry" data-open-subflow="'+node.id+'" role="button" tabindex="0" aria-label="进入 '+node.name+' 的子节点配置">'+(childCount?'<span class="flow-node-child-count">'+childCount+' 个子节点</span>':'<span>配置子节点</span>')+'<b aria-hidden="true">›</b></span>':'<span>'+role+'</span>';
+  const core='<span class="flow-node-copy"><strong>'+node.id+' · '+node.name+'</strong><small class="flow-node-meta">'+subflowEntry+'</small></span><span class="flow-node-icon">'+nodeIconMarkupV2(node)+'</span>';
+  return '<span class="flow-node-delete" role="button" aria-label="删除节点" title="删除节点">×</span><span class="node-handle handle-in" data-handle="in" title="连接到此节点"></span>'+core+'<span class="node-handle handle-out" data-handle="out" title="拖动创建连线"></span>';
+}
+function renderCanvasV2(){
+  if(!canvasAreaV2.classList.contains('canvas-fullscreen'))retainMainCanvasExtentV2();
+  stageV2.innerHTML='';
+  editorNodesV2.forEach(node=>{const button=document.createElement('button');button.type='button';button.className='flow-node'+(node.name==='开始'?' start':'')+(node.name==='结束'?' end':'')+(node.id===selectedNodeIdV2?' selected':'');button.style.left=node.x+'px';button.style.top=node.y+'px';button.dataset.nodeId=node.id;button.setAttribute('aria-label',terminalNodeNameV2(node)?node.name+'节点':node.id+' · '+node.name);button.innerHTML=nodeMarkupV2(node);button.addEventListener('pointerdown',event=>startNodePointerV2(event,node,button));button.addEventListener('click',event=>{if(event.target.closest('.node-handle'))return;const remove=event.target.closest('.flow-node-delete');if(remove){event.preventDefault();event.stopPropagation();selectedNodeIdV2=node.id;selectedConnectionIdV2=null;deleteSelectedNodeV2();return}if(event.target.closest('[data-open-subflow]')){event.preventDefault();event.stopPropagation();openSubflowForNodeV2(node.id);return}selectedNodeIdV2=node.id;selectedConnectionIdV2=null;subflowViewActiveV2=false;renderCanvasV2()});button.addEventListener('keydown',event=>{if(!event.target.closest('[data-open-subflow]')||!['Enter',' '].includes(event.key))return;event.preventDefault();event.stopPropagation();openSubflowForNodeV2(node.id)});stageV2.appendChild(button)});
+  renderConnectionsV2();refreshPropertiesV2();syncTerminalPaletteV2();
+}
+function refreshPropertiesV2(){
+  const selected=nodeV2(selectedNodeIdV2),selectedConnection=editorConnectionsV2.find(item=>item.id===selectedConnectionIdV2);
+  if(!selected){const from=nodeV2(selectedConnection?.from),to=nodeV2(selectedConnection?.to);subflowEntryFieldV2.hidden=true;selectedLabelV2.textContent=selectedConnection?'当前连线：'+selectedConnection.from+' → '+selectedConnection.to:'当前未选择节点或连线';nodeNameInputV2.value='';nodeNameInputV2.readOnly=true;nodeNameInputV2.title='请先在画布中选择节点';nodeTypeInputV2.value=selectedConnection?'连线':'';connectTargetV2.innerHTML='<option value="">请先选择节点</option>';linkSummaryV2.textContent=selectedConnection?selectedConnection.from+' → '+selectedConnection.to:'暂无选中连线';linkNamesV2.textContent=selectedConnection?(from?.name||'')+' → '+(to?.name||''):'单击节点或连线进行选择';deleteConnectionV2.disabled=!selectedConnection;return}
+  selectedLabelV2.textContent='当前节点：'+selected.name;nodeNameInputV2.value=selected.name;nodeNameInputV2.readOnly=Boolean(terminalNodeNameV2(selected));nodeNameInputV2.title=nodeNameInputV2.readOnly?'开始和结束节点名称不可修改':'';nodeTypeInputV2.value=selected.type;
+  const canOpenSubflow=isSubflowParentV2(selected);subflowEntryFieldV2.hidden=!canOpenSubflow;if(canOpenSubflow)subflowEntryButtonV2.innerHTML='<span>'+(childCountV2(selected.id)?childCountV2(selected.id)+' 个子节点':'尚未配置子节点')+'</span><strong>进入配置 ›</strong>';
+  connectTargetV2.innerHTML=editorNodesV2.filter(item=>canConnectNodesV2(selected.id,item.id)).map(item=>'<option value="'+item.id+'">'+item.id+' · '+item.name+'</option>').join('')||'<option value="">暂无可连接节点</option>';
+  const connection=editorConnectionsV2.find(item=>item.id===selectedConnectionIdV2)||editorConnectionsV2.find(item=>item.from===selected.id);
+  if(connection){const from=nodeV2(connection.from),to=nodeV2(connection.to);linkSummaryV2.textContent=connection.from+' → '+connection.to;linkNamesV2.textContent=(from?.name||'')+' → '+(to?.name||'');deleteConnectionV2.disabled=false}else{linkSummaryV2.textContent='暂无后续连线';linkNamesV2.textContent='请选择目标节点或拖动端点';deleteConnectionV2.disabled=true}
+}
+function startNodePointerV2(event,node,element){
+  if(event.button!==0)return;
+  if(event.target.closest('.flow-node-delete,[data-open-subflow]')){event.stopPropagation();return}
+  const handle=event.target.closest('.node-handle');
+  selectedNodeIdV2=node.id;selectedConnectionIdV2=null;
+  if(handle){if(handle.dataset.handle==='out'&&terminalNodeNameV2(node)!=='结束'){const rect=stageV2.getBoundingClientRect();connectionDragV2={from:node.id,x:(event.clientX-rect.left)/zoomV2,y:(event.clientY-rect.top)/zoomV2,targetId:null};boardV2.classList.add('connecting');renderConnectionsV2();event.preventDefault()}return}
+  const rect=stageV2.getBoundingClientRect();nodeDragV2={id:node.id,offsetX:(event.clientX-rect.left)/zoomV2-node.x,offsetY:(event.clientY-rect.top)/zoomV2-node.y,element,moved:false};element.classList.add('dragging');element.setPointerCapture?.(event.pointerId);event.preventDefault();refreshPropertiesV2();
+}
+document.addEventListener('pointermove',event=>{
+  if(nodeDragV2){const current=nodeV2(nodeDragV2.id),rect=stageV2.getBoundingClientRect(),position=stagePositionV2(stageV2,(event.clientX-rect.left)/zoomV2-nodeDragV2.offsetX,(event.clientY-rect.top)/zoomV2-nodeDragV2.offsetY,nodeDragV2.element,180,64);current.x=position.x;current.y=position.y;nodeDragV2.element.style.left=current.x+'px';nodeDragV2.element.style.top=current.y+'px';nodeDragV2.moved=true;renderConnectionsV2()}
+  if(connectionDragV2){const rect=stageV2.getBoundingClientRect(),target=mainConnectionTargetAtPointV2(event.clientX,event.clientY),position=target?{x:target.x,y:target.y+32}:stagePositionV2(stageV2,(event.clientX-rect.left)/zoomV2,(event.clientY-rect.top)/zoomV2);connectionDragV2.x=position.x;connectionDragV2.y=position.y;connectionDragV2.targetId=target?.id??null;renderConnectionsV2()}
+});
+document.addEventListener('pointerup',event=>{
+  if(nodeDragV2){const moved=nodeDragV2.moved,nodeId=nodeDragV2.id;nodeDragV2.element.classList.remove('dragging');nodeDragV2=null;selectedNodeIdV2=nodeId;selectedConnectionIdV2=null;subflowViewActiveV2=false;renderCanvasV2();if(moved)showToast('节点位置已更新')}
+  if(connectionDragV2){const from=connectionDragV2.from,target=mainConnectionTargetAtPointV2(event.clientX,event.clientY),to=target?.id;if(to&&canConnectNodesV2(from,to,true)){const existing=editorConnectionsV2.find(item=>item.from===from&&item.to===to);if(existing){selectedConnectionIdV2=existing.id;showToast('该连线已存在')}else{const connection={id:nextConnectionIdV2++,from,to};editorConnectionsV2.push(connection);selectedConnectionIdV2=connection.id;showToast('已创建动态连线')}}else if(document.elementFromPoint(event.clientX,event.clientY)?.closest('.flow-node')){canConnectNodesV2(from,Number(document.elementFromPoint(event.clientX,event.clientY)?.closest('.flow-node')?.dataset.nodeId),true)}connectionDragV2=null;clearMainConnectionTargetV2();boardV2.classList.remove('connecting');renderCanvasV2()}
+});
+function addNodeV2(name,type,icon,x,y,action={}){if(!canUseTerminalNodeV2(name))return null;const width=terminalNodeNameV2(name)?64:180,position=stagePositionV2(stageV2,x??240,y??480,null,width,64),item={id:nextNodeIdV2++,name,type,icon,actionKey:action.actionKey||null,actionId:action.actionId||null,actionRevision:action.actionRevision??null,actionStatus:action.actionStatus||null,downstreamActionType:action.downstreamActionType||action.actionKey||null,x:position.x,y:position.y};editorNodesV2.push(item);selectedNodeIdV2=item.id;selectedConnectionIdV2=null;renderCanvasV2();showToast(name+' 已添加到画布');return item}
+document.querySelectorAll('.palette-card').forEach(card=>{
+  card.addEventListener('click',()=>{if(!paletteDraggedV2)addNodeV2(card.dataset.nodeName,card.dataset.nodeType,card.dataset.nodeIcon,200+editorNodesV2.length%3*210,470)});
+  card.addEventListener('dragstart',event=>{paletteDraggedV2=true;event.dataTransfer.effectAllowed='copy';event.dataTransfer.setData('text/plain',JSON.stringify({name:card.dataset.nodeName,type:card.dataset.nodeType,icon:card.dataset.nodeIcon}))});
+  card.addEventListener('dragend',()=>setTimeout(()=>paletteDraggedV2=false,0));
+});
+boardV2.addEventListener('dragover',event=>{event.preventDefault();event.dataTransfer.dropEffect='copy'});
+boardV2.addEventListener('drop',event=>{event.preventDefault();try{const data=JSON.parse(event.dataTransfer.getData('text/plain')),rect=stageV2.getBoundingClientRect(),width=terminalNodeNameV2(data.name)?64:180;addNodeV2(data.name,data.type,data.icon,(event.clientX-rect.left)/zoomV2-width/2,(event.clientY-rect.top)/zoomV2-32,data)}catch(error){showToast('请从左侧拖入节点')}});
+boardV2.addEventListener('click',event=>{if(canvasPanSuppressClickV2){canvasPanSuppressClickV2=false;return}if(event.target===boardV2||event.target===stageV2){selectedNodeIdV2=null;selectedConnectionIdV2=null;subflowViewActiveV2=false;renderCanvasV2()}});
+nodeNameInputV2.addEventListener('change',event=>{const selected=nodeV2(selectedNodeIdV2);if(!selected)return;const nextName=event.target.value.trim()||'未命名节点';if(terminalNodeNameV2(selected)&&nextName!==selected.name){event.target.value=selected.name;return showToast('开始和结束节点名称不可修改')}if(!canUseTerminalNodeV2(nextName,selected.id)){event.target.value=selected.name;return}selected.name=nextName;renderCanvasV2()});
+document.getElementById('addLink').addEventListener('click',()=>{const from=selectedNodeIdV2,to=Number(connectTargetV2.value);if(!canConnectNodesV2(from,to,true))return;const existing=editorConnectionsV2.find(item=>item.from===from&&item.to===to);if(existing){selectedConnectionIdV2=existing.id;renderCanvasV2();return showToast('该连线已存在')}const connection={id:nextConnectionIdV2++,from,to};editorConnectionsV2.push(connection);selectedConnectionIdV2=connection.id;renderCanvasV2();showToast('连线已添加')});
+function deleteSelectedConnectionV2(){if(selectedConnectionIdV2===null)return false;editorConnectionsV2=editorConnectionsV2.filter(item=>item.id!==selectedConnectionIdV2);selectedConnectionIdV2=null;renderCanvasV2();showToast('选中连线已删除');return true}
+function deleteSelectedNodeV2(){const selected=nodeV2(selectedNodeIdV2);if(!selected)return false;const deletedNodeId=selected.id;editorNodesV2=editorNodesV2.filter(item=>item.id!==deletedNodeId);editorConnectionsV2=editorConnectionsV2.filter(item=>item.from!==deletedNodeId&&item.to!==deletedNodeId);subflowDataV2.delete(deletedNodeId);subflowConnectionsV2.delete(deletedNodeId);selectedNodeIdV2=null;selectedConnectionIdV2=null;subflowViewActiveV2=false;renderCanvasV2();showToast('选中节点及关联连线已删除');return true}
+deleteConnectionV2.addEventListener('click',deleteSelectedConnectionV2);
+subflowEntryButtonV2.addEventListener('click',()=>openSubflowForNodeV2(selectedNodeIdV2));
+document.getElementById('movePrev').addEventListener('click',()=>{const index=editorNodesV2.findIndex(item=>item.id===selectedNodeIdV2);if(index>0){[editorNodesV2[index-1],editorNodesV2[index]]=[editorNodesV2[index],editorNodesV2[index-1]];renderCanvasV2();showToast('节点层级已前移')}});
+document.getElementById('moveNext').addEventListener('click',()=>{const index=editorNodesV2.findIndex(item=>item.id===selectedNodeIdV2);if(index>=0&&index<editorNodesV2.length-1){[editorNodesV2[index],editorNodesV2[index+1]]=[editorNodesV2[index+1],editorNodesV2[index]];renderCanvasV2();showToast('节点层级已后移')}});
+deleteNodeButtonV2.addEventListener('click',deleteSelectedNodeV2);
+function updateCanvasViewportV2(animate=false){stageV2.classList.toggle('viewport-animate',animate);stageV2.style.transform='translate3d('+canvasPanXV2+'px,'+canvasPanYV2+'px,0) scale('+zoomV2+')';if(animate)setTimeout(()=>stageV2.classList.remove('viewport-animate'),180)}
+function constrainCanvasPanV2(){const margin=160,stageWidth=stageV2.offsetWidth*zoomV2,stageHeight=stageV2.offsetHeight*zoomV2,minX=Math.min(-margin,boardV2.clientWidth-stageWidth-margin),minY=Math.min(-margin,boardV2.clientHeight-stageHeight-margin);canvasPanXV2=clampV2(canvasPanXV2,minX,margin);canvasPanYV2=clampV2(canvasPanYV2,minY,margin)}
+function applyZoomV2(value){const next=Math.min(1.3,Math.max(.7,value)),rect=boardV2.getBoundingClientRect(),centerX=rect.width/2,centerY=rect.height/2,logicalX=(centerX-canvasPanXV2)/zoomV2,logicalY=(centerY-canvasPanYV2)/zoomV2;canvasPanXV2=centerX-logicalX*next;canvasPanYV2=centerY-logicalY*next;zoomV2=next;if(canvasAreaV2.classList.contains('canvas-fullscreen'))fitFullscreenCanvasV2();constrainCanvasPanV2();updateCanvasViewportV2(true);renderConnectionsV2();document.getElementById('zoomValue').textContent=Math.round(zoomV2*100)+'%'}
+boardV2.addEventListener('pointerdown',event=>{if(event.button!==0||event.target.closest('.flow-node,.flow-path,.canvas-controls,.subflow-panel'))return;canvasPanV2={pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,originX:canvasPanXV2,originY:canvasPanYV2,moved:false};boardV2.classList.add('panning');boardV2.setPointerCapture?.(event.pointerId);event.preventDefault()});
+document.addEventListener('pointermove',event=>{if(!canvasPanV2||event.pointerId!==canvasPanV2.pointerId)return;const deltaX=event.clientX-canvasPanV2.startX,deltaY=event.clientY-canvasPanV2.startY;canvasPanXV2=canvasPanV2.originX+deltaX;canvasPanYV2=canvasPanV2.originY+deltaY;canvasPanV2.moved=canvasPanV2.moved||Math.abs(deltaX)>3||Math.abs(deltaY)>3;constrainCanvasPanV2();updateCanvasViewportV2()});
+document.addEventListener('pointerup',event=>{if(!canvasPanV2||event.pointerId!==canvasPanV2.pointerId)return;canvasPanSuppressClickV2=canvasPanV2.moved;canvasPanV2=null;boardV2.classList.remove('panning');try{boardV2.releasePointerCapture?.(event.pointerId)}catch(error){}});
+boardV2.addEventListener('dblclick',event=>{if(event.target.closest('.flow-node,.subflow-panel'))return;canvasPanXV2=0;canvasPanYV2=0;updateCanvasViewportV2(true);showToast('画布视图已复位')});
+document.getElementById('zoomIn').addEventListener('click',()=>applyZoomV2(zoomV2+.1));document.getElementById('zoomOut').addEventListener('click',()=>applyZoomV2(zoomV2-.1));const canvasAreaV2=document.getElementById('canvasArea'),fullscreenButtonV2=document.getElementById('canvasFullscreen'),canvasHomeV2=canvasAreaV2.parentNode,canvasNextSiblingV2=canvasAreaV2.nextSibling;function portalCanvasDialogV2(active){if(active){if(canvasAreaV2.parentNode!==document.body)document.body.appendChild(canvasAreaV2)}else if(canvasAreaV2.parentNode!==canvasHomeV2)canvasHomeV2.insertBefore(canvasAreaV2,canvasNextSiblingV2)}function toggleCanvasDialogV2(force){const active=typeof force==='boolean'?force:!canvasAreaV2.classList.contains('canvas-fullscreen');stageV2.style.width='';stageV2.style.height='';stageV2.style.minHeight='';boardV2.scrollLeft=0;boardV2.scrollTop=0;if(active)portalCanvasDialogV2(true);canvasAreaV2.classList.toggle('canvas-fullscreen',active);document.body.classList.toggle('canvas-modal-open',active);fullscreenButtonV2.setAttribute('aria-pressed',String(active));fullscreenButtonV2.title=active?'退出放大':'放大画布';fullscreenButtonV2.querySelector('span').textContent=active?'退出放大':'放大画布';if(!active)portalCanvasDialogV2(false);requestAnimationFrame(()=>{if(active)fitFullscreenCanvasV2();else retainMainCanvasExtentV2();boardV2.scrollLeft=0;boardV2.scrollTop=0;constrainCanvasPanV2();updateCanvasViewportV2();renderCanvasV2()})}fullscreenButtonV2.addEventListener('click',()=>toggleCanvasDialogV2());document.addEventListener('keydown',event=>{if(event.key==='Escape'&&canvasAreaV2.classList.contains('canvas-fullscreen'))toggleCanvasDialogV2(false)});window.addEventListener('resize',()=>{if(!canvasAreaV2.classList.contains('canvas-fullscreen'))return;requestAnimationFrame(()=>{fitFullscreenCanvasV2();constrainCanvasPanV2();updateCanvasViewportV2();renderCanvasV2()})});const editorWorkspaceV2=document.querySelector('.editor-workspace');editorWorkspaceV2.addEventListener('click',event=>{const button=event.target.closest('[data-panel-toggle]');if(!button||!editorWorkspaceV2.contains(button))return;event.preventDefault();event.stopPropagation();const panel=button.dataset.panelToggle,className=panel+'-collapsed';editorWorkspaceV2.classList.toggle(className);const collapsed=editorWorkspaceV2.classList.contains(className);editorWorkspaceV2.querySelectorAll('[data-panel-toggle="'+panel+'"]').forEach(item=>{item.setAttribute('aria-expanded',String(!collapsed));item.setAttribute('aria-pressed',String(collapsed))})});
+window.__flowEditorState={get nodes(){return editorNodesV2},get connections(){return editorConnectionsV2}};
+renderCanvasV2();
+const subflowPanelV2=document.getElementById('subflowPanel');
+const subflowTitleV2=document.getElementById('subflowTitle');
+const subflowCountV2=document.getElementById('subflowCount');
+const subflowBackLabelV2=document.getElementById('subflowBackLabel');
+const exitSubflowV2=document.getElementById('exitSubflow');
+const saveSubflowV2=document.getElementById('saveSubflow');
+const subflowCanvasV2=document.getElementById('subflowCanvas');
+const subflowStageV2=document.getElementById("subflowStage");const subflowZoomValueV2=document.getElementById("subflowZoomValue");let subflowZoomV2=1;
+document.querySelector('.subflow-note').textContent='新增子节点后不会自动连线；请从节点右侧端点拖到目标节点手动连接。';
+let subflowViewActiveV2=false,subflowParentIdV2=null,selectedSubNodeIdV2=null,selectedSubConnectionIdV2=null,nextSubNodeIdV2=1,nextSubConnectionIdV2=1,subNodeDragV2=null,subConnectionDragV2=null,subPaletteDraggedV2=false,subSelectionActiveV2=false;
+function subNodesV2(){if(subflowParentIdV2===null)return[];if(!subflowDataV2.has(subflowParentIdV2))subflowDataV2.set(subflowParentIdV2,[]);return subflowDataV2.get(subflowParentIdV2)}
+function subNodeV2(id){return subNodesV2().find(item=>item.id===id)}
+function subConnectionsV2(){if(subflowParentIdV2===null)return[];if(!subflowConnectionsV2.has(subflowParentIdV2))subflowConnectionsV2.set(subflowParentIdV2,[]);return subflowConnectionsV2.get(subflowParentIdV2)}
+function subConnectionPathV2(from,to){return orthogonalPathV2(from.x+180,from.y+32,to.x,to.y+32)}
+function subConnectionRouteV2(connection){const from=subNodeV2(connection.from),to=subNodeV2(connection.to);if(!from||!to)return null;return orthogonalRouteV2(from.x+180,from.y+32,to.x,to.y+32)}
+function clearSubConnectionTargetV2(){subflowStageV2.querySelectorAll('.connection-target').forEach(element=>element.classList.remove('connection-target'))}
+function subConnectionTargetAtPointV2(clientX,clientY){
+  clearSubConnectionTargetV2();
+  const targetElement=document.elementFromPoint(clientX,clientY)?.closest('.subflow-node'),to=targetElement?.dataset.subnodeId;
+  if(!subConnectionDragV2||!to||to===subConnectionDragV2.from)return null;
+  targetElement.classList.add('connection-target');
+  return subNodeV2(to);
+}
+function deleteSelectedSubConnectionV2(){if(selectedSubConnectionIdV2===null)return false;const connections=subConnectionsV2(),index=connections.findIndex(item=>item.id===selectedSubConnectionIdV2);if(index<0)return false;connections.splice(index,1);selectedSubConnectionIdV2=null;renderSubflowV2();showToast('选中子节点连线已删除');return true}
+function renderSubLinesV2(){
+  subflowStageV2.querySelector('.subflow-lines')?.remove();
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('class','subflow-lines');svg.setAttribute('width',String(subflowStageV2.offsetWidth));svg.setAttribute('height',String(subflowStageV2.offsetHeight));
+  svg.innerHTML='<defs><marker id="subflowArrowV2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#5d92bd"/></marker><marker id="subflowArrowSelectedV2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#e1473f"/></marker></defs>';
+  subConnectionsV2().forEach(connection=>{const route=subConnectionRouteV2(connection);if(!route)return;const selected=connection.id===selectedSubConnectionIdV2,path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('class','subflow-path'+(selected?' selected':''));path.setAttribute('d',route.d);path.setAttribute('marker-end',selected?'url(#subflowArrowSelectedV2)':'url(#subflowArrowV2)');path.dataset.subConnectionId=connection.id;path.addEventListener('click',event=>{event.stopPropagation();selectedSubNodeIdV2=null;subSelectionActiveV2=false;selectedSubConnectionIdV2=connection.id;renderSubflowV2()});svg.appendChild(path);if(selected){const remove=document.createElementNS('http://www.w3.org/2000/svg','g');remove.setAttribute('class','flow-line-delete');remove.setAttribute('transform','translate('+route.deletePoint.x+' '+route.deletePoint.y+')');remove.setAttribute('role','button');remove.setAttribute('tabindex','0');remove.setAttribute('aria-label','删除选中子节点连线');remove.innerHTML='<circle r="12"></circle><path d="M -4 -4 L 4 4 M 4 -4 L -4 4"></path>';remove.addEventListener('pointerdown',event=>{event.stopPropagation();event.preventDefault()});remove.addEventListener('click',event=>{event.stopPropagation();deleteSelectedSubConnectionV2()});svg.appendChild(remove)}});
+  if(subConnectionDragV2){const from=subNodeV2(subConnectionDragV2.from);if(from){const preview=document.createElementNS('http://www.w3.org/2000/svg','path');preview.setAttribute('class','subflow-preview');preview.setAttribute('d',orthogonalPathV2(from.x+180,from.y+32,subConnectionDragV2.x,subConnectionDragV2.y));svg.appendChild(preview)}}
+  subflowStageV2.prepend(svg);
+}
+function refreshSubPropertiesV2(node){if(!node)return;subSelectionActiveV2=true;selectedSubConnectionIdV2=null;selectedLabelV2.textContent='当前子节点：'+node.name;nodeNameInputV2.value=node.name;nodeTypeInputV2.value=terminalNodeNameV2(node)?'通用节点':'子节点';const nodes=subNodesV2(),connection=subConnectionsV2().find(item=>item.from===node.id),next=subNodeV2(connection?.to);connectTargetV2.innerHTML=nodes.filter(item=>item.id!==node.id).map(item=>'<option value="'+item.id+'">'+item.id+' · '+item.name+'</option>').join('')||'<option value="">暂无其他子节点</option>';linkSummaryV2.textContent=connection?node.id+' → '+connection.to:'暂无后续连线';linkNamesV2.textContent=connection?node.name+' → '+(next?.name||''):'请拖动节点右侧端点手动连线';deleteConnectionV2.disabled=!connection}
+function renderSubflowV2(){
+  const parent=nodeV2(selectedNodeIdV2);
+  if(!subflowViewActiveV2||!isSubflowParentV2(parent)){editorWorkspaceV2.classList.remove('subflow-mode');canvasAreaV2.classList.remove('subflow-active');subflowPanelV2.hidden=true;subflowParentIdV2=null;selectedSubNodeIdV2=null;selectedSubConnectionIdV2=null;subSelectionActiveV2=false;return}
+  if(subflowParentIdV2!==parent.id){subflowParentIdV2=parent.id;selectedSubNodeIdV2=null;selectedSubConnectionIdV2=null;subSelectionActiveV2=false}
+  editorWorkspaceV2.classList.add('subflow-mode');canvasAreaV2.classList.add('subflow-active');subflowPanelV2.hidden=false;subflowEntryFieldV2.hidden=true;subflowTitleV2.textContent=parent.id+' · '+parent.name+' - 子节点流程';subflowBackLabelV2.textContent='返回主节点：'+parent.id+' · '+parent.name;
+  const nodes=subNodesV2();
+  if(nodes.length&&!selectedSubNodeIdV2&&selectedSubConnectionIdV2===null){selectedSubNodeIdV2=nodes[0].id;subSelectionActiveV2=true}
+  subflowCountV2.textContent=nodes.length+' 个子节点';subflowStageV2.innerHTML='';
+  if(!nodes.length){const empty=document.createElement('div');empty.className='subflow-empty';empty.textContent='从左侧拖入子节点开始配置';subflowStageV2.appendChild(empty)}
+  nodes.forEach(node=>{const button=document.createElement('button');button.type='button';button.className='subflow-node'+(terminalNodeNameV2(node)==='开始'?' start':'')+(terminalNodeNameV2(node)==='结束'?' end':'')+(node.id===selectedSubNodeIdV2?' selected':'');button.style.left=node.x+'px';button.style.top=node.y+'px';button.dataset.subnodeId=node.id;button.innerHTML='<span class="node-handle handle-in" data-handle="in" title="连接到此子节点"></span><span><strong>'+node.name+'</strong><small>'+(terminalNodeNameV2(node)?'通用节点':'子节点')+'</small></span><span class="subflow-node-icon">'+nodeIconMarkupV2(node)+'</span><span class="node-handle handle-out" data-handle="out" title="拖动创建子节点连线"></span>';
+    button.addEventListener('pointerdown',event=>{if(event.button!==0)return;selectedSubNodeIdV2=node.id;selectedSubConnectionIdV2=null;subSelectionActiveV2=true;const handle=event.target.closest('.node-handle');if(handle){if(handle.dataset.handle==='out'&&terminalNodeNameV2(node)!=='结束'){const rect=subflowStageV2.getBoundingClientRect();subConnectionDragV2={from:node.id,x:(event.clientX-rect.left)/subflowZoomV2,y:(event.clientY-rect.top)/subflowZoomV2,targetId:null};subflowCanvasV2.classList.add('connecting');renderSubLinesV2();event.preventDefault()}event.stopPropagation();return}const rect=subflowStageV2.getBoundingClientRect();subNodeDragV2={id:node.id,offsetX:(event.clientX-rect.left)/subflowZoomV2-node.x,offsetY:(event.clientY-rect.top)/subflowZoomV2-node.y,element:button,moved:false};button.classList.add('dragging');button.setPointerCapture?.(event.pointerId);refreshSubPropertiesV2(node);event.stopPropagation();event.preventDefault()});
+    button.addEventListener('click',event=>{if(event.target.closest('.node-handle'))return;event.stopPropagation();selectedSubNodeIdV2=node.id;selectedSubConnectionIdV2=null;renderSubflowV2();refreshSubPropertiesV2(node)});subflowStageV2.appendChild(button)});
+  renderSubLinesV2();
+  const activeSubNode=subNodeV2(selectedSubNodeIdV2);if(activeSubNode)refreshSubPropertiesV2(activeSubNode);else{const connection=subConnectionsV2().find(item=>item.id===selectedSubConnectionIdV2),from=subNodeV2(connection?.from),to=subNodeV2(connection?.to);if(connection){selectedLabelV2.textContent='当前子节点连线：'+connection.from+' → '+connection.to;nodeNameInputV2.value='';nodeTypeInputV2.value='连线';linkSummaryV2.textContent=connection.from+' → '+connection.to;linkNamesV2.textContent=(from?.name||'')+' → '+(to?.name||'');deleteConnectionV2.disabled=false}}
+}
+const baseRenderCanvasV2=renderCanvasV2;
+renderCanvasV2=function(){baseRenderCanvasV2();renderSubflowV2()};
+function closeSubflowV2(saved=false){const parent=nodeV2(subflowParentIdV2);subflowViewActiveV2=false;subSelectionActiveV2=false;selectedSubNodeIdV2=null;selectedSubConnectionIdV2=null;subConnectionDragV2=null;renderCanvasV2();showToast(saved?'子节点流程已保存，已返回主画布':'已返回主节点：'+(parent?.id||'')+' · '+(parent?.name||''))}
+exitSubflowV2.addEventListener('click',()=>closeSubflowV2(false));
+saveSubflowV2.addEventListener("click",()=>closeSubflowV2(true));function applySubflowZoomV2(value){subflowZoomV2=clampV2(value,.7,1.3);subflowStageV2.style.transform="scale("+subflowZoomV2+")";subflowStageV2.style.transformOrigin="0 0";subflowZoomValueV2.textContent=Math.round(subflowZoomV2*100)+"%"}document.getElementById("subflowZoomOut").addEventListener("click",()=>applySubflowZoomV2(subflowZoomV2-.1));document.getElementById("subflowZoomIn").addEventListener("click",()=>applySubflowZoomV2(subflowZoomV2+.1));document.getElementById("subflowFullscreen").addEventListener("click",()=>toggleCanvasDialogV2());
+stageV2.addEventListener('pointerdown',event=>{if(event.target.closest('.flow-node'))subSelectionActiveV2=false});
+document.addEventListener('pointermove',event=>{if(subNodeDragV2){const node=subNodeV2(subNodeDragV2.id),rect=subflowStageV2.getBoundingClientRect();if(node){const position=stagePositionV2(subflowStageV2,(event.clientX-rect.left)/subflowZoomV2-subNodeDragV2.offsetX,(event.clientY-rect.top)/subflowZoomV2-subNodeDragV2.offsetY,subNodeDragV2.element,180,64);node.x=position.x;node.y=position.y;subNodeDragV2.element.style.left=node.x+'px';subNodeDragV2.element.style.top=node.y+'px';subNodeDragV2.moved=true;renderSubLinesV2()}}if(subConnectionDragV2){const rect=subflowStageV2.getBoundingClientRect(),target=subConnectionTargetAtPointV2(event.clientX,event.clientY),position=target?{x:target.x,y:target.y+32}:stagePositionV2(subflowStageV2,(event.clientX-rect.left)/subflowZoomV2,(event.clientY-rect.top)/subflowZoomV2);subConnectionDragV2.x=position.x;subConnectionDragV2.y=position.y;subConnectionDragV2.targetId=target?.id??null;renderSubLinesV2()}});
+document.addEventListener('pointerup',event=>{if(subNodeDragV2){const moved=subNodeDragV2.moved;subNodeDragV2.element.classList.remove('dragging');subNodeDragV2=null;renderSubflowV2();if(moved)showToast('子节点位置已更新')}if(subConnectionDragV2){const from=subConnectionDragV2.from,target=subConnectionTargetAtPointV2(event.clientX,event.clientY),to=target?.id;if(to&&to!==from){const existing=subConnectionsV2().find(item=>item.from===from&&item.to===to);if(existing){selectedSubConnectionIdV2=existing.id;showToast('该子节点连线已存在')}else{const connection={id:nextSubConnectionIdV2++,from,to};subConnectionsV2().push(connection);selectedSubConnectionIdV2=connection.id;selectedSubNodeIdV2=null;subSelectionActiveV2=false;showToast('子节点连线已创建')}}subConnectionDragV2=null;clearSubConnectionTargetV2();subflowCanvasV2.classList.remove('connecting');renderSubflowV2()}});
+function addSubNodeV2(name,icon,x,y){if(subflowParentIdV2===null)return showToast('请先点击一个主节点');const nodes=subNodesV2(),position=stagePositionV2(subflowStageV2,x??(60+nodes.length%3*280),y??(200+Math.floor(nodes.length/3)*180),null,180,64),item={id:'C'+nextSubNodeIdV2++,name,icon,x:position.x,y:position.y};nodes.push(item);selectedSubNodeIdV2=item.id;subSelectionActiveV2=true;renderSubflowV2();refreshSubPropertiesV2(item);showToast(name+' 已添加到子流程')}
+document.querySelectorAll('.sub-palette-card').forEach(card=>{card.addEventListener('click',()=>{if(!subPaletteDraggedV2)addSubNodeV2(card.dataset.subName,card.dataset.subIcon)});card.addEventListener('dragstart',event=>{subPaletteDraggedV2=true;event.dataTransfer.effectAllowed='copy';event.dataTransfer.setData('application/x-subflow-node',JSON.stringify({name:card.dataset.subName,icon:card.dataset.subIcon}))});card.addEventListener('dragend',()=>setTimeout(()=>subPaletteDraggedV2=false,0))});
+subflowCanvasV2.addEventListener('dragover',event=>{if(event.dataTransfer.types.includes('application/x-subflow-node')){event.preventDefault();event.dataTransfer.dropEffect='copy'}});
+subflowCanvasV2.addEventListener('drop',event=>{const raw=event.dataTransfer.getData('application/x-subflow-node');if(!raw)return;event.preventDefault();try{const data=JSON.parse(raw),rect=subflowStageV2.getBoundingClientRect();addSubNodeV2(data.name,data.icon,(event.clientX-rect.left)/subflowZoomV2-90,(event.clientY-rect.top)/subflowZoomV2-32)}catch(error){showToast('子节点拖入失败')}});
+nodeNameInputV2.addEventListener('change',event=>{if(!subSelectionActiveV2)return;event.stopImmediatePropagation();const node=subNodeV2(selectedSubNodeIdV2);if(node){node.name=event.target.value.trim()||'未命名子节点';renderSubflowV2();refreshSubPropertiesV2(node)}},true);
+document.getElementById('movePrev').addEventListener('click',event=>{if(!subSelectionActiveV2)return;event.stopImmediatePropagation();const nodes=subNodesV2(),index=nodes.findIndex(item=>item.id===selectedSubNodeIdV2);if(index>0){[nodes[index-1],nodes[index]]=[nodes[index],nodes[index-1]];renderSubflowV2();refreshSubPropertiesV2(subNodeV2(selectedSubNodeIdV2));showToast('子节点已前移')}},true);
+document.getElementById('moveNext').addEventListener('click',event=>{if(!subSelectionActiveV2)return;event.stopImmediatePropagation();const nodes=subNodesV2(),index=nodes.findIndex(item=>item.id===selectedSubNodeIdV2);if(index>=0&&index<nodes.length-1){[nodes[index],nodes[index+1]]=[nodes[index+1],nodes[index]];renderSubflowV2();refreshSubPropertiesV2(subNodeV2(selectedSubNodeIdV2));showToast('子节点已后移')}},true);
+function deleteSelectedSubNodeV2(){if(!subSelectionActiveV2)return false;const nodes=subNodesV2(),index=nodes.findIndex(item=>item.id===selectedSubNodeIdV2);if(index<0)return false;const deletedId=nodes[index].id;nodes.splice(index,1);subflowConnectionsV2.set(subflowParentIdV2,subConnectionsV2().filter(item=>item.from!==deletedId&&item.to!==deletedId));selectedSubNodeIdV2=null;selectedSubConnectionIdV2=null;subSelectionActiveV2=false;renderSubflowV2();refreshPropertiesV2();showToast('选中子节点及关联连线已删除');return true}
+deleteNodeButtonV2.addEventListener('click',event=>{if(!subSelectionActiveV2)return;event.stopImmediatePropagation();deleteSelectedSubNodeV2()},true);
+function isEditorTypingTargetV2(target){return target instanceof Element&&Boolean(target.closest('input,textarea,select,[contenteditable="true"]'))}
+document.addEventListener('keydown',event=>{if(event.defaultPrevented||event.repeat||!['Delete','Backspace'].includes(event.key)||isEditorTypingTargetV2(event.target))return;let deleted=false;if(subflowViewActiveV2&&subSelectionActiveV2)deleted=deleteSelectedSubNodeV2();else if(subflowViewActiveV2&&selectedSubConnectionIdV2!==null)deleted=deleteSelectedSubConnectionV2();else if(selectedConnectionIdV2!==null)deleted=deleteSelectedConnectionV2();else if(selectedNodeIdV2!==null)deleted=deleteSelectedNodeV2();if(deleted)event.preventDefault()});
+deleteConnectionV2.addEventListener('click',event=>{if(!subflowViewActiveV2||selectedSubConnectionIdV2===null)return;event.stopImmediatePropagation();deleteSelectedSubConnectionV2()},true);
+document.getElementById('addLink').addEventListener('click',event=>{if(!subSelectionActiveV2)return;event.stopImmediatePropagation();const from=selectedSubNodeIdV2,to=connectTargetV2.value;if(!from||!to||to===from)return showToast('请选择后续子节点');const existing=subConnectionsV2().find(item=>item.from===from&&item.to===to);if(existing){selectedSubConnectionIdV2=existing.id;renderSubflowV2();return showToast('该子节点连线已存在')}const connection={id:nextSubConnectionIdV2++,from,to};subConnectionsV2().push(connection);selectedSubConnectionIdV2=connection.id;selectedSubNodeIdV2=null;subSelectionActiveV2=false;renderSubflowV2();showToast('子节点连线已添加')},true);
+Object.defineProperty(window.__flowEditorState,'subflows',{get(){return Object.fromEntries(subflowDataV2)}});
+Object.defineProperty(window.__flowEditorState,'subflowConnections',{get(){return Object.fromEntries(subflowConnectionsV2)}});
+renderSubflowV2();
+
+const WORKFLOW_DIRECT_API_BASE_URL='http://121.196.164.163:8081';
+const WORKFLOW_API_BASE_URL=typeof window.WORKFLOW_API_BASE_URL==='string'?window.WORKFLOW_API_BASE_URL:(location.protocol==='file:'?WORKFLOW_DIRECT_API_BASE_URL:'');
+const WORKFLOW_TEMPLATE_ENDPOINT=(WORKFLOW_API_BASE_URL?WORKFLOW_API_BASE_URL.replace(/\/$/,''):'')+'/api/workflow-templates';
+const WORKFLOW_TEMPLATE_UPDATE_ENDPOINT=WORKFLOW_TEMPLATE_ENDPOINT+'/update';
+const workflowTemplateIdParamV2=new URLSearchParams(location.search).get('id')?.trim()||'';
+const workflowTemplateEditIdV2=workflowTemplateIdParamV2?Number(workflowTemplateIdParamV2):null;
+const isWorkflowTemplateEditModeV2=Boolean(workflowTemplateIdParamV2);
+const editorMetaInputsV2=document.querySelectorAll('.editor-meta .editor-field input');
+const templateNumberInputV2=editorMetaInputsV2[0];
+const templateNameInputV2=editorMetaInputsV2[1];
+const applicableObjectInputV2=document.querySelector('.editor-meta .editor-field select');
+const templateSaveStatusV2=document.querySelector('.editor-meta-head .status-tag');
+const saveTemplateButtonV2=document.getElementById('saveTemplate');
+const editorModeTitleV2=document.querySelector('.editor-meta-head h2');
+if(templateNumberInputV2)templateNumberInputV2.readOnly=true;
+if(isWorkflowTemplateEditModeV2){
+  if(editorModeTitleV2)editorModeTitleV2.textContent='编辑模板 · '+workflowTemplateIdParamV2;
+  if(templateSaveStatusV2)templateSaveStatusV2.textContent='加载中';
+  if(saveTemplateButtonV2)saveTemplateButtonV2.textContent='保存修改';
+}else{
+  if(editorModeTitleV2)editorModeTitleV2.textContent='新建模板';
+  if(templateSaveStatusV2)templateSaveStatusV2.textContent='新增';
+}
+
+function escapeXmlV2(value){return String(value??'').replace(/[<>&"']/g,character=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[character]))}
+function bpmnIdV2(prefix,value){return prefix+'_'+String(value).replace(/[^a-zA-Z0-9_.-]/g,'_')}
+function actionKeyIdV2(value){const normalized=String(value||'').replace(/[^a-zA-Z0-9_.-]/g,'_');return /^[a-zA-Z_]/.test(normalized)?normalized:'action_'+normalized}
+function buildBpmnNodeIdMapV2(){
+  const counts=new Map(),idByNode=new Map();
+  editorNodesV2.forEach(node=>{
+    const isEvent=node.name==='开始'||node.name==='结束';
+    const base=isEvent||!node.actionKey?bpmnIdV2('node',node.id):actionKeyIdV2(node.actionKey);
+    const count=(counts.get(base)||0)+1;counts.set(base,count);idByNode.set(node.id,count===1?base:base+'_'+count);
+  });
+  return idByNode;
+}
+function actionTypeV2(name){
+  const value=String(name||'');
+  if(value.includes('机械臂'))return 'ARM_MOVE';
+  if(value.includes('夹抓'))return 'GRAB';
+  if(value.includes('视觉')||value.includes('拍照'))return 'VISION';
+  if(value.includes('取料'))return 'PICK';
+  if(value.includes('放料'))return 'PLACE';
+  if(value.includes('移动'))return 'MOVE';
+  if(value.includes('归零'))return 'RESET';
+  if(value.includes('自动门'))return 'DOOR';
+  if(value.includes('手套箱'))return 'GLOVE_BOX';
+  if(value.includes('贴标'))return 'LABEL';
+  if(value.includes('后处理'))return 'POST_PROCESS';
+  return 'CUSTOM';
+}
+function buildSubProcessXmlV2(parent,parentBpmnId,children,connections){
+  const startId=parentBpmnId+'_start',endId=parentBpmnId+'_end';
+  const childIds=children.map(child=>bpmnIdV2(parentBpmnId+'_child',child.id)),childIdByEditorId=new Map(children.map((child,index)=>[child.id,childIds[index]]));
+  const childTasks=children.map((child,index)=>'<receiveTask id="'+childIds[index]+'" name="'+escapeXmlV2(child.name)+'"/>').join('');
+  const validConnections=connections.filter(connection=>childIdByEditorId.has(connection.from)&&childIdByEditorId.has(connection.to)),incoming=new Set(validConnections.map(connection=>connection.to)),outgoing=new Set(validConnections.map(connection=>connection.from)),roots=children.filter(child=>!incoming.has(child.id)),leaves=children.filter(child=>!outgoing.has(child.id));
+  const flowPairs=[...roots.map(child=>[startId,childIdByEditorId.get(child.id)]),...validConnections.map(connection=>[childIdByEditorId.get(connection.from),childIdByEditorId.get(connection.to)]),...leaves.map(child=>[childIdByEditorId.get(child.id),endId])];
+  const flows=flowPairs.map((pair,index)=>'<sequenceFlow id="'+parentBpmnId+'_flow_'+(index+1)+'" sourceRef="'+pair[0]+'" targetRef="'+pair[1]+'"/>').join('');
+  return '<subProcess id="'+parentBpmnId+'" name="'+escapeXmlV2(parent.name)+'"><startEvent id="'+startId+'"/>'+childTasks+flows+'<endEvent id="'+endId+'"/></subProcess>';
+}
+function buildBpmnXmlV2(templateName){
+  const idByNode=buildBpmnNodeIdMapV2();
+  const elements=editorNodesV2.map(node=>{
+    const id=idByNode.get(node.id),name=escapeXmlV2(node.name),children=subflowDataV2.get(node.id)||[];
+    if(node.name==='开始')return '<startEvent id="'+id+'" name="'+name+'"/>';
+    if(node.name==='结束')return '<endEvent id="'+id+'" name="'+name+'"/>';
+    if(children.length)return buildSubProcessXmlV2(node,id,children,subflowConnectionsV2.get(node.id)||[]);
+    return '<receiveTask id="'+id+'" name="'+name+'"/>';
+  }).join('');
+  const flows=editorConnectionsV2.map(connection=>'<sequenceFlow id="'+bpmnIdV2('flow',connection.id)+'" sourceRef="'+idByNode.get(connection.from)+'" targetRef="'+idByNode.get(connection.to)+'"/>').join('');
+  return '<?xml version="1.0" encoding="UTF-8"?><definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:flowable="http://flowable.org/bpmn" targetNamespace="http://kunling.com/workflow"><process id="workflowTemplate" name="'+escapeXmlV2(templateName)+'" isExecutable="true">'+elements+flows+'</process></definitions>';
+}
+function buildEditorDataV2(){
+  const idByNode=buildBpmnNodeIdMapV2();
+  const nodeProperties=Object.fromEntries(editorNodesV2.map(node=>{
+    const children=subflowDataV2.get(node.id)||[];
+    return [idByNode.get(node.id),{
+      nodeCategory:node.name==='开始'||node.name==='结束'?'EVENT':children.length?'MAIN':node.type==='AGV 节点'?'MAIN':'DEVICE',
+      nodeType:node.type,
+      actionKey:node.actionKey||undefined,
+      actionId:node.actionId||undefined,
+      actionRevision:node.actionRevision??undefined,
+      actionStatus:node.actionStatus||undefined,
+      actionType:node.downstreamActionType||node.actionKey||actionTypeV2(node.name),
+      executionParams:{},
+      failureStrategy:'RETRY_THEN_SUSPEND',
+      completionCriteria:children.length?'全部子节点执行成功':undefined,
+      position:{x:node.x,y:node.y},
+      icon:node.icon
+    }];
+  }));
+  return {
+    nodeProperties,
+    nodes:editorNodesV2.map(node=>({...node,bpmnNodeId:idByNode.get(node.id)})),
+    connections:editorConnectionsV2.map(connection=>({...connection,sourceRef:idByNode.get(connection.from),targetRef:idByNode.get(connection.to)})),
+    subflows:Object.fromEntries([...subflowDataV2].map(([parentId,children])=>[idByNode.get(parentId),children.map(child=>({...child,actionType:actionTypeV2(child.name)}))])),
+    subflowConnections:Object.fromEntries([...subflowConnectionsV2].map(([parentId,connections])=>[idByNode.get(parentId),connections.map(connection=>({...connection}))]))
+  };
+}
+function validateWorkflowV2(templateName,applicableObject){
+  if(!templateName)throw new Error('请填写模板名称');
+  if(!applicableObject)throw new Error('请选择适用对象');
+  if(isWorkflowTemplateEditModeV2&&!Number.isSafeInteger(workflowTemplateEditIdV2))throw new Error('模板 ID 无效，无法保存修改');
+  const startCount=terminalNodeCountV2('开始'),endCount=terminalNodeCountV2('结束');
+  if(startCount===0)throw new Error('流程图缺少开始节点');
+  if(startCount>1)throw new Error('同一个流程只能有一个开始节点');
+  if(endCount===0)throw new Error('流程图缺少结束节点');
+  if(endCount>1)throw new Error('同一个流程只能有一个结束节点');
+  const unmappedAction=editorNodesV2.find(node=>node.name!=='开始'&&node.name!=='结束'&&!node.actionKey);
+  if(unmappedAction)throw new Error('动作节点缺少 actionKey：'+unmappedAction.name);
+  const nodeIds=new Set(editorNodesV2.map(node=>node.id));
+  if(editorConnectionsV2.some(connection=>!nodeIds.has(connection.from)||!nodeIds.has(connection.to)))throw new Error('流程图存在无效连线');
+  subflowDataV2.forEach((children,parentId)=>{const childIds=new Set(children.map(child=>child.id)),connections=subflowConnectionsV2.get(parentId)||[];if(connections.some(connection=>!childIds.has(connection.from)||!childIds.has(connection.to)))throw new Error('子流程存在无效连线');if(children.length>1&&children.some(child=>!connections.some(connection=>connection.from===child.id||connection.to===child.id)))throw new Error('子流程中存在尚未手动连线的节点')});
+}
+let isSavingWorkflowTemplateV2=false;
+async function saveWorkflowTemplateV2(){
+  if(isSavingWorkflowTemplateV2)return;
+  if(isWorkflowTemplateEditModeV2&&!window.__workflowTemplateDetailApi?.loaded)return showToast('模板详情尚未加载完成，暂不能保存修改');
+  const templateName=templateNameInputV2?.value.trim()||'';
+  const applicableObject=applicableObjectInputV2?.value||'';
+  try{validateWorkflowV2(templateName,applicableObject)}catch(error){showToast(error.message);return}
+  isSavingWorkflowTemplateV2=true;
+  const payload={...(isWorkflowTemplateEditModeV2?{id:workflowTemplateEditIdV2}:{}),templateName,applicableObject,bpmnXml:buildBpmnXmlV2(templateName),editorData:buildEditorDataV2()};
+  const saveEndpoint=isWorkflowTemplateEditModeV2?WORKFLOW_TEMPLATE_UPDATE_ENDPOINT:WORKFLOW_TEMPLATE_ENDPOINT;
+  const originalLabel=saveTemplateButtonV2.textContent;
+  const controller=new AbortController(),timeoutId=setTimeout(()=>controller.abort(),15000);
+  saveTemplateButtonV2.disabled=true;saveTemplateButtonV2.textContent=isWorkflowTemplateEditModeV2?'更新中…':'保存中…';templateSaveStatusV2.textContent=isWorkflowTemplateEditModeV2?'更新中':'保存中';
+  try{
+    const response=await fetch(saveEndpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(payload),signal:controller.signal});
+    const responseText=await response.text();
+    let result={};
+    if(responseText){try{result=JSON.parse(responseText)}catch(error){result={message:responseText}}}
+    if(!response.ok)throw new Error(result.message||result.error||('HTTP '+response.status));
+    if(typeof result.code==='number'&&result.code!==0&&result.code!==200)throw new Error(result.message||('业务错误 '+result.code));
+    const savedTemplate=result.data||result;
+    if(savedTemplate.templateNumber&&templateNumberInputV2)templateNumberInputV2.value=savedTemplate.templateNumber;
+    templateSaveStatusV2.textContent=isWorkflowTemplateEditModeV2?'已更新':'已保存';
+    showToast((isWorkflowTemplateEditModeV2?'流程模板已更新':'流程模板已保存')+(savedTemplate.templateNumber?' · '+savedTemplate.templateNumber:''));
+    window.__lastSavedWorkflowTemplate=savedTemplate;
+    saveTemplateButtonV2.textContent=(isWorkflowTemplateEditModeV2?'更新成功':'保存成功')+'，正在返回…';
+    setTimeout(()=>{location.href='process-templates.html'},600);
+  }catch(error){
+    console.error(isWorkflowTemplateEditModeV2?'更新流程模板失败':'保存流程模板失败',error);
+    isSavingWorkflowTemplateV2=false;
+    templateSaveStatusV2.textContent=isWorkflowTemplateEditModeV2?'更新失败':'保存失败';
+    showToast(error.name==='AbortError'?'连接后端超时，请检查 121.196.164.163':(isWorkflowTemplateEditModeV2?'更新失败：':'保存失败：')+error.message);
+  }finally{
+    clearTimeout(timeoutId);
+    if(!isSavingWorkflowTemplateV2){saveTemplateButtonV2.disabled=false;saveTemplateButtonV2.textContent=originalLabel}
+  }
+}
+saveTemplateButtonV2.addEventListener('click',saveWorkflowTemplateV2);
+window.__workflowTemplateApi={endpoint:isWorkflowTemplateEditModeV2?WORKFLOW_TEMPLATE_UPDATE_ENDPOINT:WORKFLOW_TEMPLATE_ENDPOINT,createEndpoint:WORKFLOW_TEMPLATE_ENDPOINT,updateEndpoint:WORKFLOW_TEMPLATE_UPDATE_ENDPOINT,mode:isWorkflowTemplateEditModeV2?'edit':'create',templateId:workflowTemplateEditIdV2,get saving(){return isSavingWorkflowTemplateV2},buildPayload(){const templateName=templateNameInputV2?.value.trim()||'',applicableObject=applicableObjectInputV2?.value||'';return {...(isWorkflowTemplateEditModeV2?{id:workflowTemplateEditIdV2}:{}),templateName,applicableObject,bpmnXml:buildBpmnXmlV2(templateName),editorData:buildEditorDataV2()}}};
+</script><script src="process-action-api.js?v=2.3.1"></script><script src="process-template-detail-api.js?v=2.3.1"></script></body></html>

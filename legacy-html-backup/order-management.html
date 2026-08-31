@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <script src="mock-api.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f5f7f9" />
+  <title>复合机器人调度系统 · 订单管理</title>
+  <link rel="stylesheet" href="assets/styles/pages/order-management.css">
+  <link rel="stylesheet" href="assets/styles/tokens.css">
+  <link rel="stylesheet" href="assets/styles/base.css">
+  <link rel="stylesheet" href="assets/styles/components.css">
+  <link rel="stylesheet" href="assets/styles/tables.css">
+  <script type="module" src="assets/components/register.js" blocking="render"></script>
+  
+</head>
+<body>
+
+  <agv-app-shell active-route="order-management.html" section-title="订单管理" user-name="陈工"><div class="agv-legacy-hooks" hidden><aside id="sidebar"></aside><div id="scrim"></div><button id="menuBtn" type="button"></button><button id="statusInfoBtn" type="button"></button><button id="statusBtn" type="button"></button><button id="alertInfoBtn" type="button"></button><button id="alertBtn" type="button"></button></div>
+
+    <div class="orders-canvas agv-list-page">
+      <section class="orders-panel">
+        <div class="tabs-row"><agv-tabs class="tabs" role="tablist"><button class="tab-btn active" role="tab" aria-selected="true">订单列表</button><button class="tab-btn" id="taskDetailTab" role="tab" aria-selected="false" aria-disabled="true" disabled>订单任务详情</button></agv-tabs></div>
+        <div class="list-content">
+          <div class="list-heading"><div><h2>订单列表</h2><p>点击“详情”查看订单公共信息，点击“查看任务”进入任务与动作执行链</p></div><button class="create-order-btn" id="createOrderBtn" type="button"><svg class="icon"><use href="assets/icons.svg#i-plus"/></svg>新建</button></div>
+          <div class="filters" data-agv-list-filters>
+            <label class="field-shell"><span>状态选择</span><select id="statusFilter" aria-label="订单状态"><option value="">全部状态</option><option value="QUEUED">排队中</option><option value="RUNNING">执行中</option><option value="SUCCEEDED">已完成</option><option value="FAILED">失败</option><option value="CANCELLED">已取消</option></select></label>
+            <label class="field-shell"><span>查询订单</span><input id="orderQuery" type="search" placeholder="订单号/系统订单号" aria-label="查询订单" /></label>
+            <div class="filter-actions"><button class="filter-btn" id="resetFilters"><img class="filter-action-icon" src="assets/list-icons/refresh.svg" alt="">重置</button><button class="filter-btn primary" id="searchOrders"><img class="filter-action-icon" src="assets/list-icons/search.svg" alt="">搜索</button></div>
+          </div>
+          <div class="table-wrap">
+            <table class="agv-list-table" aria-label="订单列表">
+              <colgroup><col style="width:13.65%"><col style="width:11.64%"><col style="width:11.64%"><col style="width:12.16%"><col style="width:11.64%"><col style="width:7.40%"><col style="width:11.21%"><col style="width:13.52%"><col style="width:7.14%"></colgroup>
+              <thead><tr><th>订单号</th><th>系统订单号</th><th>来源</th><th>状态</th><th>优先级</th><th>任务数</th><th>完成进度</th><th>下发时间</th><th>操作</th></tr></thead>
+              <tbody id="ordersBody"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <div class="page-summary" id="pageSummary"></div>
+            <div class="page-controls"><select class="page-size" id="pageSize" aria-label="每页条数"><option value="9">9 条/页</option><option value="10">10 条/页</option><option value="15">15 条/页</option></select><button class="page-btn" id="prevPage">上一页</button><div id="pageNumbers" style="display:flex;gap:7px"></div><button class="page-btn" id="nextPage">下一页</button></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </agv-app-shell>
+
+  <div class="modal-overlay" id="createOrderModal" hidden>
+    <section class="create-order-modal" role="dialog" aria-modal="true" aria-labelledby="createOrderTitle" tabindex="-1">
+      <header class="create-order-header"><h2 id="createOrderTitle">手动创建订单</h2><p>填写订单信息并为每个任务选择流程</p></header>
+      <form id="createOrderForm">
+        <div class="create-order-body">
+          <div class="create-order-grid">
+            <label class="create-field"><span>订单号</span><input id="manualOrderNo" maxlength="100" autocomplete="off" required placeholder="请输入订单号"></label>
+            <label class="create-field"><span>来源</span><select id="orderSource" required><option value="MANUAL">MANUAL</option><option value="MES">MES</option><option value="LIMS">LIMS</option><option value="UPSTREAM">UPSTREAM</option></select></label>
+            <label class="create-field"><span>优先级</span><select id="orderPriority" required><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4（最低）</option></select></label>
+            <label class="create-field"><span>任务数</span><input id="orderTaskCount" type="number" min="1" max="10" step="1" value="1" required></label>
+          </div>
+          <section class="create-tasks" aria-labelledby="createTasksTitle"><div class="create-tasks-heading"><h3 id="createTasksTitle">任务明细</h3><span id="flowLoadState" role="status">正在加载流程…</span></div><div class="create-task-rows" id="createTaskRows"></div></section>
+          <p class="create-order-feedback" id="createOrderFeedback" role="alert" hidden></p>
+        </div>
+        <div class="modal-actions create-order-actions"><button class="modal-close" id="cancelCreateOrder" type="button">取消</button><button class="create-order-submit modal-primary" id="createOrderSubmit" type="submit" disabled>创建订单</button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-overlay" id="orderDetailModal" hidden>
+    <section class="order-detail-modal" role="dialog" aria-modal="true" aria-labelledby="orderDetailTitle" aria-describedby="orderDetailNotice" tabindex="-1">
+      <header class="order-detail-header"><h2 id="orderDetailTitle">订单详情</h2><button class="order-detail-x" id="orderDetailCloseX" type="button" aria-label="关闭订单详情">×</button></header>
+      <div class="order-detail-body">
+        <div class="order-detail-grid">
+          <article class="order-detail-item"><span>订单号</span><strong id="detailOrderNo">-</strong></article>
+          <article class="order-detail-item"><span>订单状态</span><div id="detailOrderStatus"></div></article>
+          <article class="order-detail-item"><span>系统订单号</span><strong id="detailSystemOrderNo">-</strong></article>
+          <article class="order-detail-item"><span>优先级</span><strong id="detailPriority">-</strong></article>
+          <article class="order-detail-item"><span>订单来源</span><strong id="detailSource">-</strong></article>
+          <article class="order-detail-item"><span>任务数量 / 完成进度</span><strong id="detailTaskProgress">-</strong></article>
+          <article class="order-detail-item"><span>下发时间</span><strong id="detailIssuedAt">-</strong></article>
+          <article class="order-detail-item"><span>结果回调状态</span><strong id="detailCallbackStatus">-</strong></article>
+        </div>
+        <p class="order-detail-notice" id="orderDetailNotice">订单只展示订单级公共信息。库位、载具、目标机台等可能随任务不同而变化的数据，请到“订单任务详情”逐条查看。</p>
+        <div class="order-detail-actions"><button class="order-detail-primary" id="viewOrderTasks" type="button">查看订单任务详情</button><button class="order-detail-secondary" id="requestOrderCancel" type="button">请求上游取消</button></div>
+      </div>
+      <footer class="order-detail-footer"><button class="modal-close" id="orderDetailClose" type="button">关闭</button></footer>
+    </section>
+  </div>
+
+  <div class="modal-overlay" id="statusModal" hidden>
+    <section class="status-modal" role="dialog" aria-modal="true" aria-labelledby="statusTitle" tabindex="-1">
+      <h2 id="statusTitle">系统运行状态</h2>
+      <div class="status-list"><article class="status-item normal"><strong>绿色·系统正常</strong><p>核心服务、数据库、任务引擎和机器人连接正常。</p></article><article class="status-item limited"><strong>黄色·受限运行</strong><p>部分非核心设备或上游接口异常，系统仍可继续部分业务。</p></article><article class="status-item abnormal"><strong>红色·系统异常</strong><p>核心能力异常，系统暂停接收和分配新任务。</p></article><article class="status-item maintenance"><strong>灰色·维护模式</strong><p>系统处于人工维护、升级或硬件调试状态。</p></article></div>
+      <div class="modal-actions"><button class="modal-close" id="statusClose">关闭</button></div>
+    </section>
+  </div>
+
+  <div class="alert-overlay" id="alertDrawer" hidden>
+    <aside class="alert-drawer" role="dialog" aria-modal="true" aria-labelledby="alertTitle" tabindex="-1">
+      <header class="alert-header"><h2 id="alertTitle">异常提醒</h2><p>3条未完成·1条严重</p></header>
+      <div class="alert-feed"><div class="alert-list">
+        <article class="alert-card"><span class="severity">严重</span><strong>机台允许进样事件等待超过流程配置的30秒</strong><p>ALM-20260817-0042 · 待处理 · 负责人：陈工</p></article>
+        <article class="alert-card"><strong>系统记录为空，但库位传感器检测有物</strong><p>ALM-20260817-0041 · 处理中 · 负责人：王工</p></article>
+        <article class="alert-card"><strong>视觉设备在60秒内出现3次短时断连</strong><p>ALM-20260817-0040 · 已确认 · 负责人：李工</p></article>
+      </div></div>
+      <footer class="alert-footer"><button class="alert-primary" id="recoveryBtn">进入异常与恢复</button></footer>
+    </aside>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const orders = [];
+
+    const body = document.getElementById('ordersBody');
+    const statusFilter = document.getElementById('statusFilter');
+    const orderQuery = document.getElementById('orderQuery');
+    const pageSizeSelect = document.getElementById('pageSize');
+    const pageNumbers = document.getElementById('pageNumbers');
+    const pageSummary = document.getElementById('pageSummary');
+    const prevPage = document.getElementById('prevPage');
+    const nextPage = document.getElementById('nextPage');
+    const toast = document.getElementById('toast');
+    let currentPage = 1;
+    let toastTimer;
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2300);
+    }
+
+    function getFilteredOrders() {
+      const query = orderQuery.value.trim().toLowerCase();
+      return orders.filter(function (order) {
+        const statusMatch = statusFilter.value === 'all' || order.status === statusFilter.value;
+        const queryMatch = !query || order.orderNo.toLowerCase().includes(query) || order.systemNo.toLowerCase().includes(query);
+        return statusMatch && queryMatch;
+      });
+    }
+
+    function renderOrders() {
+      const filtered = getFilteredOrders();
+      const pageSize = Number(pageSizeSelect.value);
+      const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+      currentPage = Math.min(currentPage, totalPages);
+      const start = (currentPage - 1) * pageSize;
+      const rows = filtered.slice(start, start + pageSize);
+      body.innerHTML = rows.length ? rows.map(function (order) {
+        return '<tr data-status="' + order.status + '">' +
+          '<td>' + order.orderNo + '</td><td>' + order.systemNo + '</td><td>' + order.source + '</td>' +
+          '<td><span class="status-tag status-' + order.status + '">' + order.statusLabel + '</span></td>' +
+          '<td>' + order.priority + '</td><td>' + order.tasks + '</td><td>' + order.progress + '</td><td>' + order.time + '</td>' +
+          '<td><div class="row-actions"><button class="row-btn js-order-detail" data-order="' + order.orderNo + '">详情</button><button class="row-btn tasks js-order-tasks" data-order="' + order.orderNo + '">查看任务</button></div></td></tr>';
+      }).join('') : '<tr class="empty-row"><td colspan="9">没有符合条件的订单</td></tr>';
+
+      const end = Math.min(start + rows.length, filtered.length);
+      pageSummary.textContent = '共 ' + filtered.length + ' 条，当前显示 ' + (filtered.length ? start + 1 : 0) + '–' + end + ' 条';
+      prevPage.disabled = currentPage === 1;
+      nextPage.disabled = currentPage === totalPages;
+      pageNumbers.innerHTML = '';
+      for (let page = 1; page <= totalPages; page += 1) {
+        const button = document.createElement('button');
+        button.className = 'page-btn' + (page === currentPage ? ' active' : '');
+        button.textContent = page;
+        button.addEventListener('click', function () { currentPage = page; renderOrders(); });
+        pageNumbers.appendChild(button);
+      }
+      bindRowActions();
+    }
+
+    function bindRowActions() {
+      document.querySelectorAll('.js-order-detail, .js-order-tasks').forEach(function (button) {
+        button.addEventListener('click', function () {
+          window.location.href = 'order-task-detail.html?order=' + encodeURIComponent(button.dataset.order);
+        });
+      });
+    }
+
+    document.getElementById('searchOrders').addEventListener('click', function () { currentPage = 1; renderOrders(); });
+    orderQuery.addEventListener('keydown', function (event) { if (event.key === 'Enter') { currentPage = 1; renderOrders(); } });
+    statusFilter.addEventListener('change', function () { currentPage = 1; renderOrders(); });
+    document.getElementById('resetFilters').addEventListener('click', function () { statusFilter.value = 'all'; orderQuery.value = ''; currentPage = 1; renderOrders(); });
+    pageSizeSelect.addEventListener('change', function () { currentPage = 1; renderOrders(); });
+    prevPage.addEventListener('click', function () { if (currentPage > 1) { currentPage -= 1; renderOrders(); } });
+    nextPage.addEventListener('click', function () { currentPage += 1; renderOrders(); });
+
+    const syncOrders = document.getElementById('syncOrders');
+    syncOrders?.addEventListener('click', function () {
+      syncOrders.disabled = true;
+      syncOrders.querySelector('span').textContent = '同步中…';
+      setTimeout(function () { syncOrders.disabled = false; syncOrders.querySelector('span').textContent = '同步订单'; showToast('订单同步完成，共更新 17 条记录'); }, 800);
+    });
+
+    const sidebar = document.getElementById('sidebar');
+    const scrim = document.getElementById('scrim');
+    const menuBtn = document.getElementById('menuBtn');
+    function setSidebar(open) { sidebar.classList.toggle('open', open); scrim.classList.toggle('show', open); }
+    menuBtn.addEventListener('click', function () { setSidebar(!sidebar.classList.contains('open')); });
+    scrim.addEventListener('click', function () { setSidebar(false); });
+    document.querySelectorAll('.demo-link').forEach(function (link) { link.addEventListener('click', function (event) { event.preventDefault(); showToast(link.dataset.page + ' 模块尚未创建独立页面'); if (innerWidth <= 760) setSidebar(false); }); });
+
+    const statusModal = document.getElementById('statusModal');
+    const statusInfoBtn = document.getElementById('statusInfoBtn');
+    const statusClose = document.getElementById('statusClose');
+    function openStatus() { statusModal.hidden = false; document.body.style.overflow = 'hidden'; requestAnimationFrame(function () { statusModal.classList.add('open'); statusClose.focus(); }); }
+    function closeStatus() { statusModal.classList.remove('open'); document.body.style.overflow = ''; setTimeout(function () { statusModal.hidden = true; statusInfoBtn.focus(); }, 200); }
+    statusInfoBtn.addEventListener('click', openStatus); statusClose.addEventListener('click', closeStatus); statusModal.addEventListener('click', function (event) { if (event.target === statusModal) closeStatus(); });
+
+    const alertDrawer = document.getElementById('alertDrawer');
+    const alertInfoBtn = document.getElementById('alertInfoBtn');
+    const alertPanel = alertDrawer.querySelector('.alert-drawer');
+    function openAlert() { alertDrawer.hidden = false; document.body.style.overflow = 'hidden'; requestAnimationFrame(function () { alertDrawer.classList.add('open'); alertPanel.focus(); }); }
+    function closeAlert() { alertDrawer.classList.remove('open'); document.body.style.overflow = ''; setTimeout(function () { alertDrawer.hidden = true; alertInfoBtn.focus(); }, 240); }
+    alertInfoBtn.addEventListener('click', openAlert); alertDrawer.addEventListener('click', function (event) { if (event.target === alertDrawer) closeAlert(); });
+    document.getElementById('recoveryBtn').addEventListener('click', function () { closeAlert(); location.href='current-anomalies.html'; });
+    document.addEventListener('keydown', function (event) { if (event.key === 'Escape') { if (!alertDrawer.hidden) closeAlert(); else if (!statusModal.hidden) closeStatus(); else setSidebar(false); } });
+
+    renderOrders();
+  </script>
+  <script type="module" src="order-api.js"></script>
+</body>
+</html>

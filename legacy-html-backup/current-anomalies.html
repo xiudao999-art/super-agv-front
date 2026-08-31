@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <script src="mock-api.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f6f8">
+  <title>复合机器人调度系统 · 当前异常</title>
+  <link rel="stylesheet" href="assets/styles/tokens.css">
+  <link rel="stylesheet" href="assets/styles/base.css">
+  <link rel="stylesheet" href="assets/styles/components.css">
+  <link rel="stylesheet" href="assets/styles/tables.css">
+  <link rel="stylesheet" href="assets/styles/pages/exception-recovery.css">
+  <script type="module" src="assets/components/register.js" blocking="render"></script>
+</head>
+<body data-recovery-page="exceptions">
+  <agv-app-shell active-route="current-anomalies.html" section-title="异常与恢复" user-name="陈工">
+    <div class="agv-legacy-hooks" hidden>
+      <aside id="sidebar"></aside><div id="scrim"></div><button id="menuBtn" type="button"></button>
+      <button id="statusInfoBtn" type="button"></button><button id="statusBtn" type="button"></button>
+      <button id="alertInfoBtn" type="button"></button><button id="alertBtn" type="button"></button>
+    </div>
+
+    <agv-page-header class="page-head">
+      <div><h1>异常与恢复</h1><p>聚合异常原因、影响范围、恢复状态和人工处理建议</p></div>
+    </agv-page-header>
+
+    <main class="page-canvas">
+      <section class="recovery-panel">
+        <nav class="module-tabs" aria-label="异常与恢复模块导航">
+          <a class="module-tab active" href="current-anomalies.html" aria-current="page">当前异常</a>
+          <a class="module-tab" href="alarm-records.html">告警记录</a>
+          <a class="module-tab" href="task-recovery-status.html">任务恢复与状态核对</a>
+        </nav>
+        <div class="module-content">
+          <header class="list-heading">
+            <div><h2>当前异常</h2><p>仅展示仍需跟进的异常；点击行查看系统保护、恢复方式并提交处理结果</p></div>
+            <div class="heading-meta"><span class="count-pill" id="activeAnomalyCount">0 项待跟进</span></div>
+          </header>
+
+          <div class="table-wrap anomaly-table-wrap">
+            <table class="data-table anomaly-table" aria-label="当前异常列表">
+              <colgroup>
+                <col style="width:154px"><col style="width:154px"><col style="width:84px"><col style="width:102px">
+                <col style="width:150px"><col><col style="width:88px"><col style="width:96px">
+              </colgroup>
+              <thead><tr><th>异常编号</th><th>发生时间</th><th>等级</th><th>异常类型</th><th>异常对象</th><th>异常内容</th><th>负责人</th><th>状态</th></tr></thead>
+              <tbody id="anomalyBody"></tbody>
+            </table>
+          </div>
+          <footer class="table-footer"><span id="anomalySummary">共 0 条</span><div class="page-controls"><button class="page-button active" type="button">1</button></div></footer>
+        </div>
+      </section>
+    </main>
+  </agv-app-shell>
+
+  <div class="modal-overlay" id="anomalyModal" hidden>
+    <section class="exception-modal" role="dialog" aria-modal="true" aria-labelledby="anomalyModalTitle">
+      <header class="modal-header">
+        <div><h2 id="anomalyModalTitle">异常详情与恢复处置</h2><p id="anomalyModalSubtitle"></p></div>
+        <button class="modal-x" type="button" data-close="anomalyModal" aria-label="关闭">×</button>
+      </header>
+      <div class="modal-body">
+        <article class="exception-summary" id="exceptionSummary">
+          <div id="anomalyLevel"></div>
+          <div><h3 id="anomalyMessage"></h3><p id="anomalyCode"></p></div>
+        </article>
+
+        <div class="section-title"><h3>异常事实与影响</h3><span>先核对现场，再选择恢复方式</span></div>
+        <div class="detail-grid">
+          <article class="detail-item"><span class="detail-label">异常对象</span><strong class="detail-value" id="anomalyObject"></strong></article>
+          <article class="detail-item"><span class="detail-label">当前状态</span><div id="anomalyState"></div></article>
+          <article class="detail-item"><span class="detail-label">负责人</span><strong class="detail-value" id="anomalyOwner"></strong></article>
+          <article class="detail-item wide"><span class="detail-label">关联订单 / 任务 / AGV</span><strong class="detail-value" id="anomalyAssociation"></strong></article>
+          <article class="detail-item"><span class="detail-label">最后更新</span><strong class="detail-value" id="anomalyUpdated"></strong></article>
+          <article class="detail-item full"><span class="detail-label">影响范围</span><strong class="detail-value" id="anomalyImpact"></strong></article>
+          <article class="detail-item full"><span class="detail-label">现场与系统证据</span><strong class="detail-value" id="anomalyEvidence"></strong></article>
+        </div>
+
+        <div class="section-title"><h3>系统已执行的保护</h3><span>处置完成前保持生效</span></div>
+        <div class="protection-strip" id="protectionStrip"></div>
+
+        <div class="section-title"><h3>选择恢复方式</h3><span>不会自动重复任何已完成的物理动作</span></div>
+        <div class="route-grid">
+          <button class="route-card" type="button" data-route="direct"><h4>直接继续运行</h4><p>确认现场与检查点一致后，从指定安全位置继续执行。</p></button>
+          <button class="route-card" type="button" data-route="manual"><h4>人工处置</h4><p>执行现场操作或转入已配置的异常处理流程。</p></button>
+        </div>
+
+        <div class="route-panel" data-route-panel="direct" hidden>
+          <form id="directResumeForm" autocomplete="off">
+            <div class="form-grid">
+              <label class="form-field"><span>继续位置</span><select id="resumePosition" required><option value="">请选择安全继续位置</option><option>当前检查点</option><option>下一动作节点</option><option>下一流程节点</option><option>跳过当前订单</option></select></label>
+              <label class="form-field"><span>现场确认人</span><input required placeholder="请输入确认人姓名"></label>
+            </div>
+            <label class="confirm-line"><input id="resumeConfirmed" type="checkbox">我已确认现场状态、载具位置和系统检查点一致，不会重复已完成动作。</label>
+            <div class="route-submit-row"><button class="route-action" id="confirmDirectResume" type="submit" disabled>确认继续方案</button></div>
+          </form>
+        </div>
+
+        <div class="route-panel" data-route-panel="manual" hidden>
+          <form id="manualRecoveryForm" autocomplete="off">
+            <div class="form-grid">
+              <label class="form-field"><span>处置方式</span><select required><option value="">请选择处置方式</option><option>执行临时人工动作</option><option>启动异常处理流程</option><option>转管理员审批</option><option>保持锁定并等待现场确认</option></select></label>
+              <label class="form-field"><span>现场负责人</span><input required placeholder="请输入现场负责人"></label>
+              <label class="form-field wide"><span>处置说明</span><textarea required placeholder="记录现场检查、人工动作和预期恢复条件"></textarea></label>
+            </div>
+            <div class="route-submit-row"><button class="route-action" type="submit">确认人工处置方案</button></div>
+          </form>
+        </div>
+
+        <div class="section-title"><h3>建议处理步骤</h3><span id="anomalySuggestion"></span></div>
+        <ol class="suggestion-list" id="suggestionList"></ol>
+
+        <div class="route-panel" id="resultPanel" hidden>
+          <form id="anomalyResultForm" autocomplete="off">
+            <div class="form-grid">
+              <label class="form-field"><span>处理结果</span><select id="resultStatus" required><option value="">请选择处理结果</option><option value="已恢复">已恢复</option><option value="已关闭">已关闭</option></select></label>
+              <label class="form-field"><span>结果确认人</span><input required placeholder="请输入确认人姓名"></label>
+              <label class="form-field wide"><span>处理结果说明</span><textarea required placeholder="填写处理动作、现场结果和资源释放情况"></textarea></label>
+            </div>
+            <div class="route-submit-row"><button class="route-action" type="submit">提交处理结果</button></div>
+          </form>
+        </div>
+
+        <div class="modal-actions"><button class="modal-close" type="button" data-close="anomalyModal">关闭</button><button class="modal-primary" id="showResultForm" type="button">填写处理结果</button></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="assets/scripts/exception-recovery.js"></script>
+</body>
+</html>

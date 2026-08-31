@@ -1,0 +1,16 @@
+.modal-overlay, .alert-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(12, 29, 47, 0.5);
+}
+.modal-overlay { display: grid; place-items: center; padding: 24px; }
+.modal-card, .status-modal { max-height: calc(100vh - 48px); overflow: auto; }
+.toast { font-size: var(--agv-text-small); }
+.status-tag, .badge { white-space: nowrap; }
+
+@media (max-width: 760px) {
+  .modal-overlay { padding: 16px; }
+  .modal-card, .status-modal { max-width: 100%; }
+  .alert-drawer { width: 100vw; }
+}
