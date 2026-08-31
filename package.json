@@ -12,6 +12,7 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
     "axios": "^1.11.0",
+    "bpmn-js": "^18.26.0",
     "element-plus": "^2.10.7",
     "vue": "^3.5.20",
     "vue-router": "^4.5.1"
