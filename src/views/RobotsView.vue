@@ -43,10 +43,10 @@ onMounted(loadRobots)
           <div><h2>机器人列表</h2><p>点击机器人所在行可查看基础信息和硬件模组</p></div>
           <span class="count-badge">{{ total }} 台已配置</span>
         </header>
-        <div class="filters">
-          <label class="field-shell"><span>运行状态</span><select v-model="statusInput"><option value="all">全部状态</option><option v-for="item in ['运行中','等待资源','空闲','充电中','异常']" :key="item">{{ item }}</option></select></label>
-          <label class="field-shell"><span>查询机器人</span><input v-model="keywordInput" type="search" placeholder="请输入 AGV 编号" autocomplete="off" @keydown.enter="search"></label>
-          <div class="filter-actions">
+        <div class="filters agv-filter-bar" data-agv-list-filters>
+          <label class="agv-filter-field"><span>运行状态</span><select v-model="statusInput" aria-label="机器人运行状态"><option value="all">全部状态</option><option v-for="item in ['运行中','等待资源','空闲','充电中','异常']" :key="item">{{ item }}</option></select></label>
+          <label class="agv-filter-field"><span>查询机器人</span><input v-model="keywordInput" type="search" placeholder="机器人编号/名称" aria-label="查询机器人" autocomplete="off" @keydown.enter="search"></label>
+          <div class="agv-filter-actions">
             <button class="filter-btn" type="button" @click="reset"><img class="filter-action-icon" src="/assets/list-icons/refresh.svg" alt="">重置</button>
             <button class="filter-btn primary" type="button" @click="search"><img class="filter-action-icon" src="/assets/list-icons/search.svg" alt="">搜索</button>
           </div>
