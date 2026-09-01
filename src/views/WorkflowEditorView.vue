@@ -41,10 +41,29 @@ function normalizeActions(rows){const fallback=[['移动','MOVE'],['单次取料
 function selectElement(element){selectedElement.value=element;const b=element?.businessObject;Object.assign(propertyForm,{name:b?.name||'',actionKey:b?.actionKey||'',actionRevision:b?.actionRevision||'',executionParams:b?.executionParams||'',failureStrategy:b?.failureStrategy||'RETRY_THEN_SUSPEND',completionBasis:b?.completionBasis||''})}
 function removeDiagramElement(element){if(!element)return;modeler.value.get('modeling').removeElements([element]);modeler.value.get('selection').select(null)}
 function startConnection(event,element,side){if(element.outgoing?.some(flow=>flow.type==='bpmn:SequenceFlow'))return;event.stopPropagation();event.preventDefault();pendingSourceSide=side;const x=side==='left'?element.x:element.x+element.width;modeler.value.get('connect').start(event,element,{x,y:element.y+element.height/2})}
+function connectionSide(connection,endpoint,isSource){
+  const property=isSource?'sourceSide':'targetSide',temporary=isSource?'_agvSourceSide':'_agvTargetSide',explicit=connection.businessObject?.[property]||connection[temporary]
+  if(explicit)return explicit
+  const waypoint=isSource?connection.waypoints?.[0]:connection.waypoints?.at(-1)
+  if(waypoint&&endpoint){
+    const leftDistance=Math.abs(waypoint.x-endpoint.x),rightDistance=Math.abs(waypoint.x-(endpoint.x+endpoint.width))
+    if(Math.min(leftDistance,rightDistance)<=2)return leftDistance<=rightDistance?'left':'right'
+  }
+  const other=isSource?connection.target:connection.source
+  return other&&other.x+other.width/2<endpoint.x+endpoint.width/2?'left':'right'
+}
+function compactWaypoints(points){
+  const unique=points.filter((point,index)=>!index||point.x!==points[index-1].x||point.y!==points[index-1].y)
+  return unique.filter((point,index)=>{
+    if(!index||index===unique.length-1)return true
+    const previous=unique[index-1],next=unique[index+1]
+    return !(previous.x===point.x&&point.x===next.x)&&!(previous.y===point.y&&point.y===next.y)
+  })
+}
 function orthogonalWaypoints(connection){
   const source=connection?.source,target=connection?.target
   if(!source||!target)return[]
-  const sourceSide=connection.businessObject?.sourceSide||connection._agvSourceSide||'right',targetSide=connection.businessObject?.targetSide||connection._agvTargetSide||'left'
+  const sourceSide=connectionSide(connection,source,true),targetSide=connectionSide(connection,target,false)
   const sourcePoint={x:sourceSide==='left'?source.x:source.x+source.width,y:source.y+source.height/2}
   const targetPoint={x:targetSide==='left'?target.x:target.x+target.width,y:target.y+target.height/2}
   const clearance=36
@@ -52,7 +71,7 @@ function orthogonalWaypoints(connection){
     const outerX=sourceSide==='right'
       ?Math.max(sourcePoint.x,targetPoint.x)+clearance
       :Math.min(sourcePoint.x,targetPoint.x)-clearance
-    return[sourcePoint,{x:outerX,y:sourcePoint.y},{x:outerX,y:targetPoint.y},targetPoint]
+    return compactWaypoints([sourcePoint,{x:outerX,y:sourcePoint.y},{x:outerX,y:targetPoint.y},targetPoint])
   }
   const sourceExitX=sourcePoint.x+(sourceSide==='left'?-clearance:clearance)
   const targetEntryX=targetPoint.x+(targetSide==='left'?-clearance:clearance)
@@ -67,8 +86,7 @@ function orthogonalWaypoints(connection){
   if(verticalGap>=clearance*2)routeY=(source.y+source.height+target.y)/2
   else if(reverseVerticalGap>=clearance*2)routeY=(target.y+target.height+source.y)/2
   else routeY=Math.min(source.y,target.y)-clearance
-  const points=[sourcePoint,{x:sourceExitX,y:sourcePoint.y},{x:sourceExitX,y:routeY},{x:targetEntryX,y:routeY},{x:targetEntryX,y:targetPoint.y},targetPoint]
-  return points.filter((point,index)=>!index||point.x!==points[index-1].x||point.y!==points[index-1].y)
+  return compactWaypoints([sourcePoint,{x:sourceExitX,y:sourcePoint.y},{x:sourceExitX,y:routeY},{x:targetEntryX,y:routeY},{x:targetEntryX,y:targetPoint.y},targetPoint])
 }
 function sameWaypoints(current,next){return current?.length===next.length&&current.every((point,index)=>Math.abs(point.x-next[index].x)<.5&&Math.abs(point.y-next[index].y)<.5)}
 function normalizeSequenceFlows(){
