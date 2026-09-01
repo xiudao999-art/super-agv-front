@@ -134,12 +134,12 @@ onMounted(load)
               <td><span class="nav-count">{{ counts.pointCount ?? 0 }} 个点位</span></td>
               <td><span :class="['badge', currentStatus === '已发布' ? 'badge-green' : 'badge-blue']">{{ currentStatus }}<template v-if="currentConfig"> R{{ currentConfig.revision }}</template></span></td>
               <td class="col-actions"><div class="row-actions">
-                <button class="icon-action" type="button" aria-label="编辑地图" title="编辑地图" :disabled="!currentConfig" @click="openEditor"><svg class="icon"><use href="#i-edit" /></svg></button>
-                <button class="icon-action" type="button" aria-label="查看地图" title="查看地图" :disabled="!currentConfig" @click="openPreview"><svg class="icon"><use href="#i-map" /></svg></button>
-                <button class="row-btn" type="button" :disabled="!currentConfig" @click="openPreview">配置详情</button>
-                <router-link v-if="currentConfig" class="row-btn blue" :to="{ path:'/config/passage-rules', query:{ configId:configId(currentConfig) } }">配置通行/机台</router-link>
-                <button v-if="draftConfig" class="row-btn" type="button" @click="validateDraft">校验</button><button v-if="draftConfig" class="row-btn blue" type="button" @click="publishDraft">发布</button>
-                <button v-else-if="lab.published" class="row-btn" type="button" @click="createDraftOnly">创建草稿</button>
+                <TableActionButton kind="edit" label="编辑地图" :disabled="!currentConfig" @click="openEditor"/>
+                <TableActionButton kind="map" label="查看地图" :disabled="!currentConfig" @click="openPreview"/>
+                <TableActionButton kind="view" label="配置详情" :disabled="!currentConfig" @click="openPreview"/>
+                <router-link v-if="currentConfig" class="table-action-link" aria-label="配置通行与机台" title="配置通行与机台" :to="{ path:'/config/passage-rules', query:{ configId:configId(currentConfig) } }"><svg viewBox="0 0 24 24"><path d="M4 7h10M4 12h16M10 17h10"/><circle cx="17" cy="7" r="2"/><circle cx="7" cy="17" r="2"/></svg></router-link>
+                <TableActionButton v-if="draftConfig" kind="view" label="校验草稿" @click="validateDraft"/><TableActionButton v-if="draftConfig" kind="publish" label="发布草稿" @click="publishDraft"/>
+                <TableActionButton v-else-if="lab.published" kind="edit" label="创建草稿" @click="createDraftOnly"/>
               </div></td>
             </tr>
           </tbody></table></div>

@@ -168,10 +168,10 @@ async function closeAnomaly(row) {
         <el-table-column v-if="mode === 'anomalies'" prop="owner" label="负责人" width="105" /><el-table-column v-else label="负责人" width="105"><template #default>系统</template></el-table-column>
         <el-table-column label="操作" fixed="right" width="185">
           <template #default="{ row }">
-            <el-button link type="primary" @click="showDetail(row)">详情</el-button>
+              <TableActionButton kind="view" label="查看详情" @click="showDetail(row)"/>
             <template v-if="mode === 'anomalies'">
-              <el-button link type="primary" @click="showAction(row)">分派</el-button>
-              <el-button v-if="row.status !== '已确认'" link type="success" @click="closeAnomaly(row)">确认</el-button>
+                <TableActionButton kind="edit" label="分派" @click="showAction(row)"/>
+                <TableActionButton v-if="row.status !== '已确认'" kind="toggle" label="确认" active @click="closeAnomaly(row)"/>
             </template>
           </template>
         </el-table-column>
@@ -189,8 +189,8 @@ async function closeAnomaly(row) {
         <el-table-column prop="action" label="建议动作" min-width="120" />
         <el-table-column label="操作" fixed="right" width="135">
           <template #default="{ row }">
-            <el-button link type="primary" @click="showDetail(row)">检查结果</el-button>
-            <el-button link type="success" @click="showAction(row)">发起检查</el-button>
+              <TableActionButton kind="view" label="检查结果" @click="showDetail(row)"/>
+              <TableActionButton kind="publish" label="发起检查" @click="showAction(row)"/>
           </template>
         </el-table-column>
       </el-table>

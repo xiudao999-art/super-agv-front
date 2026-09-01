@@ -181,7 +181,7 @@ onMounted(load)
           <el-table-column prop="coordinate" label="地图坐标（X / Y / θ）" min-width="210" /><el-table-column prop="rule" label="通行规则" min-width="180" />
         </template>
         <el-table-column label="状态" width="100"><template #default><el-tag :type="editable ? 'warning' : 'success'">{{ editable ? '草稿' : '已发布' }}</el-tag></template></el-table-column>
-        <el-table-column label="操作" fixed="right" width="120"><template #default="{ row }"><div class="row-actions"><el-button link type="danger" :disabled="!editable" @click="remove(row)">删除</el-button><el-button link type="primary" :disabled="!editable" @click="openEdit(row)">编辑</el-button></div></template></el-table-column>
+        <el-table-column label="操作" fixed="right" width="120"><template #default="{ row }"><div class="row-actions"><TableActionButton kind="edit" label="编辑" :disabled="!editable" @click="openEdit(row)"/><TableActionButton kind="delete" label="删除" danger :disabled="!editable" @click="remove(row)"/></div></template></el-table-column>
         <template #empty><el-empty :description="`当前配置暂无${title}数据`" /></template>
       </el-table>
       <div class="pagination-bar"><span>共 {{ rows.length }} 条数据</span><span>数据来源：实验室配置接口</span></div>

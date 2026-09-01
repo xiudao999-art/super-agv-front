@@ -268,9 +268,9 @@ onUnmounted(() => {
                 <td>{{ formatPriority(row.priority) }}</td><td>{{ row.taskCount ?? 0 }}</td><td>{{ progressText(row) }}</td><td>{{ row.issuedAt || '-' }}</td>
                 <td class="col-actions">
                   <div class="row-actions">
-                    <button class="row-icon-button" type="button" aria-label="查看详情" title="查看详情" @click="openDetail(row, $event)"><img src="/assets/list-icons/file-detail.svg" alt=""></button>
-                    <button class="row-icon-button" type="button" aria-label="查看任务" title="查看任务" @click="openTasks(row)"><img src="/assets/list-icons/document.svg" alt=""></button>
-                    <button class="row-icon-button danger" type="button" aria-label="删除" title="删除" @click="removeOrder(row)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+                    <TableActionButton kind="view" label="查看详情" @click="openDetail(row, $event)"/>
+                    <TableActionButton kind="document" label="查看任务" @click="openTasks(row)"/>
+                    <TableActionButton kind="delete" label="删除" danger @click="removeOrder(row)"/>
                   </div>
                 </td>
               </tr>

@@ -234,3 +234,26 @@ export async function uploadLabMap(file) {
   body.append('file', file)
   return unwrap(await http.post('/api/files/images', body, { headers: { 'Content-Type': 'multipart/form-data' } }))
 }
+
+export async function listRobots(params = {}) {
+  if (useMockApi) {
+    const records = clone(collection('robotPool') || [])
+    return { records, total: records.length, current: 1, size: records.length }
+  }
+  return unwrap(await http.get('/api/robot-info', { params: { pageNum: 1, pageSize: 200, ...params } }))
+}
+
+export async function getRobotInfo(id) {
+  if (useMockApi) return clone(collection('robotPool').find((row) => String(row.id) === String(id)))
+  return unwrap(await http.get(`/api/robot-info/${encodeURIComponent(id)}`))
+}
+
+export async function saveRobotInfo(payload) {
+  if (useMockApi) return payload.id ? updateRecord('robotPool', payload.id, payload) : createRecord('robotPool', payload)
+  return unwrap(await http.post('/api/robot-info', payload))
+}
+
+export async function deleteRobotInfo(id) {
+  if (useMockApi) return removeRecord('robotPool', id)
+  return unwrap(await http.delete(`/api/robot-info/${encodeURIComponent(id)}`))
+}

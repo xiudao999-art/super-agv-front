@@ -1,70 +1,32 @@
 <script setup>
-import { computed, reactive, ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import PageHeader from '../components/PageHeader.vue'
-import { appState } from '../stores/appStore'
+import { deleteRobotInfo, getRobotInfo, listRobots, saveRobotInfo } from '../api/agv'
 
-const keywordInput = ref('')
-const statusInput = ref('all')
-const applied = reactive({ keyword: '', status: 'all' })
-const selected = ref(null)
-const detailVisible = ref(false)
-const createVisible = ref(false)
-const saving = ref(false)
-const form = reactive({ id: '', name: '', map: '', chassis: '', point: '', status: '', remark: '' })
+const runningStatusLabels={0:'空闲',1:'运行中',2:'暂停',3:'充电中',4:'故障',5:'急停'}
+const runningStatusValues={'空闲':0,'运行中':1,'暂停':2,'充电中':3,'故障':4,'急停':5,'等待资源':2,'异常':4}
+const moduleStatusLabels={0:'离线',1:'在线',2:'故障'}
+const keywordInput=ref(''),statusInput=ref('all'),applied=reactive({keyword:'',status:'all'})
+const robotRows=ref([]),total=ref(0),loading=ref(false),selected=ref(null),detailVisible=ref(false),createVisible=ref(false),saving=ref(false),editingId=ref(null)
+const form=reactive({robotCode:'',robotName:'',mapName:'',mapVersion:'',currentLocationCode:'',runningStatus:0,connectionStatus:1,batteryLevel:100,enabled:1,remark:''})
 
-const rows = computed(() => appState.robotPool.filter((robot) => {
-  const keywordMatch = !applied.keyword || robot.id.includes(applied.keyword)
-  const statusMatch = applied.status === 'all' || robot.status === applied.status
-  return keywordMatch && statusMatch
-}))
+function normalizeModule(module){return{...module,module:module.deviceName||module.module||'-',vendor:module.manufacturer||module.vendor||'-',model:module.hardwareModel||module.model||'-',code:module.deviceCode||module.code||'-',protocol:module.communicationProtocol||module.protocol||'-',purpose:module.remark||module.purpose||'-',status:moduleStatusLabels[module.status]||module.status||'未知'}}
+function normalizeRobot(robot){const legacy=typeof robot.id==='string'&&!robot.robotCode;const modules=(robot.modules||[]).map(normalizeModule);return{...robot,databaseId:legacy?null:robot.id,id:robot.robotCode||robot.id||'-',name:robot.robotName||robot.name||'-',map:robot.mapName||robot.map||'-',mapVersion:robot.mapVersion||'-',point:robot.currentLocationCode||robot.point||'-',connection:robot.connectionStatus==null?(robot.connection||'未知'):(Number(robot.connectionStatus)===1?'在线':'离线'),status:runningStatusLabels[robot.runningStatus]||robot.status||'未知',battery:Number(robot.batteryLevel??robot.battery??0),enabled:Number(robot.enabled??1),remark:robot.remark||'',modules,abnormalModules:modules.filter(item=>item.status==='故障').length,order:robot.order||'—',task:robot.task||'—',flow:robot.flow||'—',target:robot.target||'—'}}
+const rows=computed(()=>robotRows.value.filter(robot=>(!applied.keyword||`${robot.id} ${robot.name}`.toUpperCase().includes(applied.keyword))&&(applied.status==='all'||robot.status===applied.status)))
+const statusClass=value=>({在线:'status-online',离线:'status-offline',运行中:'status-running',暂停:'status-waiting',等待资源:'status-waiting',空闲:'status-idle',充电中:'status-charging',故障:'status-error',急停:'status-error',异常:'status-error'}[value]||'status-running')
+const batteryClass=value=>value<=15?'is-critical':value<=30?'is-low':''
 
-const statusClass = (value) => ({
-  在线: 'status-online', 离线: 'status-offline', 运行中: 'status-running',
-  等待资源: 'status-waiting', 空闲: 'status-idle', 充电中: 'status-charging', 异常: 'status-error',
-}[value] || 'status-running')
-const batteryClass = (value) => value <= 15 ? 'is-critical' : value <= 30 ? 'is-low' : ''
-const deviceCode = (code, robotId) => code.replace(/-01$/, `-${robotId.slice(-2)}`)
-
-function search() {
-  applied.keyword = keywordInput.value.trim().toUpperCase()
-  applied.status = statusInput.value
-}
-
-function reset() {
-  keywordInput.value = ''
-  statusInput.value = 'all'
-  applied.keyword = ''
-  applied.status = 'all'
-}
-
-function showDetail(robot) {
-  selected.value = robot
-  detailVisible.value = true
-}
-
-function openCreate() {
-  Object.assign(form, { id: '', name: '', map: '', chassis: '', point: '', status: '', remark: '' })
-  createVisible.value = true
-}
-
-async function createRobot() {
-  const id = form.id.trim().toUpperCase()
-  if (!id || !form.name.trim() || !form.map || !form.chassis || !form.point.trim() || !form.status) {
-    return ElMessage.warning('请完整填写机器人必填信息')
-  }
-  if (appState.robotPool.some((item) => item.id === id)) return ElMessage.warning(`${id} 已存在，请修改机器人编号`)
-  saving.value = true
-  appState.robotPool.push({
-    ...form, id, name: form.name.trim(), point: form.point.trim(), connection: '在线',
-    battery: form.status === '充电中' ? 20 : 100, order: '—', task: '—', flow: '—', target: '—',
-    abnormalModules: 0, map: '大型实验室总览地图', mapVersion: 'V3.2', remark: form.remark.trim(),
-  })
-  saving.value = false
-  createVisible.value = false
-  reset()
-  ElMessage.success(`${id} 已加入机器人池`)
-}
+async function loadRobots(){loading.value=true;try{const page=await listRobots();robotRows.value=(page?.records||[]).map(normalizeRobot);total.value=Number(page?.total??robotRows.value.length)}catch(error){ElMessage.error(`机器人列表加载失败：${error.message}`)}finally{loading.value=false}}
+function search(){applied.keyword=keywordInput.value.trim().toUpperCase();applied.status=statusInput.value}
+function reset(){keywordInput.value='';statusInput.value='all';applied.keyword='';applied.status='all'}
+async function showDetail(robot){selected.value=robot;detailVisible.value=true;if(robot.databaseId==null)return;try{selected.value=normalizeRobot({...robot,...await getRobotInfo(robot.databaseId)})}catch(error){ElMessage.error(`机器人详情加载失败：${error.message}`)}}
+function resetForm(){Object.assign(form,{robotCode:'',robotName:'',mapName:'',mapVersion:'',currentLocationCode:'',runningStatus:0,connectionStatus:1,batteryLevel:100,enabled:1,remark:''})}
+function openCreate(){editingId.value=null;resetForm();createVisible.value=true}
+function openEdit(robot){editingId.value=robot.databaseId;Object.assign(form,{robotCode:robot.id,robotName:robot.name,mapName:robot.map,mapVersion:robot.mapVersion,currentLocationCode:robot.point,runningStatus:runningStatusValues[robot.status]??0,connectionStatus:robot.connection==='在线'?1:0,batteryLevel:robot.battery,enabled:robot.enabled,remark:robot.remark});createVisible.value=true}
+async function submitRobot(){if(!form.robotCode.trim()||!form.robotName.trim())return ElMessage.warning('请填写机器人编号和名称');saving.value=true;try{await saveRobotInfo({...editingId.value&&{id:editingId.value},robotCode:form.robotCode.trim().toUpperCase(),robotName:form.robotName.trim(),mapName:form.mapName.trim(),mapVersion:form.mapVersion.trim(),currentLocationCode:form.currentLocationCode.trim(),connectionStatus:Number(form.connectionStatus),runningStatus:Number(form.runningStatus),batteryLevel:Number(form.batteryLevel),enabled:Number(form.enabled),remark:form.remark.trim()});createVisible.value=false;ElMessage.success(editingId.value?'机器人信息已更新':'机器人已新增');await loadRobots()}catch(error){ElMessage.error(`保存失败：${error.message}`)}finally{saving.value=false}}
+async function removeRobot(robot){if(robot.databaseId==null)return ElMessage.warning('演示数据暂不支持删除');try{await ElMessageBox.confirm(`确认删除机器人 ${robot.id}？此操作不可撤销。`,'删除机器人',{type:'warning',confirmButtonText:'删除',cancelButtonText:'取消'});await deleteRobotInfo(robot.databaseId);ElMessage.success(`${robot.id} 已删除`);await loadRobots()}catch(error){if(error!=='cancel'&&error!=='close')ElMessage.error(`删除失败：${error.message}`)}}
+onMounted(loadRobots)
 </script>
 
 <template>
@@ -79,7 +41,7 @@ async function createRobot() {
       <section class="robot-pool-panel">
         <header class="panel-head">
           <div><h2>机器人列表</h2><p>点击机器人所在行可查看基础信息和硬件模组</p></div>
-          <span class="count-badge">{{ appState.robotPool.length }} 台已配置</span>
+          <span class="count-badge">{{ total }} 台已配置</span>
         </header>
         <div class="filters">
           <label class="field-shell"><span>运行状态</span><select v-model="statusInput"><option value="all">全部状态</option><option v-for="item in ['运行中','等待资源','空闲','充电中','异常']" :key="item">{{ item }}</option></select></label>
@@ -89,7 +51,8 @@ async function createRobot() {
             <button class="filter-btn primary" type="button" @click="search"><img class="filter-action-icon" src="/assets/list-icons/search.svg" alt="">搜索</button>
           </div>
         </div>
-        <div v-if="rows.length" class="table-wrap">
+        <div v-if="loading" class="empty-state"><strong>正在加载机器人信息…</strong></div>
+        <div v-else-if="rows.length" class="table-wrap">
           <table aria-label="机器人列表">
             <thead><tr><th>机器人编号</th><th>工作地图</th><th>当前位置</th><th>连接状态</th><th>运行状态</th><th>正常 / 异常模组</th><th>电量</th><th>当前订单</th><th class="col-actions">操作</th></tr></thead>
             <tbody>
@@ -99,16 +62,16 @@ async function createRobot() {
                 <td>{{ robot.point }}</td>
                 <td><span :class="['status-tag', statusClass(robot.connection)]">{{ robot.connection }}</span></td>
                 <td><span :class="['status-tag', statusClass(robot.status)]">{{ robot.status }}</span></td>
-                <td><span class="module-health"><strong>{{ appState.hardwareModules.length - robot.abnormalModules }}</strong><em>/</em><strong :class="{ 'has-error': robot.abnormalModules }">{{ robot.abnormalModules }}</strong></span></td>
+                <td><span class="module-health"><strong>{{ robot.modules.length - robot.abnormalModules }}</strong><em>/</em><strong :class="{ 'has-error': robot.abnormalModules }">{{ robot.abnormalModules }}</strong></span></td>
                 <td><div class="battery-cell"><span class="battery-track"><i :class="batteryClass(robot.battery)" :style="{ width: `${robot.battery}%` }" /></span><span>{{ robot.battery }}%</span></div></td>
                 <td :class="{ 'empty-order': robot.order === '—' }">{{ robot.order }}</td>
-                <td class="col-actions"><button class="icon-action" type="button" :aria-label="`查看 ${robot.id}`" title="查看详情" @click.stop="showDetail(robot)"><svg viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg></button></td>
+                <td class="col-actions"><div class="row-actions"><TableActionButton kind="view" :label="`查看 ${robot.id}`" @click.stop="showDetail(robot)"/><TableActionButton kind="edit" :label="`编辑 ${robot.id}`" @click.stop="openEdit(robot)"/><TableActionButton kind="delete" :label="`删除 ${robot.id}`" danger @click.stop="removeRobot(robot)"/></div></td>
               </tr>
             </tbody>
           </table>
         </div>
         <div v-else class="empty-state"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><strong>没有匹配的机器人</strong><span>请调整机器人编号或运行状态</span></div>
-        <div class="table-footer">当前显示 {{ rows.length }} 台 / 共 {{ appState.robotPool.length }} 台</div>
+        <div class="table-footer">当前显示 {{ rows.length }} 台 / 共 {{ total }} 台</div>
       </section>
     </main>
 
@@ -118,7 +81,7 @@ async function createRobot() {
         <div v-if="selected" class="detail-content">
           <section class="detail-hero">
             <div class="detail-identity"><span class="detail-robot-icon"><svg viewBox="0 0 24 24"><rect x="5" y="7" width="14" height="11" rx="3"/><path d="M9 7V4h6v3M8.5 12h.01M15.5 12h.01M9 16h6"/></svg></span><div><strong>{{ selected.name }}</strong><p>{{ selected.id }} · {{ selected.target }} · {{ selected.point }}</p></div></div>
-            <div class="detail-tags"><span :class="['status-tag', statusClass(selected.connection)]">{{ selected.connection }}</span><span :class="['status-tag', statusClass(selected.status)]">{{ selected.status }}</span><span :class="['status-tag', selected.abnormalModules ? 'status-waiting' : 'status-online']">正常模组 {{ appState.hardwareModules.length - selected.abnormalModules }} / 异常 {{ selected.abnormalModules }}</span></div>
+            <div class="detail-tags"><span :class="['status-tag', statusClass(selected.connection)]">{{ selected.connection }}</span><span :class="['status-tag', statusClass(selected.status)]">{{ selected.status }}</span><span :class="['status-tag', selected.abnormalModules ? 'status-waiting' : 'status-online']">正常模组 {{ selected.modules.length - selected.abnormalModules }} / 异常 {{ selected.abnormalModules }}</span></div>
           </section>
           <section class="detail-stat-grid">
             <article class="detail-stat"><small>当前订单</small><strong :title="selected.order">{{ selected.order }}</strong><span>当前任务 {{ selected.task }}</span></article>
@@ -126,7 +89,7 @@ async function createRobot() {
             <article class="detail-stat"><small>当前位置</small><strong>{{ selected.point }}</strong><span>定位正常 · 电量 {{ selected.battery }}%</span></article>
             <article class="detail-stat"><small>工作地图</small><strong>{{ selected.map }}</strong><span>版本 {{ selected.mapVersion }}</span></article>
           </section>
-          <section class="module-panel"><header class="module-panel-head"><div><h3>硬件模组列表</h3><p>显示 {{ selected.id }} 当前配置的全部硬件模组</p></div><span class="module-count">{{ appState.hardwareModules.length }} 个模组</span></header><div class="module-table-wrap"><table class="module-table" :aria-label="`${selected.id} 硬件模组列表`"><thead><tr><th>硬件模组</th><th>硬件厂商</th><th>设备型号</th><th>设备编号</th><th>通信协议</th><th>主要用途</th><th>状态</th></tr></thead><tbody><tr v-for="(module,index) in appState.hardwareModules" :key="module.code"><td><strong>{{ module.module }}</strong></td><td>{{ module.vendor }}</td><td>{{ module.model }}</td><td>{{ deviceCode(module.code, selected.id) }}</td><td>{{ module.protocol }}</td><td>{{ module.purpose }}</td><td><span :class="['status-tag', selected.abnormalModules && index >= appState.hardwareModules.length - selected.abnormalModules ? 'status-error' : 'status-online']">{{ selected.abnormalModules && index >= appState.hardwareModules.length - selected.abnormalModules ? '异常' : module.status }}</span></td></tr></tbody></table></div></section>
+          <section class="module-panel"><header class="module-panel-head"><div><h3>硬件模组列表</h3><p>显示 {{ selected.id }} 当前配置的全部硬件模组</p></div><span class="module-count">{{ selected.modules.length }} 个模组</span></header><div v-if="selected.modules.length" class="module-table-wrap"><table class="module-table" :aria-label="`${selected.id} 硬件模组列表`"><thead><tr><th>硬件模组</th><th>硬件厂商</th><th>设备型号</th><th>设备编号</th><th>通信协议</th><th>主要用途</th><th>状态</th></tr></thead><tbody><tr v-for="module in selected.modules" :key="module.id||module.code"><td><strong>{{ module.module }}</strong></td><td>{{ module.vendor }}</td><td>{{ module.model }}</td><td>{{ module.code }}</td><td>{{ module.protocol }}</td><td>{{ module.purpose }}</td><td><span :class="['status-tag', module.status==='故障'?'status-error':module.status==='在线'?'status-online':'status-offline']">{{ module.status }}</span></td></tr></tbody></table></div><div v-else class="module-empty">暂无硬件模组数据</div></section>
         </div>
         <div class="modal-actions"><button class="modal-close" type="button" @click="detailVisible = false">关闭</button></div>
       </section>
@@ -134,16 +97,19 @@ async function createRobot() {
 
     <div v-if="createVisible" class="modal-overlay open" @click.self="createVisible = false">
       <section class="modal-card add-robot-modal" role="dialog" aria-modal="true" aria-labelledby="addRobotTitle">
-        <div class="modal-title-row"><div><h2 id="addRobotTitle">新增机器人</h2><p>填写机器人基础信息后加入机器人池</p></div><button class="modal-x" type="button" aria-label="关闭新增机器人弹窗" @click="createVisible = false">×</button></div>
-        <form class="form-grid" @submit.prevent="createRobot">
-          <label class="form-field"><span>机器人编号 <i>*</i></span><input v-model="form.id" placeholder="例如：AGV-11" required></label>
-          <label class="form-field"><span>机器人名称 <i>*</i></span><input v-model="form.name" placeholder="例如：复合机器人 11" required></label>
-          <label class="form-field"><span>工作地图 <i>*</i></span><select v-model="form.map" required><option value="" disabled>请选择工作地图</option><option>大型实验室总览地图 V3.2</option></select></label>
-          <label class="form-field"><span>底盘型号 <i>*</i></span><select v-model="form.chassis" required><option value="" disabled>请选择底盘型号</option><option>HIKROBOT AMR-1200</option><option>STANDARD ROBOTS AMR-1200</option></select></label>
-          <label class="form-field"><span>初始位置 <i>*</i></span><input v-model="form.point" placeholder="例如：N26" required></label>
-          <label class="form-field"><span>初始状态 <i>*</i></span><select v-model="form.status" required><option value="" disabled>请选择初始状态</option><option>空闲</option><option>充电中</option><option>等待资源</option></select></label>
+        <div class="modal-title-row"><div><h2 id="addRobotTitle">{{ editingId ? '编辑机器人' : '新增机器人' }}</h2><p>机器人信息将保存至调度服务</p></div><button class="modal-x" type="button" aria-label="关闭机器人弹窗" @click="createVisible = false">×</button></div>
+        <form class="form-grid" @submit.prevent="submitRobot">
+          <label class="form-field"><span>机器人编号 <i>*</i></span><input v-model="form.robotCode" placeholder="例如：AGV-11" required></label>
+          <label class="form-field"><span>机器人名称 <i>*</i></span><input v-model="form.robotName" placeholder="例如：复合机器人 11" required></label>
+          <label class="form-field"><span>工作地图</span><input v-model="form.mapName" placeholder="例如：大型实验室总览地图"></label>
+          <label class="form-field"><span>地图版本</span><input v-model="form.mapVersion" placeholder="例如：V3.2"></label>
+          <label class="form-field"><span>当前位置</span><input v-model="form.currentLocationCode" placeholder="例如：N26"></label>
+          <label class="form-field"><span>运行状态</span><select v-model.number="form.runningStatus"><option :value="0">空闲</option><option :value="1">运行中</option><option :value="2">暂停</option><option :value="3">充电中</option><option :value="4">故障</option><option :value="5">急停</option></select></label>
+          <label class="form-field"><span>连接状态</span><select v-model.number="form.connectionStatus"><option :value="1">在线</option><option :value="0">离线</option></select></label>
+          <label class="form-field"><span>剩余电量（%）</span><input v-model.number="form.batteryLevel" type="number" min="0" max="100"></label>
+          <label class="form-field"><span>是否启用</span><select v-model.number="form.enabled"><option :value="1">启用</option><option :value="0">停用</option></select></label>
           <label class="form-field wide"><span>备注</span><textarea v-model="form.remark" rows="3" placeholder="填写机器人用途或配置说明（选填）" /></label>
-          <div class="modal-actions wide"><button class="modal-close" type="button" @click="createVisible = false">取消</button><button class="modal-primary" type="submit" :disabled="saving">{{ saving ? '保存中…' : '确认新增' }}</button></div>
+          <div class="modal-actions wide"><button class="modal-close" type="button" @click="createVisible = false">取消</button><button class="modal-primary" type="submit" :disabled="saving">{{ saving ? '保存中…' : editingId ? '保存修改' : '确认新增' }}</button></div>
         </form>
       </section>
     </div>
@@ -222,6 +188,11 @@ tbody tr:focus { outline: none; }
 .icon-action { width: 30px; height: 30px; display: inline-grid; place-items: center; padding: 0; border: 0; border-radius: 6px; color: var(--agv-blue); background: transparent; cursor: pointer; }
 .icon-action:hover { background: var(--agv-blue-soft); }
 .icon-action svg { width: 17px; height: 17px; }
+.row-actions { display:flex; align-items:center; gap:5px; }
+.text-action { height:28px; padding:0 7px; border:0; border-radius:5px; color:var(--agv-blue); background:transparent; font-size:11px; cursor:pointer; }
+.text-action:hover { background:var(--agv-blue-soft); }
+.text-action.danger { color:var(--agv-red); }
+.text-action.danger:hover { background:#fff1f0; }
 .table-footer { display: flex; align-items: center; padding-top: 15px; color: var(--agv-text-muted); font-size: 11px; }
 .empty-state { min-height: 190px; display: grid; place-items: center; align-content: center; gap: 7px; color: var(--agv-text-muted); }
 .empty-state svg { width: 32px; height: 32px; margin-bottom: 3px; }
@@ -264,6 +235,7 @@ tbody tr:focus { outline: none; }
 .module-table th { height: 42px; }
 .module-table tbody tr { cursor: default; }
 .module-table tbody tr:hover td { background: #fafcfd; }
+.module-empty { min-height:100px; display:grid; place-items:center; color:var(--agv-text-muted); font-size:12px; }
 
 .add-robot-modal { width: min(640px, calc(100vw - 32px)); }
 .add-robot-modal .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
