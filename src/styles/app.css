@@ -604,3 +604,65 @@ a { color: inherit; text-decoration: none; }
 }
 .table-action-link:hover { border-color: #d5e9fa; background: #edf6ff; }
 .table-action-link svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Unified semantic tags: one size and shape across native and Element Plus tables/cards. */
+:root {
+    --agv-tag-height: 26px;
+    --agv-tag-padding-x: 10px;
+    --agv-tag-font-size: 12px;
+    --agv-tag-dot-size: 5px;
+}
+#app :is(.status-tag, .severity-tag, .status-chip, .resource-status, .level-chip, .scope-chip, .readonly-chip, .role-chip, .tag, .badge, .count-badge, .fleet-badge, .fleet-metric-badge, .emergency-rule-chip, .ticket-chip) {
+    min-width: 0 !important;
+    min-height: var(--agv-tag-height) !important;
+    height: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 4px var(--agv-tag-padding-x) !important;
+    border: 1px solid currentColor !important;
+    border-radius: 999px !important;
+    font-size: var(--agv-tag-font-size) !important;
+    font-weight: 500 !important;
+    line-height: 16px !important;
+    white-space: nowrap !important;
+}
+#app .el-tag {
+    --el-tag-border-radius: 999px;
+    min-height: var(--agv-tag-height) !important;
+    height: auto !important;
+    padding: 4px var(--agv-tag-padding-x) !important;
+    border-radius: 999px !important;
+    font-size: var(--agv-tag-font-size) !important;
+    font-weight: 500 !important;
+    line-height: 16px !important;
+}
+#app .el-tag--success { --el-tag-text-color:#1f925f; --el-tag-border-color:#cce9da; --el-tag-bg-color:#effaf4; }
+#app :is(.el-tag--primary, .el-tag--info) { --el-tag-text-color:#1677c8; --el-tag-border-color:#cbe3f7; --el-tag-bg-color:#f1f8fd; }
+#app .el-tag--warning { --el-tag-text-color:#b97800; --el-tag-border-color:#f3dfae; --el-tag-bg-color:#fff8e8; }
+#app .el-tag--danger { --el-tag-text-color:#d84343; --el-tag-border-color:#f1cccc; --el-tag-bg-color:#fff3f3; }
+#app :is(.status-tag, .severity-tag, .status-chip, .resource-status, .tag)::before {
+    width: var(--agv-tag-dot-size) !important;
+    height: var(--agv-tag-dot-size) !important;
+    flex: 0 0 var(--agv-tag-dot-size) !important;
+    border-radius: 50% !important;
+    background: currentColor !important;
+}
+
+/* Shared semantic palette. Page-specific class names map to these five meanings. */
+#app :is(.status-tag, .severity-tag, .status-chip, .resource-status, .level-chip, .scope-chip, .readonly-chip, .role-chip, .tag, .badge, .count-badge, .fleet-badge, .fleet-metric-badge):is(.success, .valid, .enabled, .badge-green, .status-online, .status-running, .status-completed, .status-published, .state-empty) {
+    color: #1f925f !important; border-color: #cce9da !important; background: #effaf4 !important;
+}
+#app :is(.status-tag, .severity-tag, .status-chip, .resource-status, .level-chip, .scope-chip, .readonly-chip, .role-chip, .tag, .badge, .count-badge, .fleet-badge, .fleet-metric-badge):is(.info, .badge-blue, .blue-state, .status-executing, .state-occupied) {
+    color: #1677c8 !important; border-color: #cbe3f7 !important; background: #f1f8fd !important;
+}
+#app :is(.status-tag, .severity-tag, .status-chip, .resource-status, .level-chip, .scope-chip, .readonly-chip, .role-chip, .tag, .badge, .count-badge, .fleet-badge, .fleet-metric-badge):is(.warning, .draft, .standby, .status-waiting, .status-charging, .state-reserved) {
+    color: #b97800 !important; border-color: #f3dfae !important; background: #fff8e8 !important;
+}
+#app :is(.status-tag, .severity-tag, .status-chip, .resource-status, .level-chip, .scope-chip, .readonly-chip, .role-chip, .tag, .badge, .count-badge, .fleet-badge, .fleet-metric-badge):is(.danger, .error, .critical, .severity-critical, .status-error, .status-failed, .state-conflict) {
+    color: #d84343 !important; border-color: #f1cccc !important; background: #fff3f3 !important;
+}
+#app :is(.status-tag, .severity-tag, .status-chip, .resource-status, .level-chip, .scope-chip, .readonly-chip, .role-chip, .tag, .badge, .count-badge, .fleet-badge, .fleet-metric-badge):is(.gray, .disabled, .status-offline, .status-cancelled, .state-disabled) {
+    color: #7b8792 !important; border-color: #dfe4e8 !important; background: #f5f7f8 !important;
+}
