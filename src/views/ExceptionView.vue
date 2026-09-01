@@ -107,8 +107,8 @@ async function closeAnomaly(row) {
 </script>
 
 <template>
-  <section class="page-view">
-    <PageHeader :title="metadata.title" :description="metadata.description">
+  <section class="page-view exception-reference-page">
+    <PageHeader class="page-head" :title="metadata.title" :description="metadata.description">
       <template #actions>
         <el-button @click="router.push('/operations/logs')">查看系统日志</el-button>
         <el-button type="primary" @click="ElMessage.success('异常数据已刷新')">刷新数据</el-button>
@@ -211,3 +211,8 @@ async function closeAnomaly(row) {
     </el-dialog>
   </section>
 </template>
+
+<style scoped>
+.exception-reference-page > .page-head { padding:17px 20px; }
+@media (max-width:760px) { .exception-reference-page > .page-head { padding:14px; } }
+</style>

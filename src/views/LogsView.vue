@@ -145,6 +145,7 @@ onBeforeUnmount(()=>{document.removeEventListener('keydown',onKeydown);document.
 <style scoped src="../styles/components.css"></style>
 <style scoped>
 .logs-reference-page { padding: 0; }
-.logs-reference-page > .page-head { margin: 0; }
+.logs-reference-page > .page-head { margin: 0; padding: 17px 20px; }
 .page-btn:disabled { cursor: not-allowed; opacity: .45; }
+@media (max-width:760px) { .logs-reference-page > .page-head { padding:14px; } }
 </style>

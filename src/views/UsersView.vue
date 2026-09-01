@@ -239,7 +239,7 @@ tbody tr:hover td { background:#f8fbfd; }
 </style>
 <style scoped>
 .users-reference-page { padding:0; }
-.users-reference-page > .page-head { margin:0; }
+.users-reference-page > .page-head { margin:0; padding:17px 20px; }
 .users-reference-page .page-head .primary-btn { flex:0 0 auto; }
 .users-reference-page > .page-canvas { padding:20px; }
 .users-reference-page .filter-bar { margin-bottom:0;border:0;border-bottom:1px solid var(--agv-line-soft);border-radius:0; }

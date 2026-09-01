@@ -99,10 +99,11 @@ onBeforeUnmount(()=>{clearInterval(clockTimer);clearTimeout(toastTimer);window.r
 <style scoped src="../styles/components.css"></style>
 <style scoped>
 .capacity-reference-page { padding: 0; }
-.capacity-reference-page > .page-head { margin: 0; }
+.capacity-reference-page > .page-head { margin: 0; padding: 17px 20px; }
 .bar-chart { align-items: stretch; gap: 0; padding: 0; border: 0; }
 .bar-chart > .y-axis { grid-column: 1; grid-row: 1; }
 .bar-chart > .plot { grid-column: 2; grid-row: 1; }
 .bar-chart > .x-axis { grid-column: 2; grid-row: 2; }
 .camera-feed-frame img { width:100%;height:100%;display:block;object-fit:cover;background:#07131d; }
+@media (max-width:760px) { .capacity-reference-page > .page-head { padding:14px; } }
 </style>

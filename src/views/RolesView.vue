@@ -322,7 +322,7 @@ onBeforeUnmount(()=>{clearTimeout(toastTimer);window.removeEventListener('keydow
 <style scoped src="../styles/components.css"></style>
 <style scoped>
 .roles-reference-page { --agv-control:40px; padding:0; }
-.roles-reference-page > .page-head { margin:0; }
+.roles-reference-page > .page-head { margin:0; padding:17px 20px; }
 .roles-reference-page .page-head .primary-btn { flex:0 0 auto; }
 .roles-reference-page > .page-canvas { padding:20px; }
 .roles-reference-page .permission-groups { margin-top:0; }

@@ -118,6 +118,8 @@ onMounted(loadRobots)
 
 <style scoped src="../styles/components.css"></style>
 <style scoped>
+.robots-reference-page { padding: 0; }
+.robots-reference-page > .page-head { margin: 0; padding: 17px 20px; }
 :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif; }
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; color: var(--agv-ink); background: var(--agv-canvas); -webkit-font-smoothing: antialiased; }
@@ -283,6 +285,7 @@ tbody tr:focus { outline: none; }
 }
 
 @media (max-width: 600px) {
+  .robots-reference-page > .page-head { padding: 14px; }
   .robot-pool-panel { padding: 16px 12px; }
   .panel-head { align-items: flex-start; }
   .filters { grid-template-columns: 1fr; margin: 15px 0 12px; }

@@ -71,6 +71,8 @@ function test() {
 
 <style scoped src="../styles/components.css"></style>
 <style scoped>
+.charging-reference-page { padding: 0; }
+.charging-reference-page > .page-head { margin: 0; padding: 17px 20px; }
 .primary-btn,.secondary-btn { min-height:36px; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:0 16px; border-radius:7px; font-size:13px; font-weight:650; cursor:pointer; }
 .primary-btn { border:1px solid var(--agv-blue); color:#fff; background:var(--agv-blue); }
 .primary-btn:hover { border-color:var(--agv-blue-hover); background:var(--agv-blue-hover); }
@@ -148,6 +150,7 @@ tbody tr:hover td { background:#f8fbfd; }
 .toast.show { opacity:1; transform:translate(-50%,0); }
 
 @media (max-width:600px) {
+  .charging-reference-page > .page-head { padding:14px; }
   .panel-toolbar { align-items:stretch; flex-direction:column; }
   .config-tabs,.test-button { width:100%; }
   .config-tab { flex:1; padding:0 8px; }

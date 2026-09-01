@@ -1397,10 +1397,11 @@ body {
 </style>
 <style scoped>
 .operations-reference-page { padding: 0; }
-.operations-reference-page > .page-head { margin: 0; }
+.operations-reference-page > .page-head { margin: 0; padding: 17px 20px; }
 .link-button { padding: 0; border: 0; background: transparent; cursor: pointer; }
 .clickable-row { cursor: pointer; }
 .ops-section { padding-top: 0; border-top: 0; }
 .warning-note { border-top: 0; border-right: 0; border-bottom: 0; }
 .primary-action:disabled,.modal-primary:disabled,.recovery-option:disabled { cursor: not-allowed; opacity: .5; }
+@media (max-width:760px) { .operations-reference-page > .page-head { padding:14px; } }
 </style>
