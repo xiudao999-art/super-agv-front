@@ -95,7 +95,7 @@ onBeforeUnmount(() => { document.removeEventListener('keydown', onKeydown); docu
           <colgroup><col class="col-rule"><col class="col-scene"><col class="col-scope"><col class="col-duty"><col class="col-ticket"><col class="col-action"></colgroup>
           <thead><tr><th>规则编号</th><th>异常场景</th><th>急停范围</th><th>处置责任</th><th>当前关联工单</th><th class="col-actions">操作</th></tr></thead>
           <tbody><tr v-for="row in emergencyProcedures" :key="row.id" class="clickable-row" tabindex="0" :aria-label="`查看急停规则 ${row.id}`" @click="open(row)" @keydown.enter="open(row)">
-            <td class="ops-code">{{ row.id }}</td><td><strong class="table-primary">{{ row.title }}</strong><span class="table-secondary">{{ row.signal }}</span></td><td><span :class="['scope-chip',scopeClass(row.scope)]">{{ row.scope }}</span></td><td>{{ row.duty }}</td><td><button v-for="ticket in row.tickets" :key="ticket" class="ticket-chip procedure-ticket-link" type="button" :title="`前往异常与恢复查看 ${ticket}`" @click.stop="toTicket(ticket)">{{ ticket }}<span>→</span></button><span v-if="!row.tickets.length" class="table-secondary">—</span></td><td class="procedure-status-cell col-actions"><TableActionButton kind="toggle" :label="enabled[row.id]?'停用规则':'启用规则'" :active="enabled[row.id]" :danger="enabled[row.id]" @click.stop="toggleProcedure(row)"/></td>
+            <td class="ops-code">{{ row.id }}</td><td><strong class="table-primary">{{ row.title }}</strong><span class="table-secondary">{{ row.signal }}</span></td><td><span :class="['scope-chip',scopeClass(row.scope)]">{{ row.scope }}</span></td><td>{{ row.duty }}</td><td><button v-for="ticket in row.tickets" :key="ticket" class="ticket-chip procedure-ticket-link" type="button" :title="`前往异常与恢复查看 ${ticket}`" @click.stop="toTicket(ticket)"><span class="ticket-label">{{ ticket }}</span><span class="ticket-arrow" aria-hidden="true">→</span></button><span v-if="!row.tickets.length" class="table-secondary">—</span></td><td class="procedure-status-cell col-actions"><TableActionButton kind="toggle" :label="enabled[row.id]?'停用规则':'启用规则'" :active="enabled[row.id]" :danger="enabled[row.id]" @click.stop="toggleProcedure(row)"/></td>
           </tr></tbody>
         </table>
       </div></div></section>
@@ -117,7 +117,7 @@ onBeforeUnmount(() => { document.removeEventListener('keydown', onKeydown); docu
 
           <template v-else>
             <div class="procedure-meta"><span :class="['scope-chip',scopeClass(selected.scope)]">{{ selected.scope }}</span><span class="readonly-chip">只读规程</span></div>
-            <div class="ops-summary"><article class="ops-summary-item wide"><span>检测信号</span><strong>{{ selected.signal }}</strong></article><article class="ops-summary-item wide"><span>当前关联工单</span><strong><button v-for="ticket in selected.tickets" :key="ticket" class="ticket-chip procedure-ticket-link" type="button" @click="toTicket(ticket)">{{ ticket }}<span>→</span></button><span v-if="!selected.tickets.length">暂无进行中的工单</span></strong></article></div>
+            <div class="ops-summary"><article class="ops-summary-item wide"><span>检测信号</span><strong>{{ selected.signal }}</strong></article><article class="ops-summary-item wide"><span>当前关联工单</span><strong><button v-for="ticket in selected.tickets" :key="ticket" class="ticket-chip procedure-ticket-link" type="button" @click="toTicket(ticket)"><span class="ticket-label">{{ ticket }}</span><span class="ticket-arrow" aria-hidden="true">→</span></button><span v-if="!selected.tickets.length">暂无进行中的工单</span></strong></article></div>
             <section class="ops-section"><div class="ops-section-title"><h3>1. 系统自动执行</h3><span>急停触发后立即完成</span></div><ol class="procedure-list"><li v-for="item in selected.auto" :key="item" class="procedure-item">{{ item }}</li></ol></section>
             <section class="ops-section"><div class="ops-section-title"><h3>2. 人工处置步骤</h3><span>在异常工单中逐项确认</span></div><ol class="procedure-list"><li v-for="item in selected.manual" :key="item" class="procedure-item">{{ item }}</li></ol></section>
             <section class="ops-section"><div class="ops-section-title"><h3>3. 恢复放行条件</h3><span>归位后由系统复核</span></div><ul class="checkpoint-list"><li v-for="item in selected.gates" :key="item" class="checkpoint-item">{{ item }}</li></ul></section>
@@ -1370,12 +1370,12 @@ body {
 .workorder-ops-table .status-tag.critical{color:#c8453e;background:#fff0ef}
 .workorder-ops-table .status-tag.warning{color:#a86b00;background:#fff5db}
 .workorder-ops-table .status-tag.valid{color:#287b56;background:#e9f7f0}
-.procedure-ops-table{min-width:820px}
+.procedure-ops-table{min-width:1080px}
 .procedure-ops-table .col-rule{width:10%}
-.procedure-ops-table .col-scene{width:33%}
+.procedure-ops-table .col-scene{width:31%}
 .procedure-ops-table .col-scope{width:13%}
-.procedure-ops-table .col-duty{width:18%}
-.procedure-ops-table .col-ticket{width:16%}
+.procedure-ops-table .col-duty{width:17%}
+.procedure-ops-table .col-ticket{width:19%}
 .procedure-ops-table .col-action{width:10%}
 .procedure-ops-table td:first-child,.procedure-ops-table td:last-child{white-space:nowrap}
 .procedure-ops-table td:nth-child(5){white-space:nowrap}
@@ -1393,7 +1393,11 @@ body {
 .procedure-switch:hover{background:#f4f7f8}
 .procedure-switch:focus-visible{outline:2px solid rgba(22,119,200,.28);outline-offset:2px}
 .confirm-item{align-items:flex-start}.confirm-item input[type="checkbox"]{width:16px;height:16px;min-width:16px;min-height:16px;flex:0 0 16px;margin:1px 0 0;accent-color:#1677c8}.confirm-item>span{min-width:0;flex:1}.confirm-item .role-chip{flex:0 0 auto}
-.procedure-ticket-link{max-width:100%;box-sizing:border-box;gap:7px;min-height:28px;padding:4px 8px;overflow:hidden;border:1px solid #cfe2f2;text-overflow:ellipsis;transition:border-color .15s ease,background .15s ease}.procedure-ticket-link:hover{border-color:#7db4dd;background:#dfedf9}.procedure-ticket-link span{margin:0;color:inherit;font-size:13px}
+.procedure-ticket-link{max-width:100%;box-sizing:border-box;gap:6px;min-height:28px;padding:4px 9px;overflow:hidden;border:1px solid #cfe2f2;transition:border-color .15s ease,background .15s ease}.procedure-ticket-link:hover{border-color:#7db4dd;background:#dfedf9}.procedure-ticket-link .ticket-label{min-width:0;overflow:hidden;margin:0;color:inherit;font-size:12px;line-height:16px;text-overflow:ellipsis;white-space:nowrap}.procedure-ticket-link .ticket-arrow{flex:0 0 auto;margin:0;color:inherit;font-size:13px;line-height:16px}
+.protection-list .protection-item{position:relative;min-height:0}
+.protection-list .protection-item::before,
+.checkpoint-list .checkpoint-item::before,
+.procedure-list .procedure-item::before{position:static;inset:auto}
 </style>
 <style scoped>
 .operations-reference-page { padding: 0; }
