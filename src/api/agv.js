@@ -181,6 +181,18 @@ export async function getActions() {
   return unwrap(await http.get('/api/actions'))
 }
 
+export async function listActionBusinessScenes() {
+  return unwrap(await http.get('/api/action-business-scenes'))
+}
+
+export async function listActionSceneOperations(sceneCode) {
+  return unwrap(await http.get(`/api/action-business-scenes/${encodeURIComponent(sceneCode)}/operations`))
+}
+
+export async function createActionDefinition(payload) {
+  return unwrap(await http.post('/api/actions', payload))
+}
+
 export async function saveWorkflow(payload) {
   if (useMockApi) {
     return payload.id ? updateRecord('workflows', payload.id, payload) : createRecord('workflows', payload)
