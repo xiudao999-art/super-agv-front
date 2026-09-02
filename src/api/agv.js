@@ -86,7 +86,7 @@ function normalizeRows(name, rows, context = {}) {
       trigger: row.trigger || '-',
       steps: row.templateNodeCount ?? '-',
       version: row.version || '-',
-      statusLabel: publishStatusLabels[row.status] || row.status || '已配置',
+      statusLabel: row.statusDescription || publishStatusLabels[row.status] || (Number(row.status) === 1 ? '启用' : Number(row.status) === 0 ? '停用' : row.status || '已配置'),
       updatedAt: formatDateTime(row.updatedAt),
     }))
   }
