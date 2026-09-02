@@ -2,7 +2,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import PageHeader from '../components/PageHeader.vue'
-import { createResource, listResource } from '../api/agv'
+import { createResource, getFlow, listResource, updateFlow } from '../api/agv'
 
 const rows = ref([])
 const templates = ref([])
@@ -11,6 +11,7 @@ const loading = ref(false)
 const saving = ref(false)
 const dialogVisible = ref(false)
 const editingId = ref(null)
+const hydratingForm = ref(false)
 const page = ref(1)
 const pageSize = ref(10)
 const jumpPage = ref('')
@@ -21,7 +22,7 @@ const pageRows = computed(() => filtered.value.slice((page.value - 1) * pageSize
 const statusLabel = (row) => row.statusLabel || ([1,'1',true,'ENABLED','ACTIVE'].includes(row.status) ? '启用' : [0,'0',false,'DISABLED','INACTIVE'].includes(row.status) ? '停用' : '未返回')
 
 watch([keyword,pageSize], () => { page.value = 1 })
-watch(() => form.sourceTemplateId, (id) => { const item = templates.value.find(t => String(t.id) === String(id)); if (item?.applicableObject) form.applicableScope = item.applicableObject })
+watch(() => form.sourceTemplateId, (id) => { if (hydratingForm.value) return; const item = templates.value.find(t => String(t.id) === String(id)); if (item?.applicableObject) form.applicableScope = item.applicableObject }, { flush:'sync' })
 
 async function load() {
   loading.value = true
@@ -30,29 +31,45 @@ async function load() {
   finally { loading.value = false }
 }
 
-function openForm(row = null) {
-  editingId.value = row?.id ?? null
-  const source = templates.value.find(item => item.templateName === row?.template) || templates.value[0]
-  Object.assign(form, { templateName:row?.name || '智能仓储->贴标机台', sourceTemplateId:source?.id || '', applicableScope:row?.applicableScope || source?.applicableObject || '贴标机台', status:['停用','已停用'].includes(statusLabel(row || {})) ? 0 : 1, description:row?.description || '由上游业务订单触发，按照所选流程模板执行。' })
-  dialogVisible.value = true
+function fillForm(row = null) {
+  const source = templates.value.find(item => String(item.id) === String(row?.sourceTemplateId)) || templates.value.find(item => item.templateName === (row?.templateName || row?.template)) || templates.value[0]
+  Object.assign(form, { templateName:row?.flowName || row?.name || '智能仓储->贴标机台', sourceTemplateId:row?.sourceTemplateId || source?.id || '', applicableScope:row?.applicableScope || source?.applicableObject || '贴标机台', status:row?.status != null ? Number(row.status) : ['停用','已停用'].includes(statusLabel(row || {})) ? 0 : 1, description:row?.description || '由上游业务订单触发，按照所选流程模板执行。' })
+}
+
+async function openForm(row = null) {
+  hydratingForm.value = true
+  try {
+    if (row?.id != null) {
+      const detail = await getFlow(row.id)
+      editingId.value = row.id
+      fillForm(detail)
+    } else {
+      editingId.value = null
+      fillForm()
+    }
+    dialogVisible.value = true
+  } catch (error) {
+    ElMessage.error(`流程详情加载失败：${error.message}`)
+  } finally {
+    hydratingForm.value = false
+  }
 }
 
 async function save() {
   if (!form.templateName.trim()) return ElMessage.warning('请填写流程名称')
   if (!Number(form.sourceTemplateId)) return ElMessage.warning('请选择来源流程模板')
   saving.value = true
-  const chosen = templates.value.find(item => String(item.id) === String(form.sourceTemplateId))
   try {
     if (editingId.value == null) {
       await createResource('processes', { templateName:form.templateName.trim(), sourceTemplateId:Number(form.sourceTemplateId), description:form.description.trim(), status:Number(form.status), applicableScope:form.applicableScope.trim() })
       ElMessage.success('流程创建成功'); await load()
     } else {
-      const index = rows.value.findIndex(item => item.id === editingId.value)
-      if (index >= 0) rows.value[index] = { ...rows.value[index], name:form.templateName.trim(), template:chosen?.templateName || rows.value[index].template, applicableScope:form.applicableScope.trim(), description:form.description.trim(), status:Number(form.status), statusLabel:Number(form.status) ? '启用' : '停用', updatedAt:'刚刚' }
+      await updateFlow(editingId.value, { flowName:form.templateName.trim(), sourceTemplateId:Number(form.sourceTemplateId), status:Number(form.status), applicableScope:form.applicableScope.trim(), description:form.description.trim() })
       ElMessage.success('流程信息已保存')
+      await load()
     }
     dialogVisible.value = false
-  } catch (error) { ElMessage.error(`创建失败：${error.message}`) }
+  } catch (error) { ElMessage.error(`${editingId.value == null ? '创建' : '保存'}失败：${error.message}`) }
   finally { saving.value = false }
 }
 

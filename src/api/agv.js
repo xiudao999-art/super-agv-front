@@ -282,3 +282,11 @@ export async function saveExceptionHandlingRule(payload) {
 export async function deleteExceptionHandlingRule(id) {
   return unwrap(await http.delete(`/api/exception-handling-rules/${encodeURIComponent(id)}`))
 }
+
+export async function updateFlow(id, payload) {
+  return unwrap(await http.put(`/api/flow-templates/flows/${encodeURIComponent(id)}`, payload))
+}
+
+export async function getFlow(id) {
+  return unwrap(await http.get(`/api/flow-templates/flows/${encodeURIComponent(id)}`))
+}
