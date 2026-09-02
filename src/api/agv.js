@@ -257,3 +257,28 @@ export async function deleteRobotInfo(id) {
   if (useMockApi) return removeRecord('robotPool', id)
   return unwrap(await http.delete(`/api/robot-info/${encodeURIComponent(id)}`))
 }
+
+export async function listExceptionHandlingRules(params = {}) {
+  return unwrap(await http.get('/api/exception-handling-rules', {
+    params: { pageNum: 1, pageSize: 200, ...params },
+  }))
+}
+
+export async function getExceptionHandlingRule(id) {
+  return unwrap(await http.get(`/api/exception-handling-rules/${encodeURIComponent(id)}`))
+}
+
+export async function changeExceptionHandlingRuleStatus(id, status) {
+  return unwrap(await http.put(`/api/exception-handling-rules/${encodeURIComponent(id)}/status`, { status }))
+}
+
+export async function saveExceptionHandlingRule(payload) {
+  const { id, ...body } = payload
+  return unwrap(id == null
+    ? await http.post('/api/exception-handling-rules', body)
+    : await http.put(`/api/exception-handling-rules/${encodeURIComponent(id)}`, body))
+}
+
+export async function deleteExceptionHandlingRule(id) {
+  return unwrap(await http.delete(`/api/exception-handling-rules/${encodeURIComponent(id)}`))
+}

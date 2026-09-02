@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '../components/PageHeader.vue'
+import { changeExceptionHandlingRuleStatus, deleteExceptionHandlingRule, getExceptionHandlingRule, listExceptionHandlingRules, saveExceptionHandlingRule } from '../api/agv'
 import { emergencyProcedures, exceptionWorkorders } from '../data/exception-operations'
 
 const props = defineProps({ mode: { type: String, required: true } })
@@ -10,6 +11,11 @@ const router = useRouter()
 const selected = ref(null)
 const dialogVisible = ref(false)
 const toastText = ref('')
+const procedureRows = ref([...emergencyProcedures])
+const procedureRequestPending = ref(false)
+const editorVisible = ref(false)
+const editorSaving = ref(false)
+const editorForm = reactive({ id:null, ruleCode:'', ruleName:'', emergencyScope:'单机急停', responsibility:'', detectionSignal:'', relatedWorkOrder:'', exceptionCode:'', automaticExecutionNote:'急停触发后立即完成', systemActions:'', manualSteps:'', releaseConditionNote:'归位后由系统复核', releaseConditions:'', releaseWarning:'', releasePermission:'', remark:'', readOnlyRule:false })
 let toastTimer
 
 const procedureKey = 'agv-emergency-procedure-status'
@@ -24,7 +30,7 @@ const workorderState = reactive(Object.fromEntries(exceptionWorkorders.map(item 
 const proceduresMode = computed(() => props.mode === 'procedures')
 const title = computed(() => proceduresMode.value ? '急停处置规程' : '异常与恢复')
 const description = computed(() => proceduresMode.value
-  ? '本页定义须急停的异常场景与处置规程（规则内容只读，可启用或停用）。异常实际发生时自动生成工单，处置操作统一在「异常与恢复」中进行，工单上标注对应规则编号。'
+  ? '本页维护须急停的异常场景与处置规程。异常实际发生时自动生成工单，处置操作统一在「异常与恢复」中进行，工单上标注对应规则编号。'
   : '核账 → 人工确认 → 选择恢复方式 → 放行续跑。点击异常查看详情并处置。')
 
 const levelText = level => ({ L1:'自动降级', L2:'远程人工', L3:'现场人工', L4:'工程师' })[level]
@@ -39,10 +45,129 @@ function toast(message) {
 function open(item) { selected.value = item; dialogVisible.value = true }
 function close() { dialogVisible.value = false }
 
-function toggleProcedure(item) {
-  enabled[item.id] = !enabled[item.id]
-  try { localStorage.setItem(procedureKey, JSON.stringify(enabled)) } catch { /* 本次会话继续保留状态 */ }
-  toast(`${item.id} 已${enabled[item.id] ? '启用' : '停用'}`)
+const asTickets = value => Array.isArray(value) ? value : value ? String(value).split(/[,，;；]/).map(item => item.trim()).filter(Boolean) : []
+function normalizeProcedure(row, fallback = {}) {
+  return {
+    ...fallback,
+    apiId: row.id ?? fallback.apiId,
+    id: row.ruleCode || fallback.id,
+    title: row.ruleName || fallback.title || '-',
+    signal: row.detectionSignal || fallback.signal || '-',
+    scope: row.emergencyScope || fallback.scope || '-',
+    duty: row.responsibility || row.releasePermission || fallback.duty || '-',
+    tickets: asTickets(row.relatedWorkOrder ?? fallback.tickets),
+    auto: row.systemActions || fallback.auto || [],
+    manual: row.manualSteps || fallback.manual || [],
+    gates: row.releaseConditions || fallback.gates || [],
+    warning: row.releaseWarning || fallback.warning || '',
+    status: row.status || fallback.status || 'DISABLED',
+    automaticExecutionNote: row.automaticExecutionNote || fallback.automaticExecutionNote || '急停触发后立即完成',
+    releaseConditionNote: row.releaseConditionNote || fallback.releaseConditionNote || '归位后由系统复核',
+    exceptionCode: row.exceptionCode || fallback.exceptionCode || '',
+    releasePermission: row.releasePermission || fallback.releasePermission || '',
+    remark: row.remark || fallback.remark || '',
+    readOnlyRule: row.readOnlyRule ?? fallback.readOnlyRule ?? false,
+  }
+}
+
+async function loadProcedures() {
+  try {
+    const page = await listExceptionHandlingRules()
+    const records = Array.isArray(page) ? page : page?.records || []
+    const fallbackByCode = new Map(emergencyProcedures.map(item => [item.id, item]))
+    procedureRows.value = records.map(row => normalizeProcedure(row, fallbackByCode.get(row.ruleCode)))
+    procedureRows.value.forEach(item => { enabled[item.id] = item.status === 'ENABLED' })
+  } catch (error) {
+    console.warn('异常处置规程接口暂不可用，继续展示内置演示数据', error)
+    toast('规程接口暂不可用，当前展示演示数据')
+  }
+}
+
+async function openProcedure(item) {
+  open(item)
+  if (item.apiId == null) return
+  try {
+    const detail = await getExceptionHandlingRule(item.apiId)
+    selected.value = normalizeProcedure(detail, item)
+  } catch (error) {
+    toast(error.message || '规程详情加载失败')
+  }
+}
+
+async function toggleProcedure(item) {
+  if (procedureRequestPending.value) return
+  const nextEnabled = !enabled[item.id]
+  if (item.apiId == null) {
+    enabled[item.id] = nextEnabled
+    try { localStorage.setItem(procedureKey, JSON.stringify(enabled)) } catch { /* 本次会话继续保留状态 */ }
+    toast(`${item.id} 已${nextEnabled ? '启用' : '停用'}（演示数据）`)
+    return
+  }
+  procedureRequestPending.value = true
+  try {
+    const updated = await changeExceptionHandlingRuleStatus(item.apiId, nextEnabled ? 'ENABLED' : 'DISABLED')
+    enabled[item.id] = updated?.status ? updated.status === 'ENABLED' : nextEnabled
+    item.status = enabled[item.id] ? 'ENABLED' : 'DISABLED'
+    toast(`${item.id} 已${enabled[item.id] ? '启用' : '停用'}`)
+  } catch (error) {
+    toast(error.message || '规程状态修改失败')
+  } finally {
+    procedureRequestPending.value = false
+  }
+}
+
+const lines = value => Array.isArray(value) ? value.join('\n') : ''
+const asList = value => String(value || '').split(/\r?\n/).map(item => item.trim()).filter(Boolean)
+function editProcedure(item = null) {
+  Object.assign(editorForm, {
+    id: item?.apiId ?? null,
+    ruleCode: item?.id || '', ruleName: item?.title || '', emergencyScope: item?.scope || '单机急停',
+    responsibility: item?.duty || '', detectionSignal: item?.signal || '', relatedWorkOrder: item?.tickets?.join(', ') || '',
+    exceptionCode: item?.exceptionCode || '', automaticExecutionNote: item?.automaticExecutionNote || '急停触发后立即完成',
+    systemActions: lines(item?.auto), manualSteps: lines(item?.manual), releaseConditionNote: item?.releaseConditionNote || '归位后由系统复核',
+    releaseConditions: lines(item?.gates), releaseWarning: item?.warning || '', releasePermission: item?.releasePermission || item?.duty || '',
+    remark: item?.remark || '', readOnlyRule: Boolean(item?.readOnlyRule),
+  })
+  editorVisible.value = true
+}
+
+async function editProcedureFromList(item) {
+  if (item.apiId == null) return editProcedure(item)
+  try {
+    const detail = await getExceptionHandlingRule(item.apiId)
+    editProcedure(normalizeProcedure(detail, item))
+  } catch (error) { toast(error.message || '规程详情加载失败') }
+}
+
+async function submitProcedure() {
+  if (!editorForm.ruleCode.trim() || !editorForm.ruleName.trim() || !editorForm.responsibility.trim() || !editorForm.detectionSignal.trim() || !editorForm.exceptionCode.trim()) {
+    toast('请填写规则编号、名称、责任、检测信号和异常编码')
+    return
+  }
+  editorSaving.value = true
+  try {
+    await saveExceptionHandlingRule({
+      ...editorForm,
+      ruleCode:editorForm.ruleCode.trim(), ruleName:editorForm.ruleName.trim(), responsibility:editorForm.responsibility.trim(),
+      detectionSignal:editorForm.detectionSignal.trim(), exceptionCode:editorForm.exceptionCode.trim(),
+      relatedWorkOrder:editorForm.relatedWorkOrder.trim(), releasePermission:editorForm.releasePermission.trim(),
+      systemActions:asList(editorForm.systemActions), manualSteps:asList(editorForm.manualSteps), releaseConditions:asList(editorForm.releaseConditions),
+    })
+    editorVisible.value = false
+    toast(`规程已${editorForm.id == null ? '新增' : '更新'}`)
+    await loadProcedures()
+  } catch (error) { toast(error.message || '规程保存失败') }
+  finally { editorSaving.value = false }
+}
+
+async function removeProcedure(item) {
+  if (item.apiId == null) return toast('演示数据不能删除')
+  if (!window.confirm(`确认删除急停规程 ${item.id}？此操作不可撤销。`)) return
+  try {
+    await deleteExceptionHandlingRule(item.apiId)
+    toast(`${item.id} 已删除`)
+    await loadProcedures()
+  } catch (error) { toast(error.message || '规程删除失败') }
 }
 
 function toggleCheck(index, checked) {
@@ -61,20 +186,21 @@ function toTicket(ticket) { close(); router.push({ path:'/operations/exception-r
 
 function openRequested() {
   const key = proceduresMode.value ? route.query.rule : route.query.ticket
-  const rows = proceduresMode.value ? emergencyProcedures : exceptionWorkorders
+  const rows = proceduresMode.value ? procedureRows.value : exceptionWorkorders
   const item = rows.find(row => row.id === key)
-  if (item) open(item)
+  if (item) proceduresMode.value ? openProcedure(item) : open(item)
 }
 
 function onKeydown(event) { if (event.key === 'Escape' && dialogVisible.value) close() }
 
-watch(() => [props.mode, route.query.ticket, route.query.rule], () => {
+watch(() => [props.mode, route.query.ticket, route.query.rule], async () => {
   selected.value = null
   dialogVisible.value = false
+  if (proceduresMode.value) await loadProcedures()
   openRequested()
 })
 watch(dialogVisible, value => { document.body.style.overflow = value ? 'hidden' : '' })
-onMounted(() => { document.addEventListener('keydown', onKeydown); openRequested() })
+onMounted(async () => { document.addEventListener('keydown', onKeydown); if (proceduresMode.value) await loadProcedures(); openRequested() })
 onBeforeUnmount(() => { document.removeEventListener('keydown', onKeydown); document.body.style.overflow = ''; clearTimeout(toastTimer) })
 </script>
 
@@ -82,7 +208,7 @@ onBeforeUnmount(() => { document.removeEventListener('keydown', onKeydown); docu
   <div class="page-view operations-reference-page">
     <PageHeader class="page-head" :title="title" :description="description" />
     <main class="page-canvas">
-      <section class="recovery-panel"><div class="module-content"><div class="table-wrap">
+      <section class="recovery-panel"><div class="module-content"><div v-if="proceduresMode" class="procedure-toolbar"><span>共 {{ procedureRows.length }} 条规程</span><button class="primary-action" type="button" @click="editProcedure()">新增规程</button></div><div class="table-wrap">
         <table v-if="!proceduresMode" class="data-table ops-table workorder-ops-table" aria-label="异常工单列表">
           <colgroup><col class="col-code"><col class="col-description"><col class="col-level"><col class="col-object"><col class="col-time"><col class="col-status"></colgroup>
           <thead><tr><th>异常编号</th><th>异常描述</th><th>处置级别</th><th>机器人 / 节点</th><th>发生时间</th><th>状态</th></tr></thead>
@@ -94,8 +220,8 @@ onBeforeUnmount(() => { document.removeEventListener('keydown', onKeydown); docu
         <table v-else class="data-table ops-table procedure-ops-table" aria-label="急停处置规程列表">
           <colgroup><col class="col-rule"><col class="col-scene"><col class="col-scope"><col class="col-duty"><col class="col-ticket"><col class="col-action"></colgroup>
           <thead><tr><th>规则编号</th><th>异常场景</th><th>急停范围</th><th>处置责任</th><th>当前关联工单</th><th class="col-actions">操作</th></tr></thead>
-          <tbody><tr v-for="row in emergencyProcedures" :key="row.id" class="clickable-row" tabindex="0" :aria-label="`查看急停规则 ${row.id}`" @click="open(row)" @keydown.enter="open(row)">
-            <td class="ops-code">{{ row.id }}</td><td><strong class="table-primary">{{ row.title }}</strong><span class="table-secondary">{{ row.signal }}</span></td><td><span :class="['scope-chip',scopeClass(row.scope)]">{{ row.scope }}</span></td><td>{{ row.duty }}</td><td><button v-for="ticket in row.tickets" :key="ticket" class="ticket-chip procedure-ticket-link" type="button" :title="`前往异常与恢复查看 ${ticket}`" @click.stop="toTicket(ticket)"><span class="ticket-label">{{ ticket }}</span><span class="ticket-arrow" aria-hidden="true">→</span></button><span v-if="!row.tickets.length" class="table-secondary">—</span></td><td class="procedure-status-cell col-actions"><TableActionButton kind="toggle" :label="enabled[row.id]?'停用规则':'启用规则'" :active="enabled[row.id]" :danger="enabled[row.id]" @click.stop="toggleProcedure(row)"/></td>
+          <tbody><tr v-for="row in procedureRows" :key="row.apiId ?? row.id" class="clickable-row" tabindex="0" :aria-label="`查看急停规则 ${row.id}`" @click="openProcedure(row)" @keydown.enter="openProcedure(row)">
+            <td class="ops-code">{{ row.id }}</td><td><strong class="table-primary">{{ row.title }}</strong><span class="table-secondary">{{ row.signal }}</span></td><td><span :class="['scope-chip',scopeClass(row.scope)]">{{ row.scope }}</span></td><td>{{ row.duty }}</td><td><button v-for="ticket in row.tickets" :key="ticket" class="ticket-chip procedure-ticket-link" type="button" :title="`前往异常与恢复查看 ${ticket}`" @click.stop="toTicket(ticket)"><span class="ticket-label">{{ ticket }}</span><span class="ticket-arrow" aria-hidden="true">→</span></button><span v-if="!row.tickets.length" class="table-secondary">—</span></td><td class="procedure-status-cell col-actions"><div class="procedure-actions"><TableActionButton kind="edit" label="编辑规程" @click.stop="editProcedureFromList(row)"/><TableActionButton kind="delete" label="删除规程" danger @click.stop="removeProcedure(row)"/><TableActionButton kind="toggle" :label="enabled[row.id]?'停用规则':'启用规则'" :active="enabled[row.id]" :danger="enabled[row.id]" @click.stop="toggleProcedure(row)"/></div></td>
           </tr></tbody>
         </table>
       </div></div></section>
@@ -116,17 +242,18 @@ onBeforeUnmount(() => { document.removeEventListener('keydown', onKeydown); docu
           </template>
 
           <template v-else>
-            <div class="procedure-meta"><span :class="['scope-chip',scopeClass(selected.scope)]">{{ selected.scope }}</span><span class="readonly-chip">只读规程</span></div>
+            <div class="procedure-meta"><span :class="['scope-chip',scopeClass(selected.scope)]">{{ selected.scope }}</span><span class="readonly-chip">规程详情</span></div>
             <div class="ops-summary"><article class="ops-summary-item wide"><span>检测信号</span><strong>{{ selected.signal }}</strong></article><article class="ops-summary-item wide"><span>当前关联工单</span><strong><button v-for="ticket in selected.tickets" :key="ticket" class="ticket-chip procedure-ticket-link" type="button" @click="toTicket(ticket)"><span class="ticket-label">{{ ticket }}</span><span class="ticket-arrow" aria-hidden="true">→</span></button><span v-if="!selected.tickets.length">暂无进行中的工单</span></strong></article></div>
-            <section class="ops-section"><div class="ops-section-title"><h3>1. 系统自动执行</h3><span>急停触发后立即完成</span></div><ol class="procedure-list"><li v-for="item in selected.auto" :key="item" class="procedure-item">{{ item }}</li></ol></section>
+            <section class="ops-section"><div class="ops-section-title"><h3>1. 系统自动执行</h3><span>{{ selected.automaticExecutionNote }}</span></div><ol class="procedure-list"><li v-for="item in selected.auto" :key="item" class="procedure-item">{{ item }}</li></ol></section>
             <section class="ops-section"><div class="ops-section-title"><h3>2. 人工处置步骤</h3><span>在异常工单中逐项确认</span></div><ol class="procedure-list"><li v-for="item in selected.manual" :key="item" class="procedure-item">{{ item }}</li></ol></section>
-            <section class="ops-section"><div class="ops-section-title"><h3>3. 恢复放行条件</h3><span>归位后由系统复核</span></div><ul class="checkpoint-list"><li v-for="item in selected.gates" :key="item" class="checkpoint-item">{{ item }}</li></ul></section>
+            <section class="ops-section"><div class="ops-section-title"><h3>3. 恢复放行条件</h3><span>{{ selected.releaseConditionNote }}</span></div><ul class="checkpoint-list"><li v-for="item in selected.gates" :key="item" class="checkpoint-item">{{ item }}</li></ul></section>
             <div class="warning-note">{{ selected.warning }}</div>
           </template>
         </div>
         <footer class="ops-modal-footer"><span v-if="proceduresMode" class="footer-hint">放行权限：{{ selected.duty }}</span><button class="modal-close" type="button" @click="close">关闭</button><button v-if="!proceduresMode" class="modal-primary" type="button" :disabled="workorderState[selected.id].released||!workorderState[selected.id].verified||!workorderState[selected.id].route" @click="release">{{ workorderState[selected.id].released ? '已放行' : '确认放行，恢复自动化' }}</button></footer>
       </section>
     </div>
+    <div v-if="editorVisible" class="modal-overlay open" @click.self="editorVisible=false"><section class="exception-modal procedure-editor" role="dialog" aria-modal="true"><header class="modal-header"><div><h2>{{ editorForm.id == null ? '新增急停处置规程' : '编辑急停处置规程' }}</h2><p>带 * 的字段为接口必填项；步骤内容每行一项。</p></div><button class="modal-x" type="button" aria-label="关闭" @click="editorVisible=false">×</button></header><form class="modal-body procedure-form" @submit.prevent="submitProcedure"><label><span>规则编号 *</span><input v-model="editorForm.ruleCode" required></label><label><span>规程名称 *</span><input v-model="editorForm.ruleName" required></label><label><span>急停范围 *</span><select v-model="editorForm.emergencyScope"><option>单机急停</option><option>机构急停</option><option>全线急停</option></select></label><label><span>处置责任 *</span><input v-model="editorForm.responsibility" required></label><label class="wide"><span>检测信号 *</span><textarea v-model="editorForm.detectionSignal" required></textarea></label><label><span>异常编码 *</span><input v-model="editorForm.exceptionCode" required></label><label><span>关联工单</span><input v-model="editorForm.relatedWorkOrder" placeholder="多个编号用逗号分隔"></label><label class="wide"><span>系统自动执行步骤</span><textarea v-model="editorForm.systemActions" rows="4"></textarea></label><label class="wide"><span>人工处置步骤</span><textarea v-model="editorForm.manualSteps" rows="5"></textarea></label><label class="wide"><span>恢复放行条件</span><textarea v-model="editorForm.releaseConditions" rows="4"></textarea></label><label class="wide"><span>放行警告</span><textarea v-model="editorForm.releaseWarning"></textarea></label><label><span>放行权限</span><input v-model="editorForm.releasePermission"></label><label><span>备注</span><input v-model="editorForm.remark"></label></form><footer class="ops-modal-footer"><button class="modal-close" type="button" @click="editorVisible=false">取消</button><button class="modal-primary" type="button" :disabled="editorSaving" @click="submitProcedure">{{ editorSaving ? '保存中…' : '保存规程' }}</button></footer></section></div>
     <div :class="['toast',{show:toastText}]" role="status" aria-live="polite">{{ toastText }}</div>
   </div>
 </template>
@@ -1372,11 +1499,11 @@ body {
 .workorder-ops-table .status-tag.valid{color:#287b56;background:#e9f7f0}
 .procedure-ops-table{min-width:1080px}
 .procedure-ops-table .col-rule{width:10%}
-.procedure-ops-table .col-scene{width:31%}
+.procedure-ops-table .col-scene{width:28%}
 .procedure-ops-table .col-scope{width:13%}
-.procedure-ops-table .col-duty{width:17%}
+.procedure-ops-table .col-duty{width:15%}
 .procedure-ops-table .col-ticket{width:19%}
-.procedure-ops-table .col-action{width:10%}
+.procedure-ops-table .col-action{width:15%}
 .procedure-ops-table td:first-child,.procedure-ops-table td:last-child{white-space:nowrap}
 .procedure-ops-table td:nth-child(5){white-space:nowrap}
 .procedure-ops-table th:last-child,.procedure-status-cell{text-align:center}
@@ -1394,10 +1521,12 @@ body {
 .procedure-switch:focus-visible{outline:2px solid rgba(22,119,200,.28);outline-offset:2px}
 .confirm-item{align-items:flex-start}.confirm-item input[type="checkbox"]{width:16px;height:16px;min-width:16px;min-height:16px;flex:0 0 16px;margin:1px 0 0;accent-color:#1677c8}.confirm-item>span{min-width:0;flex:1}.confirm-item .role-chip{flex:0 0 auto}
 .procedure-ticket-link{max-width:100%;box-sizing:border-box;gap:6px;min-height:28px;padding:4px 9px;overflow:hidden;border:1px solid #cfe2f2;transition:border-color .15s ease,background .15s ease}.procedure-ticket-link:hover{border-color:#7db4dd;background:#dfedf9}.procedure-ticket-link .ticket-label{min-width:0;overflow:hidden;margin:0;color:inherit;font-size:12px;line-height:16px;text-overflow:ellipsis;white-space:nowrap}.procedure-ticket-link .ticket-arrow{flex:0 0 auto;margin:0;color:inherit;font-size:13px;line-height:16px}
+.procedure-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}.procedure-toolbar>span{color:#768392;font-size:12px}.procedure-actions{display:flex;align-items:center;justify-content:center;gap:3px}.procedure-editor{width:min(820px,calc(100vw - 40px))}.procedure-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.procedure-form label{display:grid;gap:7px;min-width:0}.procedure-form label.wide{grid-column:1/-1}.procedure-form label>span{color:#526171;font-size:12px;font-weight:600}.procedure-form input,.procedure-form select,.procedure-form textarea{width:100%;box-sizing:border-box;border:1px solid #dfe5ea;border-radius:7px;outline:0;background:#fff;color:#25364a;font:inherit;font-size:13px}.procedure-form input,.procedure-form select{height:38px;padding:0 11px}.procedure-form textarea{min-height:72px;padding:9px 11px;resize:vertical;line-height:1.55}.procedure-form input:focus,.procedure-form select:focus,.procedure-form textarea:focus{border-color:#69aadb;box-shadow:0 0 0 2px rgba(22,119,200,.09)}
 .protection-list .protection-item{position:relative;min-height:0}
 .protection-list .protection-item::before,
 .checkpoint-list .checkpoint-item::before,
 .procedure-list .procedure-item::before{position:static;inset:auto}
+@media(max-width:600px){.procedure-form{grid-template-columns:1fr}.procedure-form label.wide{grid-column:auto}}
 </style>
 <style scoped>
 .operations-reference-page { padding: 0; }
