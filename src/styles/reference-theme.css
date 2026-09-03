@@ -67,6 +67,9 @@ body { color: var(--agv-ink); background: var(--agv-canvas); }
 .topbar-title-icon .el-icon { font-size: 16px; }
 .breadcrumb-section { color: var(--agv-text-muted); font-weight: 400; }
 .breadcrumb-separator { color: var(--agv-line); font-weight: 400; }
+.menu-figma-icon { width: 20px; height: 20px; display: inline-block; flex: 0 0 20px; background: currentColor; -webkit-mask: var(--menu-icon) center / 20px 20px no-repeat; mask: var(--menu-icon) center / 20px 20px no-repeat; }
+.app-sidebar .el-menu-item,
+.mobile-nav-drawer .el-menu-item { gap: 8px; }
 .topbar-actions { gap: 8px; }
 .topbar-actions .el-button { min-height: 34px; margin: 0; padding: 0 13px; border-color: var(--agv-line); border-radius: 18px; font-size: 13px; box-shadow: none; }
 .user-chip { gap: 8px; font-size: 13px; font-weight: 650; }

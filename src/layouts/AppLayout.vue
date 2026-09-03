@@ -31,7 +31,7 @@ function logout() {
           <template v-for="(group, index) in navigation" :key="index">
             <p v-if="group.label" class="menu-label">{{ group.label }}</p>
             <el-menu-item v-for="item in group.items" :key="item.path" :index="item.path">
-              <el-icon><component :is="item.icon" /></el-icon>
+              <span class="menu-figma-icon" :style="{'--menu-icon':`url(${item.icon})`}" aria-hidden="true" />
               <span>{{ item.label }}</span>
             </el-menu-item>
           </template>
@@ -46,7 +46,7 @@ function logout() {
         <template v-for="(group, index) in navigation" :key="index">
           <p v-if="group.label" class="menu-label">{{ group.label }}</p>
           <el-menu-item v-for="item in group.items" :key="item.path" :index="item.path">
-            <el-icon><component :is="item.icon" /></el-icon><span>{{ item.label }}</span>
+            <span class="menu-figma-icon" :style="{'--menu-icon':`url(${item.icon})`}" aria-hidden="true" /><span>{{ item.label }}</span>
           </el-menu-item>
         </template>
       </el-menu>

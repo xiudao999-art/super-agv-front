@@ -1,0 +1,8 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="transport / engine">
+<g id="Keylines">
+<path id="bg" d="M20 0V20H0V0H20Z" fill="white" fill-opacity="0.01"/>
+</g>
+<path id="Vector" d="M6.66667 3.33333H10M8.33333 3.33333V5.83333M8.75 8.75L7.5 10.8333H10L8.75 12.9167M15 10.8333H17.5M17.5 9.16667V12.5M11.8778 5.93891L14.4472 7.22361C14.786 7.393 15 7.73926 15 8.11803V12.8333C15 13.1481 14.8518 13.4445 14.6 13.6333L11.9333 15.6333C11.7602 15.7632 11.5497 15.8333 11.3333 15.8333H4.33333C3.78105 15.8333 3.33333 15.3856 3.33333 14.8333V6.83333C3.33333 6.28105 3.78105 5.83333 4.33333 5.83333H11.4306C11.5858 5.83333 11.739 5.86948 11.8778 5.93891Z" stroke="#081829" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</svg>
