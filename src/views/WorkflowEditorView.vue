@@ -97,11 +97,15 @@ function orthogonalWaypoints(connection){
   }
   const sourceExitX=sourcePoint.x+(sourceSide==='left'?-clearance:clearance)
   const targetEntryX=targetPoint.x+(targetSide==='left'?-clearance:clearance)
-  const facingWithSpace=Math.abs(sourcePoint.y-targetPoint.y)<1&&(
+  const facingWithSpace=(
     (sourceSide==='right'&&targetSide==='left'&&sourcePoint.x<=targetPoint.x)||
     (sourceSide==='left'&&targetSide==='right'&&sourcePoint.x>=targetPoint.x)
   )
-  if(facingWithSpace)return[sourcePoint,targetPoint]
+  if(facingWithSpace){
+    if(Math.abs(sourcePoint.y-targetPoint.y)<1)return[sourcePoint,targetPoint]
+    const middleX=(sourcePoint.x+targetPoint.x)/2
+    return compactWaypoints([sourcePoint,{x:middleX,y:sourcePoint.y},{x:middleX,y:targetPoint.y},targetPoint])
+  }
   const verticalGap=target.y-(source.y+source.height)
   const reverseVerticalGap=source.y-(target.y+target.height)
   let routeY
