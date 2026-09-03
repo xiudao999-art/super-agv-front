@@ -4,7 +4,7 @@ import PageHeader from '../components/PageHeader.vue'
 
 const tabs = [
   { key:'task', label:'任务执行' }, { key:'device', label:'设备通信' }, { key:'upstream', label:'上游接口' },
-  { key:'alarm', label:'告警事件' }, { key:'external', label:'外围资源' }, { key:'system', label:'系统服务' }, { key:'user', label:'用户操作' },
+  { key:'alarm', label:'告警事件' }, { key:'external', label:'外设设备' }, { key:'system', label:'系统服务' }, { key:'user', label:'用户操作' },
 ]
 const ids = Array.from({ length:7 }, (_,index) => `LOG-20260816-${1028-index}`)
 const makeRows = (source,event,object,result,resultClass='info',level='信息',levelClass='gray') => ids.map(id => ({ id,time:'2026-08-16 09:18:42',level,levelClass,source,event,object,result,resultClass }))

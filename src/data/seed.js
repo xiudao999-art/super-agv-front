@@ -86,7 +86,7 @@ export const seedState = {
   alarms: [
     { id: 1, code: 'ALM-20260826-0039', level: '警告', source: 'AGV-03', title: '电量低于任务安全阈值', duration: '8分20秒', status: '已恢复', time: '2026-08-26 17:42:11', result: '自动充电后恢复' },
     { id: 2, code: 'ALM-20260826-0038', level: '提示', source: '自动门 D-01', title: '开门反馈延迟', duration: '1分12秒', status: '已关闭', time: '2026-08-26 15:18:32', result: '人工确认正常' },
-    { id: 3, code: 'ALM-20260825-0037', level: '严重', source: '电梯-01W', title: '外围资源通信中断', duration: '23分05秒', status: '已恢复', time: '2026-08-25 11:03:27', result: '网络重连成功' },
+    { id: 3, code: 'ALM-20260825-0037', level: '严重', source: '电梯-01W', title: '外设设备通信中断', duration: '23分05秒', status: '已恢复', time: '2026-08-25 11:03:27', result: '网络重连成功' },
   ],
   recoveryTasks: [
     { id: 1, task: 'TRN-0031-01', order: 'ORD-20260827-001', checkpoint: '等待检测仪许可', physical: '载具位于 AGV', system: '任务执行中', consistency: '一致', action: '继续等待' },

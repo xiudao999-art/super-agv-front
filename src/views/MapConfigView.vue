@@ -117,12 +117,12 @@ onMounted(load)
 
 <template>
   <div class="page-view map-reference-page">
-    <PageHeader class="page-head" title="实验室配置" description="按“一张地图对应一个实验室空间”配置地图、通行规则、机台、点位和外围资源" />
+    <PageHeader class="page-head" title="实验室配置" description="按“一张地图对应一个实验室空间”配置地图、通行规则、机台、点位和外设设备" />
     <div class="page-canvas map-config-canvas">
       <section class="page-panel map-config-panel">
-        <div class="tabs-row"><nav class="tabs"><router-link class="tab-btn active" to="/config/map">地图信息</router-link><router-link class="tab-btn" to="/config/stations">机台与点位</router-link><router-link class="tab-btn" to="/config/peripherals">外围资源</router-link></nav></div>
+        <div class="tabs-row"><nav class="tabs"><router-link class="tab-btn active" to="/config/map">地图信息</router-link><router-link class="tab-btn" to="/config/stations">机台与点位</router-link><router-link class="tab-btn" to="/config/peripherals">外设设备</router-link></nav></div>
         <div class="content map-config-content">
-          <div class="rule-banner"><svg class="icon"><use href="#i-info" /></svg><span>数据规则：一个实验室空间只对应一张当前发布的底盘地图，但该地图可以关联多个导航点。实验室空间是机台、库位、动作点位、路径和外围资源的统一归属对象。</span></div>
+          <div class="rule-banner"><svg class="icon"><use href="#i-info" /></svg><span>数据规则：一个实验室空间只对应一张当前发布的底盘地图，但该地图可以关联多个导航点。实验室空间是机台、库位、动作点位、路径和外设设备的统一归属对象。</span></div>
           <div class="list-head"><div><h2>地图信息列表</h2><p>点击编辑可维护实验室空间内地图信息，并通过导航点查看地图内已标记的目标位置。</p></div></div>
           <div class="table-wrap"><table><thead><tr><th>实验室空间 / 编号</th><th>地图 / 版本</th><th>空间内对象</th><th>关联导航点</th><th>当前状态</th><th class="col-actions">操作</th></tr></thead><tbody>
             <tr v-if="loading"><td colspan="6" class="empty-row">正在加载唯一实验室…</td></tr>

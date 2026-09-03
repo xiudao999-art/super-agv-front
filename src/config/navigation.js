@@ -37,7 +37,7 @@ export const navigation = [
       { path: '/config/robots', label: '机器人与设备', icon: Van },
       { path: '/config/map', label: '地图信息', icon: MapLocation },
       { path: '/config/stations', label: '机台与点位', icon: Location },
-      { path: '/config/peripherals', label: '外围资源', icon: Operation },
+      { path: '/config/peripherals', label: '外设设备', icon: Operation },
       { path: '/config/charging', label: '充电桩与电池配置', icon: Lightning },
       { path: '/workflows/processes', label: '流程与动作', icon: Setting },
     ],

@@ -39,7 +39,7 @@ function openEditor(index = -1) {
 }
 
 function save() {
-  if (!form.code.trim() || !form.name.trim() || !form.space.trim() || !form.coordinate.trim()) return ElMessage.warning('请完整填写外围资源必填信息')
+  if (!form.code.trim() || !form.name.trim() || !form.space.trim() || !form.coordinate.trim()) return ElMessage.warning('请完整填写外设设备必填信息')
   if (cameraSelected.value && (!form.cameraIp.trim() || !String(form.cameraPort).trim() || !form.streamUrl.trim() || !String(form.frameRate).trim())) return ElMessage.warning('请完整填写摄像机通信参数')
   if (!cameraSelected.value && !form.navPoint.trim()) return ElMessage.warning('请填写关联导航点')
   saving.value = true
@@ -47,32 +47,32 @@ function save() {
   if (editingIndex.value >= 0) rows.value[editingIndex.value] = item
   else rows.value.unshift(item)
   saving.value = false; dialogVisible.value = false
-  ElMessage.success(editingIndex.value >= 0 ? '外部设备已更新' : '外部设备已挂载')
+  ElMessage.success(editingIndex.value >= 0 ? '外设设备已更新' : '外设设备已挂载')
 }
 
 async function remove(index) {
-  try { await ElMessageBox.confirm(`确认删除“${rows.value[index].code}”吗？`, '删除外围资源', { type:'warning' }); const code = rows.value[index].code; rows.value.splice(index,1); ElMessage.success(`${code} 已删除`) }
+  try { await ElMessageBox.confirm(`确认删除“${rows.value[index].code}”吗？`, '删除外设设备', { type:'warning' }); const code = rows.value[index].code; rows.value.splice(index,1); ElMessage.success(`${code} 已删除`) }
   catch (error) { if (!['cancel','close'].includes(error)) ElMessage.error(error?.message || '删除失败') }
 }
 
 function testAll() {
   testing.value = true
-  window.setTimeout(() => { testing.value = false; ElMessage.success(`连接测试完成：${rows.value.filter(item => item.status !== '离线').length} 个外部设备连接正常`) }, 700)
+  window.setTimeout(() => { testing.value = false; ElMessage.success(`连接测试完成：${rows.value.filter(item => item.status !== '离线').length} 个外设设备连接正常`) }, 700)
 }
 </script>
 
 <template>
   <div class="page-view peripheral-reference-page">
-    <PageHeader class="page-head" title="外围资源" />
+    <PageHeader class="page-head" title="外设设备" />
     <main class="page-canvas resource-page"><section class="page-panel resource-panel"><div class="content">
-      <div class="list-head resource-head"><div><h2>外部设备</h2></div><div class="tools"><button class="tool-btn primary" type="button" @click="openEditor()"><svg class="icon"><use href="#i-plus" /></svg>新增外部设备</button><button class="tool-btn test-btn" type="button" :disabled="testing" @click="testAll"><template v-if="testing">测试中…</template><template v-else><svg class="icon" viewBox="0 0 24 24"><path d="M8 12h8M12 8v8"/><circle cx="12" cy="12" r="9"/></svg>连接测试</template></button></div></div>
-      <div class="table-wrap resource-table-wrap"><table class="resource-table" aria-label="外围资源列表"><thead><tr><th>资源编号 / 名称</th><th>设备类型</th><th>所属 / 连接空间（地图）</th><th>地图坐标或两端连接点</th><th>通信 / 码流</th><th>关联导航点</th><th>状态</th><th class="col-actions">操作</th></tr></thead><tbody>
+      <div class="list-head resource-head"><div><h2>外设设备</h2></div><div class="tools"><button class="tool-btn primary" type="button" @click="openEditor()"><svg class="icon"><use href="#i-plus" /></svg>新增外设设备</button><button class="tool-btn test-btn" type="button" :disabled="testing" @click="testAll"><template v-if="testing">测试中…</template><template v-else><svg class="icon" viewBox="0 0 24 24"><path d="M8 12h8M12 8v8"/><circle cx="12" cy="12" r="9"/></svg>连接测试</template></button></div></div>
+      <div class="table-wrap resource-table-wrap"><table class="resource-table" aria-label="外设设备列表"><thead><tr><th>设备编号 / 名称</th><th>设备类型</th><th>所属 / 连接空间（地图）</th><th>地图坐标或两端连接点</th><th>通信 / 码流</th><th>关联导航点</th><th>状态</th><th class="col-actions">操作</th></tr></thead><tbody>
         <tr v-for="(row,index) in rows" :key="row.code"><td class="resource-code"><strong>{{ row.code }}</strong><small>{{ row.name || row.type }}</small></td><td>{{ row.type }}</td><td class="resource-space">{{ row.space }}</td><td class="resource-coordinate">{{ row.coordinate }}</td><td class="resource-connection">{{ connectionSummary(row) }}</td><td>{{ row.navPoint || '--' }}</td><td><span :class="['resource-status', statusClass(row.status)]">{{ row.status }}</span></td><td class="col-actions"><div class="resource-row-actions"><TableActionButton kind="edit" label="编辑" @click="openEditor(index)"/><TableActionButton kind="delete" label="删除" danger @click="remove(index)"/></div></td></tr>
-        <tr v-if="!rows.length"><td colspan="8" class="resource-empty">暂无外部设备</td></tr>
+        <tr v-if="!rows.length"><td colspan="8" class="resource-empty">暂无外设设备</td></tr>
       </tbody></table></div><div class="total">共计 {{ rows.length }} 条数据</div>
     </div></section></main>
 
-    <div v-if="dialogVisible" class="modal-overlay open" @click.self="dialogVisible = false"><section class="modal-card peripheral-modal-card" role="dialog" aria-modal="true"><header class="resource-modal-head"><div><h2>{{ editingIndex >= 0 ? `编辑外围资源 · ${rows[editingIndex]?.code}` : '新增外围资源' }}</h2><p>挂载外部设备，维护空间位置、通信参数与运行状态</p></div><button class="modal-x" type="button" aria-label="关闭" @click="dialogVisible = false">×</button></header><form @submit.prevent="save"><div class="form-grid">
+    <div v-if="dialogVisible" class="modal-overlay open" @click.self="dialogVisible = false"><section class="modal-card peripheral-modal-card" role="dialog" aria-modal="true"><header class="resource-modal-head"><div><h2>{{ editingIndex >= 0 ? `编辑外设设备 · ${rows[editingIndex]?.code}` : '新增外设设备' }}</h2><p>挂载外设设备，维护空间位置、通信参数与运行状态</p></div><button class="modal-x" type="button" aria-label="关闭" @click="dialogVisible = false">×</button></header><form @submit.prevent="save"><div class="form-grid">
       <label class="form-field"><span>资源编号</span><input v-model="form.code" maxlength="64" placeholder="例如：D-01" required></label><label class="form-field"><span>设备名称</span><input v-model="form.name" maxlength="64" placeholder="例如：检测工位摄像机" required></label><label class="form-field"><span>设备类型</span><select v-model="form.type" required><option>摄像机</option><option>自动门</option><option>电梯</option></select></label><label class="form-field"><span>状态</span><select v-model="form.status"><option>在线</option><option>可用</option><option>备用</option><option>离线</option></select></label><label class="form-field wide"><span>所属 / 连接空间（地图）</span><input v-model="form.space" placeholder="例如：空间 A / 总览地图 V3.2" required></label><label class="form-field wide"><span>地图坐标或两端连接点</span><textarea v-model="form.coordinate" placeholder="例如：X 18.400 / Y 3.200 / θ 90.0°" required /></label><label class="form-field"><span>关联导航点</span><input v-model="form.navPoint" placeholder="例如：DOOR-A-01" :required="!cameraSelected"></label>
       <fieldset v-if="cameraSelected" class="camera-fields wide"><legend>摄像机通信参数</legend><div class="camera-field-grid"><label class="form-field"><span>IP 地址</span><input v-model="form.cameraIp" inputmode="decimal" placeholder="例如：192.168.20.31" required></label><label class="form-field"><span>端口</span><input v-model="form.cameraPort" type="number" min="1" max="65535" placeholder="例如：554" required></label><label class="form-field"><span>视频协议</span><select v-model="form.cameraProtocol"><option>RTSP</option><option>HTTP</option><option>ONVIF</option></select></label><label class="form-field"><span>分辨率</span><select v-model="form.resolution"><option>1920×1080</option><option>1280×720</option><option>640×480</option></select></label><label class="form-field wide"><span>码流地址</span><input v-model="form.streamUrl" placeholder="例如：rtsp://192.168.20.31:554/stream1" required></label><label class="form-field"><span>帧率（FPS）</span><input v-model="form.frameRate" type="number" min="1" max="60" placeholder="例如：25" required></label><label class="form-field"><span>检测画面地址（可选）</span><input v-model="form.previewUrl" placeholder="PNG / JPG / WebP 图片地址"></label></div><p>实时预览默认显示检测画面；配置检测截图地址后，AGV 产能页面会优先加载该图片。</p></fieldset>
       <label class="form-field wide"><span>备注</span><textarea v-model="form.remark" placeholder="可填写通信方式、预约规则等说明" /></label>

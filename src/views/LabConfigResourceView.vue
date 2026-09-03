@@ -10,7 +10,7 @@ const props = defineProps({ mode: { type: String, required: true } })
 const tabs = [
   { label: '地图信息', path: '/config/map' },
   { label: '机台与点位', path: '/config/stations' },
-  { label: '外围资源', path: '/config/peripherals' },
+  { label: '外设设备', path: '/config/peripherals' },
   { label: '通行规则', path: '/config/passage-rules' },
 ]
 

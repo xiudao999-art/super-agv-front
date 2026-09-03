@@ -77,10 +77,10 @@ onMounted(load)
 
 <template>
   <div class="page-view stations-reference-page">
-    <PageHeader class="page-head" title="实验室配置" description="按“一张地图对应一个实验室空间”配置地图、通行规则、机台、点位和外围资源" />
+    <PageHeader class="page-head" title="实验室配置" description="按“一张地图对应一个实验室空间”配置地图、通行规则、机台、点位和外设设备" />
     <div class="page-canvas">
       <section class="page-panel">
-        <div class="tabs-row"><nav class="tabs"><router-link class="tab-btn" to="/config/map">地图信息</router-link><i class="tab-divider"/><router-link class="tab-btn active" to="/config/stations">机台与点位</router-link><i class="tab-divider"/><router-link class="tab-btn" to="/config/peripherals">外围资源</router-link></nav></div>
+        <div class="tabs-row"><nav class="tabs"><router-link class="tab-btn" to="/config/map">地图信息</router-link><i class="tab-divider"/><router-link class="tab-btn active" to="/config/stations">机台与点位</router-link><i class="tab-divider"/><router-link class="tab-btn" to="/config/peripherals">外设设备</router-link></nav></div>
         <div class="content">
           <div class="list-head"><div><h2>机台、导航点与动作点位</h2><p>机台属于实验室空间；导航点属于地图；机械臂动作点位属于机台，并通过导航点实现机器人到位。</p></div><div class="tools"><button class="tool-btn primary" type="button" @click="openForm('machines')"><svg class="icon"><use href="#i-plus" /></svg>新增机台</button><button class="tool-btn" type="button" @click="openForm('points')"><svg class="icon"><use href="#i-plus" /></svg>新增点位</button></div></div>
           <div class="table-wrap"><table aria-label="机台与点位列表"><thead><tr><th>机台 /点位</th><th>类型</th><th>所属空间（地图）</th><th>所属对象</th><th>坐标系</th><th>坐标值</th><th>关联导航点</th><th>当前状态</th><th class="col-actions">操作</th></tr></thead><tbody>

@@ -43,7 +43,7 @@ const routes = [
       { path: 'config/robots', name: 'robots', component: RobotsView, meta: { title: '机器人与设备' } },
       { path: 'config/map', name: 'map', component: MapConfigView, meta: { title: '地图信息' } },
       { path: 'config/stations', name: 'stations', component: StationsView, meta: { title: '机台与点位' } },
-      { path: 'config/peripherals', name: 'peripherals', component: PeripheralResourcesView, meta: { title: '外围资源' } },
+      { path: 'config/peripherals', name: 'peripherals', component: PeripheralResourcesView, meta: { title: '外设设备' } },
       { path: 'config/charging', name: 'charging', component: ChargingView, meta: { title: '充电桩与电池配置' } },
       { path: 'config/passage-rules', name: 'passage-rules', component: LabConfigResourceView, props: { mode: 'passageRules' }, meta: { title: '通行规则' } },
       { path: 'workflows/processes', name: 'processes', component: ProcessesView, meta: { title: '流程与动作' } },
