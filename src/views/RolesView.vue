@@ -3,16 +3,16 @@ import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import PageHeader from '../components/PageHeader.vue'
 
 const storageKey='agv.system.roles.reference.v2'
-const allPermissions=['dashboard','orders','storage','robots','map','stations','peripheral','charging','process','anomaly','logs','capacity','user-management','role-view','role-edit','user-assign']
+const allPermissions=['dashboard','orders','storage','robots','map','stations','peripheral','charging-piles','batteries','process','anomaly','logs','capacity','user-management','role-view','role-edit','user-assign']
 const initialRoles=[
   { key:'admin',name:'系统管理员',code:'SUPER_ADMIN',description:'拥有系统全部功能及管理权限',avatar:'管',color:'navy',users:2,permissions:[...allPermissions],enabled:true },
-  { key:'dispatcher',name:'调度管理员',code:'DISPATCHER',description:'可管理订单、流程及现场调度',avatar:'调',color:'blue',users:4,permissions:['dashboard','orders','storage','robots','map','stations','peripheral','charging','process','anomaly','capacity'],enabled:true },
-  { key:'operator',name:'运维工程师',code:'OPERATOR',description:'负责异常处理、设备维护和日志排查',avatar:'运',color:'cyan',users:5,permissions:['dashboard','robots','map','stations','peripheral','charging','anomaly','logs','capacity'],enabled:true },
-  { key:'viewer',name:'只读访客',code:'VIEWER',description:'仅可查看运行数据和基础配置',avatar:'访',color:'gray',users:1,permissions:['dashboard','orders','storage','robots','map','stations','peripheral','charging','process','capacity','role-view'],enabled:true },
+  { key:'dispatcher',name:'调度管理员',code:'DISPATCHER',description:'可管理订单、流程及现场调度',avatar:'调',color:'blue',users:4,permissions:['dashboard','orders','storage','robots','map','stations','peripheral','charging-piles','batteries','process','anomaly','capacity'],enabled:true },
+  { key:'operator',name:'运维工程师',code:'OPERATOR',description:'负责异常处理、设备维护和日志排查',avatar:'运',color:'cyan',users:5,permissions:['dashboard','robots','map','stations','peripheral','charging-piles','batteries','anomaly','logs','capacity'],enabled:true },
+  { key:'viewer',name:'只读访客',code:'VIEWER',description:'仅可查看运行数据和基础配置',avatar:'访',color:'gray',users:1,permissions:['dashboard','orders','storage','robots','map','stations','peripheral','charging-piles','batteries','process','capacity','role-view'],enabled:true },
 ]
 const permissionGroups=[
   {title:'运行调度',description:'现场任务与资源调度',icon:'dashboard',items:[['dashboard','运行总览'],['orders','订单管理'],['storage','库位与载具']]},
-  {title:'配置中心',description:'实验室与流程基础配置',icon:'map',items:[['robots','机器人与设备'],['map','地图信息'],['stations','机台与点位'],['peripheral','外设设备'],['charging','充电桩与电池配置'],['process','流程与动作']]},
+  {title:'配置中心',description:'实验室与流程基础配置',icon:'map',items:[['robots','机器人与设备'],['map','地图信息'],['stations','机台与点位'],['peripheral','外设设备'],['charging-piles','充电桩配置'],['batteries','电池配置'],['process','流程与动作']]},
   {title:'运维与数据',description:'异常、日志及产能数据',icon:'shield',items:[['anomaly','异常与恢复'],['logs','系统日志'],['capacity','AGV产能']]},
   {title:'系统管理',description:'角色与用户安全配置',icon:'users',items:[['user-management','用户管理'],['role-view','查看角色'],['role-edit','编辑权限'],['user-assign','分配用户']]},
 ]

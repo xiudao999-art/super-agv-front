@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Bell, DocumentChecked, Fold, Grid, UserFilled } from '@element-plus/icons-vue'
+import { Bell, DocumentChecked, Fold, UserFilled } from '@element-plus/icons-vue'
 import { activeMenuForRoute, navigation } from '../config/navigation'
 
 const route = useRoute()
@@ -12,6 +12,7 @@ const alertsVisible = ref(false)
 
 const activeMenu = computed(() => activeMenuForRoute[route.path] || route.path)
 const title = computed(() => route.meta.title || '运行总览')
+const sectionTitle = computed(() => navigation.find(group => group.items.some(item => item.path === activeMenu.value))?.label || '')
 
 function logout() {
   sessionStorage.removeItem('agv-session')
@@ -55,7 +56,9 @@ function logout() {
       <el-header class="topbar">
         <div class="topbar-title">
           <el-button class="mobile-menu-button" text :icon="Fold" @click="mobileMenu = true" />
-          <span class="topbar-title-icon"><el-icon><Grid /></el-icon></span>
+          <span class="topbar-title-icon"><el-icon><Fold /></el-icon></span>
+          <span v-if="sectionTitle" class="breadcrumb-section">{{ sectionTitle }}</span>
+          <span v-if="sectionTitle" class="breadcrumb-separator">/</span>
           <span>{{ title }}</span>
         </div>
         <div class="topbar-actions">

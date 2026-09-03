@@ -65,6 +65,8 @@ body { color: var(--agv-ink); background: var(--agv-canvas); }
 .topbar-title { gap: 12px; color: var(--agv-ink); font-size: 14px; font-weight: 650; }
 .topbar-title-icon { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 7px; background: #f2f5f7; }
 .topbar-title-icon .el-icon { font-size: 16px; }
+.breadcrumb-section { color: var(--agv-text-muted); font-weight: 400; }
+.breadcrumb-separator { color: var(--agv-line); font-weight: 400; }
 .topbar-actions { gap: 8px; }
 .topbar-actions .el-button { min-height: 34px; margin: 0; padding: 0 13px; border-color: var(--agv-line); border-radius: 18px; font-size: 13px; box-shadow: none; }
 .user-chip { gap: 8px; font-size: 13px; font-weight: 650; }

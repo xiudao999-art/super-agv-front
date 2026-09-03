@@ -3,6 +3,10 @@ import { computed, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import PageHeader from '../components/PageHeader.vue'
 
+const props = defineProps({
+  mode: { type: String, default: 'piles', validator: value => ['piles', 'batteries'].includes(value) },
+})
+
 const piles = ref([
   { code:'CHG-01', brand:'HIKROBOT', model:'CR-2400', space:'空间 B / 总览地图 V3.2', protocol:'Modbus TCP', power:'2.4 kW', navPoint:'CHG-B-01', status:'启用' },
   { code:'CHG-02', brand:'STANDARD ROBOTS', model:'SR-CHG-24', space:'空间 A / 总览地图 V3.2', protocol:'REST API', power:'2.0 kW', navPoint:'CHG-A-02', status:'禁用' },
@@ -11,13 +15,14 @@ const batteries = ref([
   { code:'BAT-01', brand:'CATL', model:'LFP-48-100', type:'磷酸铁锂', specification:'48 V / 100 Ah', lowThreshold:'20%', resumeThreshold:'80%', status:'启用' },
   { code:'BAT-02', brand:'EVE', model:'LF105', type:'磷酸铁锂', specification:'48 V / 105 Ah', lowThreshold:'25%', resumeThreshold:'85%', status:'禁用' },
 ])
-const active = ref('piles')
 const dialogVisible = ref(false)
 const editingIndex = ref(-1)
 const testing = ref(false)
 const form = reactive({})
-const rows = computed(() => active.value === 'piles' ? piles.value : batteries.value)
-const pileMode = computed(() => active.value === 'piles')
+const pileMode = computed(() => props.mode === 'piles')
+const rows = computed(() => pileMode.value ? piles.value : batteries.value)
+const pageTitle = computed(() => pileMode.value ? '充电桩配置' : '电池配置')
+const pageDescription = computed(() => pileMode.value ? '维护充电设备、通信协议及关联导航点' : '维护电池参数及低电量调度策略')
 
 function openEditor(index = -1) {
   editingIndex.value = index
@@ -51,11 +56,11 @@ function test() {
 
 <template>
   <div class="page-view charging-reference-page">
-    <PageHeader class="page-head" title="充电桩与电池配置" description="维护充电设备、电池参数及低电量调度策略">
+    <PageHeader class="page-head" :title="pageTitle" :description="pageDescription">
       <button class="primary-btn" type="button" :aria-label="pileMode ? '新增充电桩' : '新增电池配置'" @click="openEditor()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>{{ pileMode ? '新增充电桩' : '新增电池配置' }}</span></button>
     </PageHeader>
     <main class="page-canvas charging-page"><section class="config-panel">
-      <header class="panel-toolbar"><div class="config-tabs" role="tablist" aria-label="配置类型"><button :class="['config-tab',{active:pileMode}]" type="button" role="tab" :aria-selected="pileMode" @click="active='piles'">充电桩配置</button><button :class="['config-tab',{active:!pileMode}]" type="button" role="tab" :aria-selected="!pileMode" @click="active='batteries'">电池配置</button></div><button v-if="pileMode" class="secondary-btn test-button" type="button" :disabled="testing" @click="test"><template v-if="testing">测试中…</template><template v-else><svg viewBox="0 0 24 24"><path d="M8 12h8M12 8v8"/><circle cx="12" cy="12" r="9"/></svg>连接测试</template></button></header>
+      <header class="panel-toolbar"><div class="module-heading"><span class="module-icon" aria-hidden="true"><svg v-if="pileMode" viewBox="0 0 24 24"><path d="M7 3h8v10H7zM9 7h4M9 10h4M15 6h2a2 2 0 0 1 2 2v7a3 3 0 0 1-6 0v-2M6 21h10"/></svg><svg v-else viewBox="0 0 24 24"><rect x="3" y="6" width="17" height="12" rx="2"/><path d="M20 10h2v4h-2M7 9v6M10 12H4"/></svg></span><div><strong>{{ pageTitle }}</strong><small>{{ rows.length }} 条配置记录</small></div></div><button v-if="pileMode" class="secondary-btn test-button" type="button" :disabled="testing" @click="test"><template v-if="testing">测试中…</template><template v-else><svg viewBox="0 0 24 24"><path d="M8 12h8M12 8v8"/><circle cx="12" cy="12" r="9"/></svg>连接测试</template></button></header>
       <div v-if="pileMode" class="table-wrap" role="tabpanel"><table aria-label="充电桩配置列表"><thead><tr><th>桩编号</th><th>品牌</th><th>型号</th><th>所属空间（地图）</th><th>通信协议</th><th>额定功率</th><th>关联导航点</th><th>状态</th><th class="col-actions">操作</th></tr></thead><tbody><tr v-for="(row,index) in piles" :key="row.code"><td class="code-cell">{{ row.code }}</td><td>{{ row.brand }}</td><td>{{ row.model }}</td><td>{{ row.space }}</td><td>{{ row.protocol }}</td><td>{{ row.power }}</td><td>{{ row.navPoint }}</td><td><span :class="['status-tag',row.status==='禁用'?'disabled':'enabled']">{{ row.status }}</span></td><td class="col-actions"><div class="row-actions"><TableActionButton kind="edit" label="编辑" @click="openEditor(index)"/><TableActionButton kind="delete" label="删除" danger @click="remove(index)"/></div></td></tr></tbody></table></div>
       <div v-else class="table-wrap" role="tabpanel"><table aria-label="电池配置列表"><thead><tr><th>配置编号</th><th>电池品牌</th><th>电池型号</th><th>电池类型</th><th>额定电压 / 容量</th><th>低电量阈值</th><th>恢复任务阈值</th><th>状态</th><th class="col-actions">操作</th></tr></thead><tbody><tr v-for="(row,index) in batteries" :key="row.code"><td class="code-cell">{{ row.code }}</td><td>{{ row.brand }}</td><td>{{ row.model }}</td><td>{{ row.type }}</td><td>{{ row.specification }}</td><td>{{ row.lowThreshold }}</td><td>{{ row.resumeThreshold }}</td><td><span :class="['status-tag',row.status==='禁用'?'disabled':'enabled']">{{ row.status }}</span></td><td class="col-actions"><div class="row-actions"><TableActionButton kind="edit" label="编辑" @click="openEditor(index)"/><TableActionButton kind="delete" label="删除" danger @click="remove(index)"/></div></td></tr></tbody></table></div>
       <footer class="table-footer"><span>共 {{ rows.length }} 条数据</span><div class="pagination"><button type="button" disabled>‹</button><button class="active" type="button">1</button><button type="button" disabled>›</button></div></footer>
@@ -84,9 +89,12 @@ function test() {
 
 .config-panel { overflow:hidden; border:1px solid var(--agv-line-soft); border-radius:11px; background:#fff; }
 .panel-toolbar { min-height:68px; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 16px; border-bottom:1px solid var(--agv-line-soft); background:#fbfcfd; }
-.config-tabs { display:inline-flex; padding:3px; border-radius:8px; background:#edf1f4; }
-.config-tab { min-height:34px; padding:0 18px; border:0; border-radius:6px; color:var(--agv-text-secondary); background:transparent; font-size:12px; cursor:pointer; }
-.config-tab.active { color:var(--agv-blue); background:#fff; box-shadow:0 2px 7px rgba(17,42,65,.09); font-weight:700; }
+.module-heading { display:flex; align-items:center; gap:10px; }
+.module-heading > div { display:grid; gap:2px; }
+.module-heading strong { color:var(--agv-ink); font-size:14px; }
+.module-heading small { color:var(--agv-text-muted); font-size:11px; }
+.module-icon { width:36px; height:36px; display:grid; place-items:center; border-radius:999px; color:var(--agv-blue); background:rgba(21,119,210,.08); }
+.module-icon svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 .test-button:disabled { cursor:wait; opacity:.62; }
 
 .table-wrap { overflow-x:auto; }
@@ -152,8 +160,7 @@ tbody tr:hover td { background:#f8fbfd; }
 @media (max-width:600px) {
   .charging-reference-page > .page-head { padding:14px; }
   .panel-toolbar { align-items:stretch; flex-direction:column; }
-  .config-tabs,.test-button { width:100%; }
-  .config-tab { flex:1; padding:0 8px; }
+  .test-button { width:100%; }
   .form-grid { grid-template-columns:1fr; }
   .wide { grid-column:auto; }
   .page-head .primary-btn { width:36px; padding:0; }
