@@ -1,0 +1,8 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="map / navigation">
+<g id="Keylines">
+<path id="bg" d="M24 0V24H0V0H24Z" fill="white" fill-opacity="0.01"/>
+</g>
+<path id="Vector" fill-rule="evenodd" clip-rule="evenodd" d="M19.7683 2.69246C20.7236 2.34854 21.6478 3.27264 21.3038 4.22799L15.2642 21.0047C14.8888 22.0474 13.4215 22.0676 13.0176 21.0356L10.1891 13.8072L2.96073 10.9786C1.92871 10.5748 1.94886 9.10746 2.99155 8.73209L19.7683 2.69246Z" fill="#1577D2"/>
+</g>
+</svg>
