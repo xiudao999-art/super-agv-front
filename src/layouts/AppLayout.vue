@@ -9,12 +9,31 @@ const router = useRouter()
 const mobileMenu = ref(false)
 const statusVisible = ref(false)
 const alertsVisible = ref(false)
+const alertDetailVisible = ref(false)
 
 const alertItems = [
   { title: '机台允许进样事件等待超过流程配置的30秒', code: 'ALM-20260817-0042', time: '2026-08-17 09:42:18', level: '严重', levelClass: 'danger', object: '贴标机台进样许可', impact: '运输任务保持在 W-B01；贴标机台进样位继续预约；后续同目标任务暂停派发', status: '待处理', statusClass: 'pending', owner: '陈工' },
   { title: '系统记录为空，但库位传感器检测有物', code: 'ALM-20260817-0041', time: '2026-08-17 09:36:54', level: '警告', levelClass: 'warning', object: '立库 A 第4层07位', impact: '库位 A-04-07 已锁定，不参与新任务分配；同层其他库位不受影响', status: '处理中', statusClass: 'processing', owner: '王工' },
   { title: '系统记录为空，但库位传感器检测有物', code: 'ALM-20260817-0041', time: '2026-08-17 09:36:54', level: '警告', levelClass: 'warning', object: '立库 A 第4层07位', impact: '库位 A-04-07 已锁定，不参与新任务分配；同层其他库位不受影响', status: '处理中', statusClass: 'processing', owner: '王工' },
   { title: '视觉设备在60秒内出现3次短时断连', code: 'ALM-20260817-0040', time: '2026-08-17 09:31:12', level: '警告', levelClass: 'warning', object: '视觉 VISION-01', impact: '当前动作在重试前暂停；底盘和机械臂保持安全状态；其他任务等待', status: '已确认', statusClass: 'confirmed', owner: '李工' },
+]
+
+const alertDetailCards = [
+  { title: '发生了什么', text: '视觉设备在 60 秒内出现 3 次短时断连' },
+  { title: '系统已经采取的保护', text: '系统已暂停当前动作，底盘和机械臂保持安全状态，未自动重复抓取或放置。', tag: '保护已生效' },
+  { title: '影响范围', text: '当前动作在重试前暂停；底盘和机械臂保持安全状态；其他任务等待' },
+  { title: '判断证据', text: '三次 TCP 连接重置；最后一次心跳已恢复' },
+  { title: '关联对象', text: '视觉 VISION-01 · 实验室 A' },
+  { title: '当前负责人', text: '李工' },
+  { title: '关联任务', text: 'MES-20260817-0067 / TRN-0067-01 / AGV-01' },
+  { title: '异常状态 / 最近更新', text: '已确认 / 09:33:46' },
+]
+
+const recoverySteps = [
+  { number: 1, title: '检查设备供电与网络', text: '核对网线、交换机端口、设备电源和服务进程。', role: '实施工程师' },
+  { number: 2, title: '刷新连接与设备状态', text: '恢复通信后先读取设备当前状态和最后命令结果。', role: '系统' },
+  { number: 3, title: '根据证据判断是否继续', text: '确认动作未执行才允许重试；结果不确定时进入恢复核对。', role: '系统＋实施工程师' },
+  { number: 3, title: '反复断连则安排维护', text: '保留通信记录和原始错误码，转厂商工具进一步诊断。', role: '实施工程师' },
 ]
 
 const activeMenu = computed(() => activeMenuForRoute[route.path] || route.path)
@@ -24,6 +43,11 @@ const sectionTitle = computed(() => navigation.find(group => group.items.some(it
 function logout() {
   sessionStorage.removeItem('agv-session')
   router.replace('/login')
+}
+
+function openAlertDetail() {
+  alertsVisible.value = false
+  alertDetailVisible.value = true
 }
 </script>
 
@@ -115,9 +139,52 @@ function logout() {
           <div><dt>当前状态：</dt><dd class="alert-state" :class="alert.statusClass">{{ alert.status }}</dd></div>
           <div><dt>负责人：</dt><dd>{{ alert.owner }}</dd></div>
         </dl>
-        <button class="alert-detail-button" @click="alertsVisible = false; router.push('/operations/exception-recovery')">查看详情与处理</button>
+        <button class="alert-detail-button" @click="openAlertDetail">查看详情与处理</button>
       </article>
     </div>
     <template #footer><el-button type="primary" @click="alertsVisible = false; router.push('/operations/exception-recovery')">进入异常与恢复</el-button></template>
   </el-drawer>
+
+  <el-dialog v-model="alertDetailVisible" width="800px" :show-close="false" align-center class="alert-detail-dialog">
+    <div class="alert-detail-layout">
+      <header class="alert-detail-header">
+        <h2>异常详情与处理意见•ALM-20260817-0040</h2>
+        <button aria-label="关闭" @click="alertDetailVisible = false"><img src="/assets/topbar/dialog-close.svg" alt=""></button>
+      </header>
+
+      <div class="alert-detail-grid">
+        <article v-for="card in alertDetailCards" :key="card.title" class="alert-info-card">
+          <div class="alert-info-card__title"><strong>{{ card.title }}</strong><span v-if="card.tag" class="detail-success-tag"><img src="/assets/topbar/detail-success.svg" alt="">{{ card.tag }}</span></div>
+          <p>{{ card.text }}</p>
+        </article>
+      </div>
+
+      <section class="alert-detail-section">
+        <h3>建议处理步骤</h3>
+        <p>系统根据“设备通信”异常类型给出对应建议和可执行操作</p>
+      </section>
+
+      <div class="recovery-step-list">
+        <article v-for="step in recoverySteps" :key="step.title" class="recovery-step">
+          <span class="recovery-step__number">{{ step.number }}</span>
+          <div><strong>{{ step.title }}</strong><p>{{ step.text }}</p></div>
+          <span class="detail-role-tag"><img src="/assets/topbar/detail-role.svg" alt="">{{ step.role }}</span>
+        </article>
+      </div>
+
+      <section class="alert-detail-section operation-heading">
+        <h3>处理操作</h3>
+        <p>先执行必要的核对和恢复操作，确认影响已经解除后再填写处理结果</p>
+      </section>
+      <div class="alert-operation-buttons">
+        <el-button type="primary">刷新设备状态</el-button>
+        <el-button>查看通信证据</el-button>
+        <el-button>发起恢复检查</el-button>
+      </div>
+    </div>
+    <template #footer>
+      <el-button @click="alertDetailVisible = false">取消</el-button>
+      <el-button type="primary">填写处理结果</el-button>
+    </template>
+  </el-dialog>
 </template>
