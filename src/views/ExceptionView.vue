@@ -426,6 +426,7 @@ function selectRow(row) {
   overflow-x: hidden;
 }
 .exception-design-page > .page-head {
+  margin: 0;
   padding: 17px 20px;
 }
 .exception-workspace {
@@ -782,6 +783,11 @@ function selectRow(row) {
   .split,
   .recovery-bottom {
     grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .exception-design-page > .page-head {
+    padding: 14px;
   }
 }
 @media (max-width: 620px) {
