@@ -10,6 +10,11 @@ const mobileMenu = ref(false)
 const statusVisible = ref(false)
 const alertsVisible = ref(false)
 const alertDetailVisible = ref(false)
+const statusQueryVisible = ref(false)
+const relatedTaskVisible = ref(false)
+const handlingResultVisible = ref(false)
+const handlingConclusion = ref('机台许可已恢复，任务可继续')
+const handlingDescription = ref('')
 
 const alertItems = [
   { title: '机台允许进样事件等待超过流程配置的30秒', code: 'ALM-20260817-0042', time: '2026-08-17 09:42:18', level: '严重', levelClass: 'danger', object: '贴标机台进样许可', impact: '运输任务保持在 W-B01；贴标机台进样位继续预约；后续同目标任务暂停派发', status: '待处理', statusClass: 'pending', owner: '陈工' },
@@ -48,6 +53,21 @@ function logout() {
 function openAlertDetail() {
   alertsVisible.value = false
   alertDetailVisible.value = true
+}
+
+function openStatusQuery() {
+  alertDetailVisible.value = false
+  statusQueryVisible.value = true
+}
+
+function openRelatedTask() {
+  alertDetailVisible.value = false
+  relatedTaskVisible.value = true
+}
+
+function openHandlingResult() {
+  alertDetailVisible.value = false
+  handlingResultVisible.value = true
 }
 </script>
 
@@ -153,7 +173,7 @@ function openAlertDetail() {
       </header>
 
       <div class="alert-detail-grid">
-        <article v-for="card in alertDetailCards" :key="card.title" class="alert-info-card">
+        <article v-for="card in alertDetailCards" :key="card.title" class="alert-info-card" :class="{ 'is-clickable': card.title === '关联任务' }" @click="card.title === '关联任务' && openRelatedTask()">
           <div class="alert-info-card__title"><strong>{{ card.title }}</strong><span v-if="card.tag" class="detail-success-tag"><img src="/assets/topbar/detail-success.svg" alt="">{{ card.tag }}</span></div>
           <p>{{ card.text }}</p>
         </article>
@@ -177,14 +197,81 @@ function openAlertDetail() {
         <p>先执行必要的核对和恢复操作，确认影响已经解除后再填写处理结果</p>
       </section>
       <div class="alert-operation-buttons">
-        <el-button type="primary">刷新设备状态</el-button>
+        <el-button type="primary" @click="openStatusQuery">刷新设备状态</el-button>
         <el-button>查看通信证据</el-button>
         <el-button>发起恢复检查</el-button>
       </div>
     </div>
     <template #footer>
       <el-button @click="alertDetailVisible = false">取消</el-button>
-      <el-button type="primary">填写处理结果</el-button>
+      <el-button type="primary" @click="openHandlingResult">填写处理结果</el-button>
+    </template>
+  </el-dialog>
+
+  <el-dialog v-model="statusQueryVisible" width="600px" :show-close="false" align-center class="status-query-dialog">
+    <div class="status-query-layout">
+      <header class="status-query-header">
+        <h2>异常处理 •刷新设备状态</h2>
+        <button aria-label="关闭" @click="statusQueryVisible = false"><img src="/assets/topbar/status-query-close.svg" alt=""></button>
+      </header>
+      <div class="status-query-list">
+        <article>
+          <div><strong>连接状态</strong><span class="query-status success"><img src="/assets/topbar/status-query-success.svg" alt="">在线</span></div>
+          <p>最近一次心跳已经恢复</p>
+        </article>
+        <article>
+          <div><strong>最后命令</strong><span class="query-status warning"><img src="/assets/topbar/status-query-warning.svg" alt="">核对中</span></div>
+          <p>已受理，物理结果仍需查询确认</p>
+        </article>
+        <article>
+          <div><strong>安全状态</strong><span class="query-status success"><img src="/assets/topbar/status-query-success.svg" alt="">正常</span></div>
+          <p>底盘停止，机械臂保持当前安全姿态</p>
+        </article>
+      </div>
+      <div class="status-query-notice">刷新连接不等于自动重试动作。系统会结合最后命令、设备状态和现场证据判断是否可继续。</div>
+    </div>
+    <template #footer>
+      <el-button @click="statusQueryVisible = false">取消</el-button>
+      <el-button type="primary" @click="statusQueryVisible = false">完成状态查询</el-button>
+    </template>
+  </el-dialog>
+
+  <el-dialog v-model="relatedTaskVisible" width="600px" :show-close="false" align-center class="related-task-dialog">
+    <div class="related-task-layout">
+      <header class="related-task-header">
+        <h2>关联运输任务</h2>
+        <button aria-label="关闭" @click="relatedTaskVisible = false"><img src="/assets/topbar/related-task-close.svg" alt=""></button>
+      </header>
+      <div class="related-task-list">
+        <article>
+          <div><strong>运输任务</strong><span class="related-task-status"><img src="/assets/topbar/related-task-warning.svg" alt="">挂起</span></div>
+          <p>TRN-0068-02</p>
+        </article>
+        <article><strong>当前步骤</strong><p>等待贴标机台 进样许可</p></article>
+        <article><strong>安全检查点</strong><p>机器人已到达 W-B01，尚未进入机台、尚未执行放料</p></article>
+        <article><strong>自动重试</strong><p>已达到机台配置的3次查询上限</p></article>
+      </div>
+    </div>
+    <template #footer><el-button @click="relatedTaskVisible = false">关闭</el-button></template>
+  </el-dialog>
+
+  <el-dialog v-model="handlingResultVisible" width="600px" :show-close="false" align-center class="handling-result-dialog">
+    <div class="handling-result-layout">
+      <header class="handling-result-header">
+        <h2>填写处理结果•ALM-20260817-0042</h2>
+        <button aria-label="关闭" @click="handlingResultVisible = false"><img src="/assets/topbar/handling-close.svg" alt=""></button>
+      </header>
+      <div class="handling-result-notice">提交后，该异常将标记为“已完成”并从当前异常列表移除。处理记录将保留在告警记录和系统日志中。</div>
+      <div class="handling-result-form">
+        <label><span>异常类型</span><input value="任务执行• 机台允许进样事件等待超过流程配置的30秒" disabled></label>
+        <label><span>处理结论</span><span class="handling-select"><select v-model="handlingConclusion"><option>机台许可已恢复，任务可继续</option><option>异常仍存在，继续保持任务挂起</option><option>转人工处理并安排现场维护</option></select><img src="/assets/topbar/handling-arrow.svg" alt=""></span></label>
+        <label><span>处理人</span><input value="陈工" disabled></label>
+        <label><span>处理说明</span><span class="handling-textarea"><textarea v-model="handlingDescription" maxlength="200" placeholder="请填写现场采取的措施、核对结果以及任务后续安排"></textarea><span>{{ handlingDescription.length }}/200 <img src="/assets/topbar/handling-resize.svg" alt=""></span></span></label>
+      </div>
+    </div>
+    <template #footer>
+      <el-button @click="handlingResultVisible = false">取消</el-button>
+      <el-button type="primary" @click="handlingResultVisible = false">提交处理结果</el-button>
     </template>
   </el-dialog>
 </template>
