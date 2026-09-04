@@ -32,7 +32,6 @@ const editingAccount = ref('')
 const resetAccount = ref('')
 const toastText = ref('')
 const form = reactive({ account:'',name:'',department:'',source:'本地账号',role:'调度管理员',status:'启用' })
-const avatarColors = ['blue','cyan','navy','gray']
 let toastTimer
 
 const rows = computed(() => users.value.filter(user => {
@@ -40,7 +39,6 @@ const rows = computed(() => users.value.filter(user => {
   const keywordMatched = !value || [user.account,user.name,user.department].some(item => item.toLowerCase().includes(value))
   return keywordMatched && (!applied.role || user.role === applied.role) && (!applied.status || user.status === applied.status)
 }))
-const enabledCount = computed(() => users.value.filter(item => item.status === '启用').length)
 
 function persist() { try { localStorage.setItem(storageKey,JSON.stringify(users.value)) } catch { /* 当前会话状态仍然有效 */ } }
 function toast(message) { toastText.value=message;clearTimeout(toastTimer);toastTimer=window.setTimeout(()=>{toastText.value=''},2200) }
@@ -70,7 +68,6 @@ function saveUser() {
 
 function openReset(user) { resetAccount.value=user.account;resetModal.value=true }
 function confirmReset() { closeResetModal();toast(`${resetAccount.value} 的临时密码已生成：Agv@2026`) }
-function toggleUser(user) { user.status=user.status==='启用'?'停用':'启用';persist();toast(`${user.name}的账号已${user.status}`) }
 function onKeydown(event) { if(event.key!=='Escape')return;if(resetModal.value)closeResetModal();else if(userModal.value)closeUserModal() }
 
 watch([userModal,resetModal],values=>{document.body.style.overflow=values.some(Boolean)?'hidden':''})
@@ -80,30 +77,21 @@ onBeforeUnmount(()=>{clearTimeout(toastTimer);window.removeEventListener('keydow
 
 <template>
   <div class="page-view users-reference-page">
-    <PageHeader class="page-head" title="用户管理" description="维护系统用户、所属部门、角色及账号状态">
-      <button class="primary-btn" type="button" @click="openUserModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>新增用户</span></button>
-    </PageHeader>
+    <PageHeader class="page-head" title="用户管理" description="维护席位所属空间地图、到达坐标、操作点位、兼容器具与占用一致性" />
 
     <main class="page-canvas user-page">
-      <section class="user-summary" aria-label="用户统计">
-        <article><span class="summary-icon blue"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 13a5 5 0 0 1 4 5"/></svg></span><div><strong>{{ users.length }}</strong><span>用户总数</span></div></article>
-        <article><span class="summary-icon green"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span><div><strong>{{ enabledCount }}</strong><span>启用账号</span></div></article>
-        <article><span class="summary-icon orange"><svg viewBox="0 0 24 24"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></span><div><strong>{{ users.length-enabledCount }}</strong><span>停用账号</span></div></article>
-        <article><span class="summary-icon cyan"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg></span><div><strong>4</strong><span>已配置角色</span></div></article>
-      </section>
-
       <section class="user-panel">
-        <header class="filter-bar">
-          <label class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input v-model="keyword" placeholder="搜索账号、姓名或部门" @keydown.enter="search"></label>
-          <label class="filter-field"><span>角色</span><select v-model="roleFilter"><option value="">全部角色</option><option>系统管理员</option><option>调度管理员</option><option>运维工程师</option><option>只读访客</option></select></label>
-          <label class="filter-field"><span>状态</span><select v-model="statusFilter"><option value="">全部状态</option><option>启用</option><option>停用</option></select></label>
-          <div class="filter-actions"><button class="secondary-btn" type="button" @click="resetFilters">重置</button><button class="primary-btn compact" type="button" @click="search">查询</button></div>
+        <header class="user-list-head">
+          <h2>用户列表</h2>
+          <button class="primary-btn" type="button" @click="openUserModal()">
+            <img src="/assets/list-icons/user-add.svg" alt="">
+            <span>新增用户</span>
+          </button>
         </header>
-        <div class="table-wrap"><table aria-label="用户列表"><thead><tr><th>用户</th><th>账号</th><th>所属部门</th><th>角色</th><th>账号来源</th><th>状态</th><th>最近登录</th><th class="col-actions">操作</th></tr></thead><tbody>
-          <tr v-for="user in rows" :key="user.account"><td><div class="user-cell"><span :class="['user-avatar',avatarColors[users.indexOf(user)%avatarColors.length]]">{{ user.name.slice(0,1) }}</span><span><strong>{{ user.name }}</strong><small>{{ user.department }}</small></span></div></td><td>{{ user.account }}</td><td>{{ user.department }}</td><td><span class="role-chip">{{ user.role }}</span></td><td>{{ user.source }}</td><td><span :class="['status-tag',user.status==='启用'?'enabled':'disabled']">{{ user.status }}</span></td><td>{{ user.login }}</td><td class="col-actions"><div class="row-actions"><TableActionButton kind="edit" label="编辑" @click="openUserModal(user)"/><TableActionButton kind="reset" label="重置密码" @click="openReset(user)"/><TableActionButton kind="toggle" :label="user.status==='停用'?'启用':'停用'" :active="user.status==='停用'" :danger="user.status!=='停用'" @click="toggleUser(user)"/></div></td></tr>
+        <div class="table-wrap"><table aria-label="用户列表"><thead><tr><th>用户名称</th><th>性别</th><th>联系方式</th><th>身份证信息</th><th>现居住地址</th><th>任职角色</th><th>最近登陆时间</th><th>操作</th></tr></thead><tbody>
+          <tr v-for="(user,index) in rows" :key="user.account"><td>{{ user.name }}</td><td>{{ [2,4,8].includes(index) ? '女' : '男' }}</td><td>12345678901</td><td>442726******7890</td><td>上海市青浦区赵巷镇镇中路65弄34号303</td><td>admin</td><td>{{ user.login.replaceAll('-','.') }}</td><td><div class="user-row-actions"><button title="编辑用户" @click="openUserModal(user)"><img src="/assets/list-icons/user-edit.svg" alt=""></button><button title="重置密码" @click="openReset(user)"><img src="/assets/list-icons/user-detail.svg" alt=""></button></div></td></tr>
           <tr v-if="!rows.length"><td class="empty-row" colspan="8">没有符合条件的用户</td></tr>
         </tbody></table></div>
-        <footer class="table-footer"><span>共 {{ rows.length }} 条数据</span><div class="pagination"><button type="button" disabled>‹</button><button class="active" type="button">1</button><button type="button" disabled>›</button></div></footer>
       </section>
     </main>
 
@@ -241,7 +229,28 @@ tbody tr:hover td { background:#f8fbfd; }
 .users-reference-page { padding:0; }
 .users-reference-page > .page-head { margin:0; padding:17px 20px; }
 .users-reference-page .page-head .primary-btn { flex:0 0 auto; }
-.users-reference-page > .page-canvas { padding:20px; }
+.users-reference-page > .page-canvas { padding:24px; }
+.users-reference-page .user-page { min-width:0; }
+.users-reference-page .user-panel { padding:20px;border:0;border-radius:12px; }
+.users-reference-page .user-list-head { min-height:36px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px; }
+.users-reference-page .user-list-head h2 { margin:0;font-size:14px;line-height:20px; }
+.users-reference-page .user-list-head .primary-btn { height:36px;border-radius:8px;font-size:14px;font-weight:500; }
+.users-reference-page .user-list-head .primary-btn img { width:18px;height:18px;display:block; }
+.users-reference-page .table-wrap { border:1px solid #f5f6f7;border-radius:10px; }
+.users-reference-page .table-wrap table { min-width:1360px;font-size:14px; }
+.users-reference-page .table-wrap th { height:48px;padding:0 16px;background:rgba(8,24,41,.02);font-size:12px; }
+.users-reference-page .table-wrap td { height:56px;padding:0 16px;font-size:14px; }
+.users-reference-page .table-wrap th:nth-child(1) { width:9%; }
+.users-reference-page .table-wrap th:nth-child(2) { width:6%; }
+.users-reference-page .table-wrap th:nth-child(3) { width:10%; }
+.users-reference-page .table-wrap th:nth-child(4) { width:14%; }
+.users-reference-page .table-wrap th:nth-child(5) { width:24%; }
+.users-reference-page .table-wrap th:nth-child(6) { width:11%; }
+.users-reference-page .table-wrap th:nth-child(7) { width:18%; }
+.users-reference-page .table-wrap th:nth-child(8) { width:8%; }
+.users-reference-page .user-row-actions { display:flex;align-items:center;gap:4px; }
+.users-reference-page .user-row-actions button { width:20px;height:24px;display:grid;place-items:center;padding:0;border:0;background:transparent;cursor:pointer; }
+.users-reference-page .user-row-actions img { width:16px;height:16px;display:block; }
 .users-reference-page .filter-bar { margin-bottom:0;border:0;border-bottom:1px solid var(--agv-line-soft);border-radius:0; }
 .users-reference-page .modal-card .form-field select { min-height:40px; }
 .users-reference-page .reset-note { font-size:14px; }

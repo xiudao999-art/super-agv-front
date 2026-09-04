@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Bell, DocumentChecked, Fold, UserFilled } from '@element-plus/icons-vue'
+import { Fold, UserFilled } from '@element-plus/icons-vue'
 import { activeMenuForRoute, navigation } from '../config/navigation'
 
 const route = useRoute()
@@ -56,14 +56,14 @@ function logout() {
       <el-header class="topbar">
         <div class="topbar-title">
           <el-button class="mobile-menu-button" text :icon="Fold" @click="mobileMenu = true" />
-          <span class="topbar-title-icon"><el-icon><Fold /></el-icon></span>
+          <span class="topbar-title-icon"><img src="/assets/topbar/breadcrumb.svg" alt=""></span>
           <span v-if="sectionTitle" class="breadcrumb-section">{{ sectionTitle }}</span>
           <span v-if="sectionTitle" class="breadcrumb-separator">/</span>
           <span>{{ title }}</span>
         </div>
         <div class="topbar-actions">
-          <el-button round :icon="DocumentChecked" @click="statusVisible = true">状态说明</el-button>
-          <el-button round :icon="Bell" @click="alertsVisible = true">异常提醒</el-button>
+          <el-button round @click="statusVisible = true"><img class="topbar-action-icon" src="/assets/topbar/status.svg" alt="">状态说明</el-button>
+          <el-button round @click="alertsVisible = true"><img class="topbar-action-icon" src="/assets/topbar/warning.svg" alt="">异常提醒</el-button>
           <el-dropdown trigger="click">
             <button class="user-chip">
               <el-avatar :size="32" :icon="UserFilled" />

@@ -64,14 +64,16 @@ body { color: var(--agv-ink); background: var(--agv-canvas); }
 .topbar { position: sticky; top: 0; z-index: 20; height: 56px !important; padding: 0 20px; border-bottom: 1px solid var(--agv-line-soft); background: rgb(255 255 255 / 96%); backdrop-filter: blur(12px); }
 .topbar-title { gap: 12px; color: var(--agv-ink); font-size: 14px; font-weight: 650; }
 .topbar-title-icon { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 7px; background: #f2f5f7; }
-.topbar-title-icon .el-icon { font-size: 16px; }
+.topbar-title-icon img { width: 16px; height: 16px; display: block; }
 .breadcrumb-section { color: var(--agv-text-muted); font-weight: 400; }
 .breadcrumb-separator { color: var(--agv-line); font-weight: 400; }
 .menu-figma-icon { width: 20px; height: 20px; display: inline-block; flex: 0 0 20px; background: currentColor; -webkit-mask: var(--menu-icon) center / 20px 20px no-repeat; mask: var(--menu-icon) center / 20px 20px no-repeat; }
 .app-sidebar .el-menu-item,
 .mobile-nav-drawer .el-menu-item { gap: 8px; }
 .topbar-actions { gap: 8px; }
-.topbar-actions .el-button { min-height: 34px; margin: 0; padding: 0 13px; border-color: var(--agv-line); border-radius: 18px; font-size: 13px; box-shadow: none; }
+.topbar-actions .el-button { min-height: 34px; margin: 0; padding: 0 13px; gap: 6px; border-color: var(--agv-line); border-radius: 18px; font-size: 13px; box-shadow: none; }
+.topbar-actions .el-button > span { display: inline-flex; align-items: center; gap: 6px; }
+.topbar-action-icon { width: 18px; height: 18px; display: block; flex: 0 0 18px; }
 .user-chip { gap: 8px; font-size: 13px; font-weight: 650; }
 .user-chip .el-avatar { color: #fff; background: var(--agv-blue); }
 .app-content { background: var(--agv-canvas); }
