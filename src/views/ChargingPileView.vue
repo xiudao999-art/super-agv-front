@@ -43,19 +43,19 @@ function refreshPage() {
   refreshing.value = true
   window.setTimeout(() => {
     refreshing.value = false
-    ElMessage.success('充电桩状态已刷新')
+    ElMessage.success('充电桩与电池状态已刷新')
   }, 600)
 }
 </script>
 
 <template>
   <div class="page-view charging-pile-page">
-    <PageHeader class="page-head" title="充电桩配置" description="查看充电桩实时状态、电池电量及其与 AGV 的绑定关系">
+    <PageHeader class="page-head" title="充电桩与电池配置" description="统一查看充电桩运行状态、电池电量以及设备与 AGV 的绑定关系">
       <button class="primary-button" type="button" :disabled="refreshing" @click="refreshPage"><el-icon :class="{spinning:refreshing}"><Refresh /></el-icon>{{ refreshing ? '刷新中' : '刷新' }}</button>
     </PageHeader>
 
     <main class="page-canvas charging-content">
-      <section class="filter-panel" aria-label="充电桩筛选">
+      <section class="filter-panel" aria-label="充电桩与电池筛选">
         <div class="filters">
           <label><span>设备名称</span><input v-model="nameFilter" type="text" aria-label="设备名称" placeholder="请输入设备名称"></label>
           <label><span>设备状态</span><input v-model="statusFilter" type="text" aria-label="设备状态" placeholder="请输入设备状态"></label>
@@ -64,7 +64,7 @@ function refreshPage() {
       </section>
 
       <section class="resource-section">
-        <header><h2>充电桩</h2><p>卡片展示充电桩外观、运行状态和正在服务的 AGV</p></header>
+        <header><h2>充电桩配置</h2><p>查看充电桩位置、运行状态和当前服务的 AGV</p></header>
         <div class="card-grid">
           <article v-for="item in shownPiles" :key="item.code" :class="['resource-card',`tone-${item.tone}`]">
             <div class="card-title"><div class="identity"><span class="round-icon"><img src="/assets/charging-pile-figma.svg" alt=""></span><h3>{{ item.code }} {{ item.name }}</h3></div><span class="state-tag">{{ item.status }}</span></div>
@@ -76,7 +76,7 @@ function refreshPage() {
       </section>
 
       <section class="resource-section battery-section">
-        <header><h2>电池</h2><p>展示电池厂商、型号、当前电量和绑定 AGV；备用电池可以暂不绑定</p></header>
+        <header><h2>电池配置</h2><p>查看电池厂商、型号、当前电量和绑定 AGV；备用电池可以暂不绑定</p></header>
         <div class="card-grid">
           <article v-for="item in batteries" :key="item.code" :class="['resource-card',`tone-${item.tone}`]">
             <div class="card-title"><div class="identity"><span class="round-icon"><img src="/assets/battery-figma.svg" alt=""></span><h3>{{ item.code }}{{ item.name }}</h3></div><span class="state-tag">{{ item.status }}</span></div>

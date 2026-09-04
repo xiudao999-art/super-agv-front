@@ -20,8 +20,7 @@ export const navigation = [
       { path: '/config/map', label: '地图信息', icon: menuIcon('map') },
       { path: '/config/stations', label: '机台与点位', icon: menuIcon('location') },
       { path: '/config/peripherals', label: '外设设备', icon: menuIcon('peripheral') },
-      { path: '/config/charging-piles', label: '充电桩配置', icon: menuIcon('charging') },
-      { path: '/config/batteries', label: '电池配置', icon: menuIcon('battery') },
+      { path: '/config/charging-piles', label: '充电桩与电池配置', icon: menuIcon('charging') },
       { path: '/workflows/processes', label: '流程与动作', icon: menuIcon('process') },
     ],
   },
@@ -45,6 +44,7 @@ export const navigation = [
 
 export const activeMenuForRoute = {
   '/config/charging': '/config/charging-piles',
+  '/config/batteries': '/config/charging-piles',
   '/orders/detail': '/orders',
   '/dispatch/carriers': '/dispatch/storage',
   '/dispatch/storage-types': '/dispatch/storage',

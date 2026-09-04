@@ -8,7 +8,6 @@ import StorageResourceView from '../views/StorageResourceView.vue'
 import ConflictsView from '../views/ConflictsView.vue'
 import DeviceDebugView from '../views/DeviceDebugView.vue'
 import MapConfigView from '../views/MapConfigView.vue'
-import ChargingView from '../views/ChargingView.vue'
 import ChargingPileView from '../views/ChargingPileView.vue'
 import TemplatesView from '../views/TemplatesView.vue'
 import WorkflowEditorView from '../views/WorkflowEditorView.vue'
@@ -46,8 +45,8 @@ const routes = [
       { path: 'config/stations', name: 'stations', component: StationsView, meta: { title: '机台与点位' } },
       { path: 'config/peripherals', name: 'peripherals', component: PeripheralResourcesView, meta: { title: '外设设备' } },
       { path: 'config/charging', redirect: '/config/charging-piles' },
-      { path: 'config/charging-piles', name: 'charging-piles', component: ChargingPileView, meta: { title: '充电桩配置' } },
-      { path: 'config/batteries', name: 'batteries', component: ChargingView, props: { mode: 'batteries' }, meta: { title: '电池配置' } },
+      { path: 'config/charging-piles', name: 'charging-piles', component: ChargingPileView, meta: { title: '充电桩与电池配置' } },
+      { path: 'config/batteries', redirect: '/config/charging-piles' },
       { path: 'config/passage-rules', name: 'passage-rules', component: LabConfigResourceView, props: { mode: 'passageRules' }, meta: { title: '通行规则' } },
       { path: 'workflows/processes', name: 'processes', component: ProcessesView, meta: { title: '流程与动作' } },
       { path: 'workflows/templates', name: 'templates', component: TemplatesView, meta: { title: '流程模板' } },
