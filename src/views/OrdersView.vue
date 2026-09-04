@@ -2,7 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
-import { createResource, deleteResource, listResource, listResourcePage } from '../api/agv'
+import { createManualOrder, deleteResource, listResource, listResourcePage } from '../api/agv'
 import PaginationBar from '../components/PaginationBar.vue'
 
 const router = useRouter()
@@ -26,7 +26,7 @@ const toastMessage = ref('')
 let toastTimer
 const rows = ref([])
 const workflows = ref([])
-const form = reactive({ upstreamOrderNo: '', source: 'MANUAL', priority: 1, tasks: [{ taskName: '任务 1', flowTemplateId: '' }] })
+const form = reactive({ upstreamOrderNo: '', systemOrderNo: '', source: '', priority: '', flowTemplateId: '' })
 
 const statusMeta = {
   QUEUED: { label: '排队中', className: 'waiting' },
@@ -37,12 +37,6 @@ const statusMeta = {
 }
 
 const pageCount = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)))
-const flowState = computed(() => workflowLoading.value
-  ? '正在加载流程…'
-  : workflowError.value
-    ? '流程加载失败'
-    : workflows.value.length ? `已加载 ${workflows.value.length} 个流程` : '暂无可用流程')
-
 function statusInfo(value) {
   return statusMeta[value] || { label: value || '-', className: 'cancelled' }
 }
@@ -80,9 +74,10 @@ function reset() {
 
 function resetCreateForm() {
   form.upstreamOrderNo = ''
-  form.source = 'MANUAL'
-  form.priority = 1
-  form.tasks = [{ taskName: '任务 1', flowTemplateId: '' }]
+  form.systemOrderNo = ''
+  form.source = ''
+  form.priority = ''
+  form.flowTemplateId = ''
   createFeedback.value = ''
 }
 
@@ -100,17 +95,6 @@ function closeCreate() {
   createFeedback.value = ''
   document.body.style.overflow = ''
   nextTick(() => modalTrigger.value?.focus?.())
-}
-
-function addTask() {
-  form.tasks.push({ taskName: `任务 ${form.tasks.length + 1}`, flowTemplateId: '' })
-}
-
-function changeTaskCount(event) {
-  const value = typeof event === 'object' ? event.target.value : event
-  const count = Math.max(1, Math.min(10, Number(value) || 1))
-  while (form.tasks.length < count) addTask()
-  if (form.tasks.length > count) form.tasks.splice(count)
 }
 
 async function loadOrders() {
@@ -153,21 +137,34 @@ async function submit() {
     createFeedback.value = '请填写订单号'
     return
   }
+  if (!form.systemOrderNo.trim()) {
+    createFeedback.value = '请填写系统订单号'
+    return
+  }
+  if (!form.source.trim()) {
+    createFeedback.value = '请填写订单来源'
+    return
+  }
+  const priority = Number(String(form.priority).replace(/^P/i, ''))
+  if (!Number.isInteger(priority) || priority < 1 || priority > 4) {
+    createFeedback.value = '优先级请输入 P1 至 P4'
+    return
+  }
   if (!workflows.value.length) {
     createFeedback.value = workflowError.value ? `流程加载失败：${workflowError.value}` : '暂无可用流程，无法创建订单'
     return
   }
-  if (form.tasks.some((task) => !task.taskName.trim() || !Number(task.flowTemplateId))) {
-    createFeedback.value = '请完整填写每个任务的名称并选择流程'
+  if (!Number(form.flowTemplateId)) {
+    createFeedback.value = '请选择流程'
     return
   }
   submitting.value = true
   try {
-    await createResource('orders', {
+    await createManualOrder({
       upstreamOrderNo: form.upstreamOrderNo.trim(),
-      source: form.source,
-      priority: Number(form.priority),
-      tasks: form.tasks.map((task, index) => ({ taskName: task.taskName.trim(), taskSeq: index + 1, flowTemplateId: Number(task.flowTemplateId) })),
+      source: form.source.trim(),
+      priority,
+      tasks: [{ taskName: form.systemOrderNo.trim() || form.upstreamOrderNo.trim(), taskSeq: 1, flowTemplateId: Number(form.flowTemplateId) }],
     })
     const orderNo = form.upstreamOrderNo.trim()
     submitting.value = false
@@ -287,28 +284,19 @@ onUnmounted(() => {
 
     <div v-if="createVisible" class="modal-overlay open" @click.self="closeCreate">
       <section class="create-order-modal" role="dialog" aria-modal="true" aria-labelledby="createOrderTitle" tabindex="-1">
-        <header class="create-order-header"><h2 id="createOrderTitle">手动创建订单</h2><p>填写订单信息并为每个任务选择流程</p></header>
+        <header class="create-order-header"><h2 id="createOrderTitle">手动创建</h2><button type="button" aria-label="关闭" @click="closeCreate"><img src="/assets/list-icons/order-create-close.svg" alt=""></button></header>
         <form @submit.prevent="submit">
           <div class="create-order-body">
             <div class="create-order-grid">
               <label class="create-field"><span>订单号</span><input ref="createOrderInput" v-model="form.upstreamOrderNo" maxlength="100" autocomplete="off" required placeholder="请输入订单号"></label>
-              <label class="create-field"><span>来源</span><select v-model="form.source" required><option v-for="item in ['MANUAL','MES','LIMS','UPSTREAM']" :key="item" :value="item">{{ item }}</option></select></label>
-              <label class="create-field"><span>优先级</span><select v-model="form.priority" required><option :value="1">1（最高）</option><option :value="2">2</option><option :value="3">3</option><option :value="4">4（最低）</option></select></label>
-              <label class="create-field"><span>任务数</span><input :value="form.tasks.length" type="number" min="1" max="10" step="1" required @input="changeTaskCount"></label>
+              <label class="create-field"><span>系统订单号</span><input v-model="form.systemOrderNo" maxlength="100" required placeholder="请输入系统订单号"></label>
+              <label class="create-field"><span>来源</span><input v-model="form.source" maxlength="50" required placeholder="请输入订单来源"></label>
+              <label class="create-field"><span>优先级</span><input v-model="form.priority" maxlength="10" required placeholder="请输入 P1-P4"></label>
+              <label class="create-field"><span>选择流程</span><span class="create-flow-select"><select v-model="form.flowTemplateId" required :disabled="workflowLoading || !workflows.length"><option value="">{{ workflowLoading ? '正在加载流程…' : '请选择' }}</option><option v-for="workflow in workflows" :key="workflow.id" :value="workflow.id">{{ workflow.flowName || workflow.name || '未命名流程' }}</option></select><img src="/assets/list-icons/order-create-arrow.svg" alt=""></span></label>
             </div>
-            <section class="create-tasks" aria-labelledby="createTasksTitle">
-              <div class="create-tasks-heading"><h3 id="createTasksTitle">任务明细</h3><span>{{ flowState }}</span></div>
-              <div class="create-task-rows">
-                <div v-for="(task, index) in form.tasks" :key="index" class="create-task-row">
-                  <span class="task-sequence">#{{ index + 1 }}</span>
-                  <label class="task-field"><span>任务名称</span><input v-model="task.taskName" maxlength="100" required></label>
-                  <label class="task-field"><span>流程</span><select v-model="task.flowTemplateId" required :disabled="workflowLoading || !workflows.length"><option value="">{{ workflowLoading ? '正在加载流程…' : '请选择流程' }}</option><option v-for="workflow in workflows" :key="workflow.id" :value="workflow.id">{{ workflow.flowName || workflow.name || '未命名流程' }} · {{ workflow.flowNumber || workflow.number || '-' }}{{ workflow.templateName ? ` · ${workflow.templateName}` : '' }} · ID {{ workflow.id }}</option></select></label>
-                </div>
-              </div>
-            </section>
             <p v-if="createFeedback" class="create-order-feedback" role="alert">{{ createFeedback }}</p>
           </div>
-          <div class="modal-actions create-order-actions"><button class="modal-close" type="button" @click="closeCreate">取消</button><button class="create-order-submit modal-primary" type="submit" :disabled="submitting || workflowLoading || !workflows.length">{{ submitting ? '创建中…' : '创建订单' }}</button></div>
+          <div class="modal-actions create-order-actions"><button class="modal-close" type="button" @click="closeCreate">取消</button><button class="create-order-submit modal-primary" type="submit" :disabled="submitting || workflowLoading || !workflows.length">{{ submitting ? '保存中…' : '保存' }}</button></div>
         </form>
       </section>
     </div>
@@ -399,16 +387,21 @@ onUnmounted(() => {
     .modal-overlay.open,.alert-overlay.open { opacity: 1; }
     .modal-overlay { display: grid; place-items: center; padding: 24px; }
     .status-modal,.create-order-modal,.order-detail-modal { width: min(600px, calc(100vw - 32px)); max-height: calc(100vh - 48px); overflow: auto; padding: 24px; border-radius: 16px; background: #f5f7f9; box-shadow: 0 22px 70px rgba(0,0,0,.22); transform: translateY(10px) scale(.985); transition: transform .18s ease; }
-    .create-order-modal { width: min(760px, calc(100vw - 32px)); overflow: hidden; background: #fff; }
+    .create-order-modal { width: min(600px, calc(100vw - 32px)); overflow: hidden; padding: 0; background: #fff; }
     .modal-overlay.open .status-modal,.modal-overlay.open .create-order-modal,.modal-overlay.open .order-detail-modal { transform: none; }
     .status-modal h2 { margin: 0 0 18px; font-size: 20px; }
-    .create-order-header h2 { margin: 0 0 6px; font-size: 20px; }
-    .create-order-header p { margin: 0 0 20px; color: var(--muted); font-size: 12px; }
-    .create-order-body { max-height: 60vh; overflow-y: auto; padding-right: 5px; overscroll-behavior: contain; }
-    .create-order-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
-    .create-field { min-width: 0; display: grid; gap: 7px; color: #27384a; font-size: 12px; font-weight: 650; }
-    .create-field input,.create-field select,.task-field input,.task-field select { width: 100%; height: 40px; padding: 0 11px; border: 1px solid #dfe4e8; border-radius: 8px; outline: 0; color: var(--ink); background: #fff; font-size: 13px; font-weight: 400; }
-    .create-field input:focus,.create-field select:focus,.task-field input:focus,.task-field select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(21,119,210,.1); }
+    .create-order-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px 20px 0; }
+    .create-order-header h2 { margin: 0; color: #081829; font-size: 16px; font-weight: 600; line-height: 24px; }
+    .create-order-header button { width: 24px; height: 24px; display: grid; place-items: center; flex: 0 0 24px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+    .create-order-header button img { width: 24px; height: 24px; display: block; }
+    .create-order-body { max-height: 65vh; overflow-y: auto; padding: 16px 20px 20px; overscroll-behavior: contain; }
+    .create-order-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .create-field { min-width: 0; display: grid; gap: 8px; color: rgba(8,24,41,.48); font-size: 14px; font-weight: 400; line-height: 20px; }
+    .create-field input,.create-field select { width: 100%; height: 36px; padding: 0 12px; border: 1px solid rgba(8,24,41,.1); border-radius: 8px; outline: 0; color: #081829; background: #fff; font-size: 14px; font-weight: 400; line-height: 20px; }
+    .create-field input:focus,.create-field select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(21,119,210,.1); }
+    .create-flow-select { position: relative; display: block; }
+    .create-flow-select select { padding-right: 36px; appearance: none; cursor: pointer; }
+    .create-flow-select > img { position: absolute; top: 10px; right: 12px; width: 16px; height: 16px; display: block; pointer-events: none; }
     .create-tasks { margin-top: 20px; }
     .create-tasks-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
     .create-tasks-heading h3 { margin: 0; font-size: 14px; }
@@ -418,7 +411,9 @@ onUnmounted(() => {
     .task-sequence { align-self: center; color: var(--blue-strong); font-size: 13px; font-weight: 700; text-align: center; }
     .task-field { min-width: 0; display: grid; gap: 6px; color: var(--muted); font-size: 11px; }
     .create-order-feedback { margin: 14px 0 0; padding: 10px 12px; border-radius: 8px; color: var(--red); background: #fff5f4; font-size: 12px; }
-    .create-order-actions { gap: 10px; }
+    .create-order-actions { gap: 10px; margin: 0; padding: 24px 12px 16px; border-top: 1px solid rgba(8,24,41,.06); }
+    .create-order-actions .modal-close,.create-order-actions .create-order-submit { min-height: 36px; padding: 8px 16px; font-size: 14px; font-weight: 500; line-height: 20px; }
+    .create-order-actions .modal-close { background: rgba(8,24,41,.04); }
     .order-detail-modal { width: min(720px, calc(100vw - 32px)); display: flex; flex-direction: column; overflow: hidden; padding: 0; background: #fff; }
     .order-detail-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 20px 12px; }
     .order-detail-header h2 { margin: 0; font-size: 17px; line-height: 24px; }
@@ -478,7 +473,8 @@ onUnmounted(() => {
       .create-order-btn { align-self: flex-start; }
       .pagination { align-items: flex-start; flex-direction: column; }
       .page-controls { width: 100%; overflow-x: auto; padding-bottom: 4px; }
-      .status-modal,.create-order-modal { padding: 18px; }
+      .status-modal { padding: 18px; }
+      .create-order-modal { padding: 0; }
       .order-detail-modal { padding: 0; }
       .create-order-grid,.create-task-row { grid-template-columns: 1fr; }
       .order-detail-grid { grid-template-columns: 1fr; }

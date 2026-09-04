@@ -187,6 +187,11 @@ export async function getActions() {
   return unwrap(await http.get('/api/actions'))
 }
 
+export async function createManualOrder(payload) {
+  if (useMockApi) return createRecord('orders', payload)
+  return unwrap(await http.post('/api/orders', payload))
+}
+
 export async function listResourcePage(name, params = {}) {
   if (useMockApi || !resources[name]) {
     const allRows = normalizeRows(name, clone(collection(name)))
