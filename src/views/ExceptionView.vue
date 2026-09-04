@@ -1,218 +1,832 @@
 <script setup>
-import { computed, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import PageHeader from '../components/PageHeader.vue'
-import { appState, updateRecord } from '../stores/appStore'
-
-const props = defineProps({
-  mode: { type: String, default: 'anomalies' },
-})
-
-const router = useRouter()
-const keyword = ref('')
-const level = ref('全部')
-const status = ref('全部')
-const detailVisible = ref(false)
-const actionVisible = ref(false)
-const current = ref(null)
-const actionForm = reactive({ owner: '陈工', note: '', action: '继续任务', conclusion: '待确认' })
-const recoveryMode = ref('继续运行')
-const resultNote = ref('')
-
+import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
+import PageHeader from "../components/PageHeader.vue";
+import { appState } from "../stores/appStore";
+const props = defineProps({ mode: { type: String, default: "anomalies" } });
+const router = useRouter(),
+  keyword = ref(""),
+  selected = ref(null),
+  page = ref(1),
+  pageSize = ref(20);
 const tabs = [
-  { label: '当前异常', path: '/operations/anomalies', mode: 'anomalies' },
-  { label: '历史告警', path: '/operations/alarms', mode: 'alarms' },
-  { label: '恢复任务', path: '/operations/recovery', mode: 'recoveryTasks' },
-]
-
-const metadata = computed(() => ({
-  anomalies: { title: '历史异常与恢复', listTitle: '当前异常', description: '集中处理设备、任务与资源异常，跟踪责任人及恢复进度。' },
-  alarms: { title: '历史异常与恢复', listTitle: '告警记录', description: '查询已关闭或已恢复的告警事件与处理结果。' },
-  recoveryTasks: { title: '历史异常与恢复', listTitle: '恢复检查记录', description: '核对物理状态和系统状态，安全恢复中断的运输任务。' },
-}[props.mode]))
-
-const sourceRows = computed(() => appState[props.mode] || [])
+  { label: "当前异常", path: "/operations/anomalies", mode: "anomalies" },
+  { label: "告警记录", path: "/operations/alarms", mode: "alarms" },
+  {
+    label: "任务恢复与状态核对",
+    path: "/operations/recovery",
+    mode: "recoveryTasks",
+  },
+];
+const anomalyDesignRows = [
+  {
+    id: "D-01",
+    objectName: "贴标机台进样许可",
+    title: "机台允许进样事件等待超过流程配置的 30秒",
+    eventCode: "TASK-PERMIT-TIMEOUT",
+    robot: "AGV-01（孔板机型）",
+    location: "ARM.PLACE @ 培养箱-窗口2",
+    disposal: "L3 现场人工",
+    disposalTone: "disposal-l3",
+    type: "任务执行",
+    time: "2026.08.31 14:00:00",
+    status: "待处理",
+  },
+  {
+    id: "DEVICE-B-DOCK",
+    objectName: "立库 A 第 4 层 / 07 位",
+    title: "系统记录为空，但库位传感器检测有物",
+    eventCode: "LOCATION-STATE-MISMATCH",
+    robot: "AGV-02（摆臂机型）",
+    location: "ARM.PICK @ 智能货架-B12",
+    disposal: "L2 远程人工",
+    disposalTone: "disposal-l2",
+    type: "库位一致性",
+    time: "2026.08.31 14:00:00",
+    status: "处理中",
+  },
+  {
+    id: "DEVICE-BPLACE-1",
+    displayId: "DEVICE-BPLACE",
+    objectName: "视觉 VISION-01",
+    title: "视觉设备在 60 秒内出现 3 次短时断连",
+    eventCode: "DEVICE-LINK-UNSTABLE",
+    robot: "AGV-01（孔板机型）",
+    location: "DOCK.TRANSFER @ 窗口暂存架-W1",
+    disposal: "L1 自动降级",
+    disposalTone: "disposal-l1",
+    type: "设备通信",
+    time: "2026.08.31 14:00:00",
+    status: "处理中",
+  },
+  {
+    id: "DEVICE-BPLACE-2",
+    displayId: "DEVICE-BPLACE",
+    objectName: "视觉 VISION-01",
+    title: "视觉设备在 60 秒内出现 3 次短时断连",
+    eventCode: "DEVICE-LINK-UNSTABLE",
+    robot: "AGV-03（孔板机型）",
+    location: "WAIT.PERMIT @ 静置综合台-窗口1",
+    disposal: "L1 自动降级",
+    disposalTone: "disposal-l1",
+    type: "设备通信",
+    time: "2026.08.31 14:00:00",
+    status: "处理中",
+  },
+  {
+    id: "DEVICE-BPLACE-3",
+    displayId: "DEVICE-BPLACE",
+    objectName: "视觉 VISION-01",
+    title: "视觉设备在 60 秒内出现 3 次短时断连",
+    eventCode: "DEVICE-LINK-UNSTABLE",
+    robot: "AGV-02（摆臂机型）",
+    location: "RFID.WRITE @ 智能货架-A07",
+    disposal: "L1 自动降级",
+    disposalTone: "disposal-l1",
+    type: "设备通信",
+    time: "2026.08.31 14:00:00",
+    status: "处理中",
+  },
+  {
+    id: "DEVICE-BPLACE-4",
+    displayId: "DEVICE-BPLACE",
+    objectName: "视觉 VISION-01",
+    title: "视觉设备在 60 秒内出现 3 次短时断连",
+    eventCode: "DEVICE-LINK-UNSTABLE",
+    robot: "AGV-02（摆臂机型）",
+    location: "RFID.WRITE @ 智能货架-A07",
+    disposal: "L1 自动降级",
+    disposalTone: "disposal-l1",
+    type: "设备通信",
+    time: "2026.08.31 14:00:00",
+    status: "处理中",
+  },
+  {
+    id: "DEVICE-BPLACE-5",
+    displayId: "DEVICE-BPLACE",
+    objectName: "视觉 VISION-01",
+    title: "视觉设备在 60 秒内出现 3 次短时断连",
+    eventCode: "DEVICE-LINK-UNSTABLE",
+    robot: "AGV-02（摆臂机型）",
+    location: "RFID.WRITE @ 智能货架-A07",
+    disposal: "L1 自动降级",
+    disposalTone: "disposal-l1",
+    type: "设备通信",
+    time: "2026.08.31 14:00:00",
+    status: "处理中",
+  },
+];
+const sourceRows = computed(() =>
+  props.mode === "anomalies" ? anomalyDesignRows : appState[props.mode] || [],
+);
 const rows = computed(() => {
-  const query = keyword.value.trim().toLowerCase()
-  return sourceRows.value.filter((row) => {
-    const textMatched = !query || Object.values(row).join(' ').toLowerCase().includes(query)
-    const levelMatched = level.value === '全部' || row.level === level.value
-    const statusMatched = status.value === '全部' || row.status === status.value || row.consistency === status.value
-    return textMatched && levelMatched && statusMatched
-  })
-})
-
-const summary = computed(() => {
-  if (props.mode === 'recoveryTasks') {
-    return [
-      { label: '待恢复任务', value: sourceRows.value.length, tone: 'blue' },
-      { label: '状态一致', value: sourceRows.value.filter((item) => item.consistency === '一致').length, tone: 'green' },
-      { label: '需要核对', value: sourceRows.value.filter((item) => item.consistency !== '一致').length, tone: 'orange' },
-    ]
-  }
-  return [
-    { label: '事件总数', value: sourceRows.value.length, tone: 'blue' },
-    { label: '严重', value: sourceRows.value.filter((item) => item.level === '严重').length, tone: 'red' },
-    { label: props.mode === 'anomalies' ? '处理中' : '已恢复', value: sourceRows.value.filter((item) => ['处理中', '已恢复'].includes(item.status)).length, tone: 'green' },
-  ]
-})
-
-function tagType(value) {
-  if (['严重', '待处理', '不一致'].includes(value)) return 'danger'
-  if (['警告', '处理中', '待确认'].includes(value)) return 'warning'
-  if (['已确认', '已恢复', '已关闭', '一致'].includes(value)) return 'success'
-  return 'info'
+  const q = keyword.value.trim().toLowerCase();
+  return sourceRows.value.filter(
+    (row) => !q || Object.values(row).join(" ").toLowerCase().includes(q),
+  );
+});
+const current = computed(() => selected.value || rows.value[0] || null);
+function tone(value) {
+  if (["严重", "不一致"].includes(value)) return "error";
+  if (["警告", "待处理", "待人工核对", "待确认"].includes(value))
+    return "warning";
+  if (
+    ["已恢复", "已关闭", "一致", "补发完成", "可信", "已完成"].includes(value)
+  )
+    return "success";
+  return "info";
 }
-
-function showDetail(row) {
-  current.value = row
-  detailVisible.value = true
-}
-
-function showAction(row) {
-  current.value = row
-  actionForm.owner = row.owner && row.owner !== '未分配' ? row.owner : '陈工'
-  actionForm.note = ''
-  actionForm.action = row.action || '继续任务'
-  actionForm.conclusion = row.consistency || '待确认'
-  recoveryMode.value = '继续运行'
-  resultNote.value = ''
-  actionVisible.value = true
-}
-
-async function confirmAction(modeChoice = recoveryMode.value) {
-  if (props.mode === 'anomalies') {
-    updateRecord('anomalies', current.value.id, {
-      status: resultNote.value.trim() ? '已恢复' : '处理中',
-      owner: actionForm.owner,
-      recoveryMode: modeChoice,
-      result: resultNote.value || `${modeChoice}方案已确认`,
-    })
-  } else if (props.mode === 'recoveryTasks') {
-    updateRecord('recoveryTasks', current.value.id, {
-      consistency: actionForm.conclusion,
-      action: actionForm.action,
-    })
-  }
-  actionVisible.value = false
-  ElMessage.success('处理信息已保存')
-}
-
-async function closeAnomaly(row) {
-  await ElMessageBox.confirm(`确认将 ${row.code} 标记为已确认？`, '确认异常', { type: 'warning' })
-  updateRecord('anomalies', row.id, { status: '已确认', owner: row.owner === '未分配' ? '当前用户' : row.owner })
-  ElMessage.success('异常已确认')
+function selectRow(row) {
+  selected.value = row;
 }
 </script>
-
 <template>
-  <section class="page-view exception-reference-page">
-    <PageHeader class="page-head" :title="metadata.title" :description="metadata.description">
-      <template #actions>
-        <el-button @click="router.push('/operations/logs')">查看系统日志</el-button>
-        <el-button type="primary" @click="ElMessage.success('异常数据已刷新')">刷新数据</el-button>
-      </template>
-    </PageHeader>
-
-    <div class="subnav-tabs">
-      <button
-        v-for="tab in tabs"
-        :key="tab.path"
-        class="subnav-tab"
-        :class="{ active: tab.mode === mode }"
-        @click="router.push(tab.path)"
-      >
-        {{ tab.label }}
-      </button>
-    </div>
-
-    <div class="metric-grid metric-grid--three">
-      <article v-for="item in summary" :key="item.label" class="metric-card" :class="`metric-card--${item.tone}`">
-        <span>{{ item.label }}</span>
-        <strong>{{ item.value }}</strong>
-      </article>
-    </div>
-
-    <div class="content-card exception-list-card">
-      <div class="card-heading"><div><h3>{{ metadata.listTitle }}</h3><p>{{ mode === 'recoveryTasks' ? '恢复结果规则：物理状态、系统状态和任务检查点必须一致' : '点击详情查看完整事件与处置记录' }}</p></div></div>
-      <div class="filter-bar">
-        <el-input v-model="keyword" clearable placeholder="搜索编号、来源、任务或内容" class="filter-search" />
-        <el-select v-if="mode !== 'recoveryTasks'" v-model="level" class="filter-select">
-          <el-option v-for="item in ['全部', '严重', '警告', '提示']" :key="item" :label="`等级：${item}`" :value="item" />
-        </el-select>
-        <el-select v-model="status" class="filter-select">
-          <el-option
-            v-for="item in mode === 'recoveryTasks' ? ['全部', '一致', '不一致', '待确认'] : ['全部', '待处理', '处理中', '已确认', '已恢复', '已关闭']"
-            :key="item"
-            :label="`状态：${item}`"
-            :value="item"
-          />
-        </el-select>
+  <section class="page-view exception-design-page">
+    <PageHeader
+      class="page-head"
+      title="异常与恢复"
+      description="聚合异常原因、影响范围、恢复状态和人工处理建议"
+    />
+    <div class="exception-workspace">
+      <div class="exception-tabs" role="tablist">
+        <button
+          v-for="tab in tabs"
+          :key="tab.mode"
+          :class="['exception-tab', { active: tab.mode === mode }]"
+          type="button"
+          @click="router.push(tab.path)"
+        >
+          {{ tab.label }}
+        </button>
       </div>
-
-      <el-table v-if="mode !== 'recoveryTasks'" :data="rows" stripe>
-        <el-table-column prop="code" :label="mode === 'anomalies' ? '异常编号' : '告警编号'" min-width="178" />
-        <el-table-column prop="time" label="发生时间" min-width="168" />
-        <el-table-column label="等级" width="92">
-          <template #default="{ row }"><el-tag :type="tagType(row.level)" effect="light">{{ row.level }}</el-tag></template>
-        </el-table-column>
-        <el-table-column label="状态" width="105">
-          <template #default="{ row }"><el-tag :type="tagType(row.status)">{{ row.status }}</el-tag></template>
-        </el-table-column>
-        <el-table-column label="类型" min-width="130"><template #default="{ row }">{{ row.source.includes('AGV') ? '车辆异常' : row.source.includes('库位') ? '状态不一致' : '设备异常' }}</template></el-table-column>
-        <el-table-column prop="title" :label="mode === 'anomalies' ? '异常内容' : '告警内容'" min-width="250" show-overflow-tooltip />
-        <el-table-column prop="source" :label="mode === 'anomalies' ? '异常对象' : '来源模块'" min-width="135" />
-        <el-table-column v-if="mode === 'anomalies'" prop="object" label="关联对象" min-width="140" />
-        <template v-else><el-table-column label="异常对象" min-width="130"><template #default="{ row }">{{ row.source }}</template></el-table-column><el-table-column label="AGV" width="95"><template #default="{ row }">{{ row.source.startsWith('AGV') ? row.source : '-' }}</template></el-table-column></template>
-        <el-table-column v-if="mode === 'anomalies'" prop="owner" label="负责人" width="105" /><el-table-column v-else label="负责人" width="105"><template #default>系统</template></el-table-column>
-        <el-table-column label="操作" fixed="right" width="185">
-          <template #default="{ row }">
-              <TableActionButton kind="view" label="查看详情" @click="showDetail(row)"/>
-            <template v-if="mode === 'anomalies'">
-                <TableActionButton kind="edit" label="分派" @click="showAction(row)"/>
-                <TableActionButton v-if="row.status !== '已确认'" kind="toggle" label="确认" active @click="closeAnomaly(row)"/>
-            </template>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <el-table v-else :data="rows" stripe>
-        <el-table-column prop="task" label="检查编号" min-width="150" />
-        <el-table-column label="检查类型" min-width="150"><template #default>任务恢复状态核对</template></el-table-column>
-        <el-table-column prop="order" label="关联对象" min-width="180" />
-        <el-table-column prop="checkpoint" label="触发原因" min-width="190" />
-        <el-table-column label="当前结论" min-width="180"><template #default="{ row }"><div class="stacked-cell"><strong>{{ row.consistency }}</strong><span>{{ row.physical }} / {{ row.system }}</span></div></template></el-table-column>
-        <el-table-column label="一致性" width="100">
-          <template #default="{ row }"><el-tag :type="tagType(row.consistency)">{{ row.consistency }}</el-tag></template>
-        </el-table-column>
-        <el-table-column prop="action" label="建议动作" min-width="120" />
-        <el-table-column label="操作" fixed="right" width="135">
-          <template #default="{ row }">
-              <TableActionButton kind="view" label="检查结果" @click="showDetail(row)"/>
-              <TableActionButton kind="publish" label="发起检查" @click="showAction(row)"/>
-          </template>
-        </el-table-column>
-      </el-table>
+      <template v-if="mode === 'anomalies'"
+        ><div class="section-title">
+          <strong>当前异常</strong
+          ><span class="status-tag error">{{ rows.length }} 项处理</span>
+        </div>
+        <div class="table-wrap anomaly-table">
+          <table>
+            <thead>
+              <tr>
+                <th>异常编号</th>
+                <th>异常对象</th>
+                <th>异常内容</th>
+                <th>异常内容</th>
+                <th>处置级别</th>
+                <th>异常类型</th>
+                <th>发生时间</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in rows" :key="row.id">
+                <td>{{ row.displayId || row.id }}</td>
+                <td>{{ row.objectName }}</td>
+                <td>
+                  <strong>{{ row.title }}</strong
+                  ><small>{{ row.eventCode }}</small>
+                </td>
+                <td>
+                  <strong>{{ row.robot }}</strong
+                  ><small>{{ row.location }}</small>
+                </td>
+                <td>
+                  <span :class="['status-tag', row.disposalTone]">{{
+                    row.disposal
+                  }}</span>
+                </td>
+                <td>{{ row.type }}</td>
+                <td>{{ row.time }}</td>
+                <td>
+                  <span :class="['status-tag', tone(row.status)]">{{
+                    row.status
+                  }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span>共计 {{ rows.length }} 条数据</span>
+          <div>
+            <button>‹</button><button class="active">1</button><button>2</button
+            ><button>3</button><button>4</button><button>5</button
+            ><button>•••</button><button>98</button><button>›</button
+            ><select v-model="pageSize">
+              <option :value="10">10 条/页</option>
+              <option :value="20">20 条/页</option>
+              <option :value="50">50 条/页</option></select
+            ><span>跳至</span><input v-model="page" /><span>页</span>
+          </div>
+        </div></template
+      >
+      <template v-else-if="mode === 'alarms'"
+        ><div class="split">
+          <section class="panel">
+            <h3>告警记录</h3>
+            <div class="search">
+              <img src="/assets/list-icons/alarm-search.svg" alt="" />
+              <input v-model="keyword" placeholder="搜索记录" />
+            </div>
+            <button
+              v-for="row in rows"
+              :key="row.id"
+              :class="['record', { selected: current?.id === row.id }]"
+              @click="selectRow(row)"
+            >
+              <span
+                ><strong>{{ row.title }}</strong
+                ><small>{{ row.time.split(" ")[0] }} · 记录完整</small></span
+              ><i :class="['status-tag', tone(row.status)]">{{ row.status }}</i>
+            </button>
+          </section>
+          <aside class="panel details">
+            <h3>详情</h3>
+            <template v-if="current"
+              ><article>
+                <strong>关联 ID</strong><small>TRACE-20260816-1028</small>
+              </article>
+              <article>
+                <div>
+                  <strong>操作者/来源</strong
+                  ><span :class="['status-tag', tone(current.status)]">{{
+                    current.status
+                  }}</span>
+                </div>
+                <small>调度服务 / 陈工</small>
+              </article>
+              <article>
+                <div>
+                  <strong>证据</strong
+                  ><span class="status-tag success">可信</span>
+                </div>
+                <small>请求、状态、结果和审计链完整</small>
+              </article></template
+            >
+          </aside>
+        </div></template
+      >
+      <template v-else
+        ><div class="recovery-head">
+          <div>
+            <strong>恢复检查记录</strong
+            ><small
+              >只处理重启、中断、执行结果不确定或系统记录与现场不一致的情况</small
+            >
+          </div>
+          <button @click="ElMessage.success('恢复检查已发起')">
+            <img
+              src="/assets/list-icons/recovery-check.svg"
+              alt=""
+            />发起恢复检查
+          </button>
+        </div>
+        <div class="table-wrap recovery-table">
+          <table>
+            <thead>
+              <tr>
+                <th>检查编号</th>
+                <th>检查类型</th>
+                <th>关联对象</th>
+                <th>触发原因</th>
+                <th>当前状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(row, index) in rows"
+                :key="row.id"
+                :class="{ selected: current?.id === row.id }"
+                @click="selectRow(row)"
+              >
+                <td>REC-20260816-00{{ 3 - index }}</td>
+                <td>
+                  {{
+                    index === 0
+                      ? "系统重启恢复"
+                      : index === 1
+                        ? "库位状态核对"
+                        : "上游结果补发"
+                  }}
+                </td>
+                <td>{{ row.task }}</td>
+                <td>{{ row.checkpoint }}</td>
+                <td>
+                  <span
+                    :class="[
+                      'status-tag',
+                      tone(
+                        index === 0
+                          ? '可自动继续'
+                          : index === 1
+                            ? '待人工核对'
+                            : '补发完成',
+                      ),
+                    ]"
+                    >{{
+                      index === 0
+                        ? "可自动继续"
+                        : index === 1
+                          ? "待人工核对"
+                          : "补发完成"
+                    }}</span
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="recovery-bottom">
+          <section class="panel process">
+            <div class="process-head">
+              <div>
+                <h3>REC-20260816-003·处理过程</h3>
+                <small>系统重启恢复 / {{ current?.task }}</small>
+              </div>
+              <span class="status-tag info">可自动继续</span>
+            </div>
+            <ol>
+              <li
+                v-for="(step, index) in [
+                  '冻结影响范围',
+                  '读取系统检查点',
+                  '采集现场与上游状态',
+                  '比对并判断',
+                  '执行恢复结果',
+                ]"
+                :key="step"
+              >
+                <b>{{ index + 1 }}</b
+                ><span
+                  ><strong>{{ step }}</strong
+                  ><small>{{
+                    index === 0
+                      ? "暂停相关任务，锁定涉及的机器人、库位和机台，避免状态继续变化"
+                      : index === 1
+                        ? "等待机台许可"
+                        : index === 2
+                          ? "AGV-01 位于 W-B01，载具 TRAY-000238 在 C01；MES 订单处理中，完成回调未发送"
+                          : index === 3
+                            ? "现场状态与检查点一致，可继续等待许可"
+                            : "安全继续、补记完成、补发通知，或转待人工扫码与管理员审批"
+                  }}</small></span
+                ><i
+                  :class="[
+                    'status-tag',
+                    index < 3 ? 'success' : index === 3 ? 'info' : 'warning',
+                  ]"
+                  >{{
+                    index < 3
+                      ? "已完成"
+                      : index === 3
+                        ? "可自动继续"
+                        : "按规则执行"
+                  }}</i
+                >
+              </li>
+            </ol>
+          </section>
+          <aside class="panel rules">
+            <h3>恢复结果规则</h3>
+            <article
+              v-for="item in [
+                ['确认未执行', '从最近安全检查点继续'],
+                ['确认已完成', '补记结果并进入下一步，不重复动作'],
+                [
+                  '状态无法确定',
+                  '保持锁定，要求操作员现场扫码或确认',
+                  '人工处理',
+                ],
+                [
+                  '需要改物理记录',
+                  '管理员审批后修改载具位置或库位占用',
+                  '需审批',
+                ],
+                ['仅回调未确认', '使用同一幂等键补发通知，不重复物理动作'],
+              ]"
+              :key="item[0]"
+            >
+              <div class="rule-head">
+                <strong>{{ item[0] }}</strong>
+                <span v-if="item[2]" class="status-tag gray">{{ item[2] }}</span>
+              </div>
+              <small>{{ item[1] }}</small>
+            </article>
+          </aside>
+        </div></template
+      >
     </div>
-
-    <el-dialog v-model="detailVisible" :title="mode === 'recoveryTasks' ? '恢复检查结果' : mode === 'alarms' ? '告警详情' : '异常详情'" width="760px" class="reference-dialog">
-      <el-descriptions v-if="current" :column="2" border>
-        <el-descriptions-item v-for="(value, key) in current" :key="key" :label="key">{{ value }}</el-descriptions-item>
-      </el-descriptions>
-      <div v-if="mode === 'anomalies'" class="exception-flow"><span class="done">异常上报</span><i /><span :class="{ done: current?.status !== '待处理' }">方案确认</span><i /><span :class="{ done: current?.status === '已恢复' }">处理完成</span></div>
-      <template #footer><el-button type="primary" @click="detailVisible = false">关闭</el-button></template>
-    </el-dialog>
-
-    <el-dialog v-model="actionVisible" :title="mode === 'recoveryTasks' ? '发起恢复检查' : '异常恢复处置'" width="620px" class="reference-dialog">
-      <template v-if="mode === 'anomalies'"><p class="dialog-description">选择安全处置方式，确认后由负责人执行并提交最终处理结果。</p><div class="recovery-options"><button :class="['recovery-option',{selected:recoveryMode==='继续运行'}]" @click="recoveryMode='继续运行'"><strong>继续运行</strong><span>确认环境安全后，从当前检查点继续</span></button><button :class="['recovery-option',{selected:recoveryMode==='人工处置'}]" @click="recoveryMode='人工处置'"><strong>人工处置</strong><span>暂停任务，由现场人员完成状态核对</span></button></div><el-form label-position="top" class="exception-action-form"><el-form-item label="负责人"><el-select v-model="actionForm.owner" class="full-width"><el-option v-for="name in ['陈工', '王工', '当前用户']" :key="name" :label="name" :value="name" /></el-select></el-form-item><el-form-item label="处理方案说明"><el-input v-model="actionForm.note" type="textarea" :rows="3" placeholder="请输入处置步骤或安全确认内容" /></el-form-item><el-form-item label="处理结果（完成后填写）"><el-input v-model="resultNote" type="textarea" :rows="3" placeholder="填写后提交将把异常标记为已恢复" /></el-form-item></el-form></template>
-      <el-form v-else label-position="top" class="two-column-form"><el-form-item label="检查类型"><el-select model-value="任务恢复状态核对"><el-option label="任务恢复状态核对" value="任务恢复状态核对" /><el-option label="载具位置核对" value="载具位置核对" /></el-select></el-form-item><el-form-item label="关联对象"><el-input :model-value="current?.order" disabled /></el-form-item><el-form-item label="触发原因" class="form-wide"><el-input :model-value="current?.checkpoint" disabled /></el-form-item><el-form-item label="恢复动作"><el-select v-model="actionForm.action"><el-option v-for="name in ['继续任务', '重置检查点', '补录反馈', '取消任务']" :key="name" :label="name" :value="name" /></el-select></el-form-item><el-form-item label="当前结论"><el-select v-model="actionForm.conclusion"><el-option label="一致" value="一致" /><el-option label="不一致" value="不一致" /><el-option label="待确认" value="待确认" /></el-select></el-form-item><el-form-item label="检查说明" class="form-wide"><el-input v-model="actionForm.note" type="textarea" :rows="4" placeholder="请输入物理状态与系统状态核对结果" /></el-form-item></el-form>
-      <template #footer><el-button @click="actionVisible = false">取消</el-button><el-button v-if="mode === 'anomalies'" @click="confirmAction('人工处置')">确认人工处置方案</el-button><el-button type="primary" @click="confirmAction(mode === 'anomalies' ? '继续运行' : recoveryMode)">{{ mode === 'anomalies' ? (resultNote ? '提交处理结果' : '确认继续方案') : '发起检查' }}</el-button></template>
-    </el-dialog>
   </section>
 </template>
-
 <style scoped>
-.exception-reference-page > .page-head { padding:17px 20px; }
-@media (max-width:760px) { .exception-reference-page > .page-head { padding:14px; } }
+.exception-design-page {
+  min-width: 0;
+  padding: 0 !important;
+  overflow-x: hidden;
+}
+.exception-design-page > .page-head {
+  padding: 17px 20px;
+}
+.exception-workspace {
+  width: calc(100% - 48px);
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 24px 24px 0;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.exception-tabs {
+  height: 77px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 1px solid rgba(8, 24, 41, 0.06);
+}
+.exception-tab {
+  height: 32px;
+  padding: 0 16px;
+  border: 0;
+  background: #f5f6f7;
+  color: #081829;
+  font-size: 14px;
+  cursor: pointer;
+}
+.exception-tab:first-child {
+  border-radius: 8px 0 0 8px;
+}
+.exception-tab:last-child {
+  border-radius: 0 8px 8px 0;
+}
+.exception-tab.active {
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(21, 27, 41, 0.09);
+  font-weight: 600;
+}
+.section-title {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+.section-title strong,
+.panel h3,
+.recovery-head strong {
+  font-size: 14px;
+}
+.table-wrap {
+  margin: 0 20px;
+  border: 1px solid #f5f6f7;
+  border-radius: 10px;
+  overflow: auto;
+}
+.table-wrap table {
+  width: 100%;
+  min-width: 1200px;
+  border-collapse: collapse;
+  color: #081829;
+  font-size: 14px;
+}
+.table-wrap th {
+  height: 48px;
+  padding: 0 16px;
+  background: rgba(8, 24, 41, 0.02);
+  font-size: 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+.table-wrap td {
+  height: 68px;
+  padding: 0 16px;
+  border-top: 1px solid #f5f6f7;
+  white-space: nowrap;
+}
+.table-wrap td strong,
+.table-wrap td small {
+  display: block;
+}
+.table-wrap td small {
+  margin-top: 7px;
+  color: rgba(8, 24, 41, 0.48);
+  font-size: 12px;
+}
+.table-wrap tbody tr.selected {
+  background: rgba(21, 119, 210, 0.08);
+}
+.anomaly-table .status-tag.disposal-l3 {
+  color: #f24e3f !important;
+  border-color: rgba(242, 78, 63, 0.15) !important;
+  background: rgba(242, 78, 63, 0.08) !important;
+}
+.anomaly-table .status-tag.disposal-l2 {
+  color: #ff711f !important;
+  border-color: rgba(255, 113, 31, 0.15) !important;
+  background: rgba(255, 113, 31, 0.08) !important;
+}
+.anomaly-table .status-tag.disposal-l1,
+.anomaly-table .status-tag.warning {
+  color: #f6b714 !important;
+  border-color: rgba(246, 183, 20, 0.15) !important;
+  background: rgba(246, 183, 20, 0.08) !important;
+}
+.anomaly-table .status-tag.info {
+  color: #1577d2 !important;
+  border-color: rgba(21, 119, 210, 0.15) !important;
+  background: rgba(21, 119, 210, 0.08) !important;
+}
+.pagination {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  color: rgba(8, 24, 41, 0.48);
+  font-size: 14px;
+}
+.pagination > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #081829;
+}
+.pagination button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: #fff;
+}
+.pagination button.active {
+  background: rgba(8, 24, 41, 0.06);
+  font-weight: 600;
+}
+.pagination select,
+.pagination input {
+  height: 32px;
+  border: 1px solid rgba(8, 24, 41, 0.1);
+  border-radius: 8px;
+  background: #fff;
+}
+.pagination select {
+  padding: 0 10px;
+}
+.pagination input {
+  width: 42px;
+  text-align: center;
+}
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 492px;
+  gap: 20px;
+  padding: 20px;
+}
+.panel {
+  border: 1px solid rgba(8, 24, 41, 0.06);
+  border-radius: 12px;
+  background: #fff;
+  padding: 20px;
+}
+.panel h3 {
+  margin: 0 0 16px;
+}
+.search {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(8, 24, 41, 0.1);
+  border-radius: 8px;
+  color: rgba(8, 24, 41, 0.48);
+}
+.search input {
+  min-width: 0;
+  flex: 1;
+  width: 100%;
+  border: 0;
+  outline: 0;
+}
+.search img {
+  width: 16px;
+  height: 16px;
+  display: block;
+  flex: 0 0 16px;
+}
+.record {
+  width: 100%;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 12px 16px;
+  border: 1px solid rgba(8, 24, 41, 0.06);
+  border-radius: 10px;
+  background: #fff;
+  text-align: left;
+}
+.record.selected {
+  border-color: rgba(21, 119, 210, 0.18);
+  background: rgba(21, 119, 210, 0.08);
+}
+.record span strong,
+.record span small,
+.details article small,
+.recovery-head small,
+.process-head small,
+.process li small,
+.rules article small {
+  display: block;
+}
+.record small,
+.details article small,
+.recovery-head small,
+.process-head small,
+.process li small,
+.rules article small {
+  margin-top: 8px;
+  color: rgba(8, 24, 41, 0.48);
+  font-size: 12px;
+}
+.details article,
+.rules article {
+  min-height: 72px;
+  padding: 12px 16px;
+  margin-top: 12px;
+  border: 1px solid rgba(8, 24, 41, 0.06);
+  border-radius: 10px;
+}
+.details article > div {
+  display: flex;
+  justify-content: space-between;
+}
+.recovery-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+}
+.recovery-head button {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  background: #1577d2;
+}
+.recovery-head button img {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+.recovery-table {
+  margin-top: 0;
+}
+.recovery-table table {
+  min-width: 900px;
+}
+.recovery-bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 20px;
+  padding: 20px;
+}
+.process-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.process-head h3 {
+  margin-bottom: 0;
+}
+.process ol {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+}
+.process li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(8, 24, 41, 0.06);
+}
+.process li > b {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #1577d2;
+  background: rgba(21, 119, 210, 0.08);
+}
+.process li > span {
+  flex: 1;
+}
+.rules article {
+  margin-top: 8px;
+}
+.rules article strong {
+  font-size: 14px;
+}
+.rule-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+@media (max-width: 1000px) {
+  .table-wrap {
+    overflow: hidden;
+  }
+  .table-wrap table,
+  .recovery-table table {
+    min-width: 0;
+    table-layout: fixed;
+  }
+  .anomaly-table th:nth-child(4),
+  .anomaly-table td:nth-child(4),
+  .anomaly-table th:nth-child(5),
+  .anomaly-table td:nth-child(5),
+  .anomaly-table th:nth-child(6),
+  .anomaly-table td:nth-child(6),
+  .anomaly-table th:nth-child(7),
+  .anomaly-table td:nth-child(7) {
+    display: none;
+  }
+  .anomaly-table th:nth-child(1) {
+    width: 22%;
+  }
+  .anomaly-table th:nth-child(2) {
+    width: 22%;
+  }
+  .anomaly-table th:nth-child(3) {
+    width: 36%;
+  }
+  .anomaly-table th:nth-child(8) {
+    width: 20%;
+  }
+  .table-wrap td,
+  .table-wrap td strong,
+  .table-wrap td small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .split,
+  .recovery-bottom {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 620px) {
+  .exception-tabs {
+    height: auto;
+    align-items: stretch;
+    flex-direction: column;
+    padding: 10px;
+  }
+  .exception-tab,
+  .exception-tab:first-child,
+  .exception-tab:last-child {
+    border-radius: 8px;
+  }
+  .section-title,
+  .recovery-head {
+    height: auto;
+    align-items: flex-start;
+    gap: 12px;
+    flex-direction: column;
+    padding: 16px;
+  }
+  .pagination {
+    align-items: flex-start;
+    gap: 12px;
+    flex-direction: column;
+    height: auto;
+    padding: 16px;
+    overflow: hidden;
+  }
+  .pagination > div {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+  .recovery-table th:nth-child(4),
+  .recovery-table td:nth-child(4) {
+    display: none;
+  }
+  .split,
+  .recovery-bottom {
+    padding: 12px;
+  }
+  .panel {
+    padding: 14px;
+  }
+}
+/* 异常恢复页面设计稿样式 */
 </style>

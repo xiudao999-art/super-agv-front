@@ -51,7 +51,7 @@ const routes = [
       { path: 'workflows/processes', name: 'processes', component: ProcessesView, meta: { title: '流程与动作' } },
       { path: 'workflows/templates', name: 'templates', component: TemplatesView, meta: { title: '流程模板' } },
       { path: 'workflows/editor', name: 'template-editor', component: WorkflowEditorView, meta: { title: '流程模板配置' } },
-      { path: 'operations/exception-recovery', name: 'exception-recovery', component: ExceptionOperationsView, props: { mode: 'workorders' }, meta: { title: '异常与恢复' } },
+      { path: 'operations/exception-recovery', redirect: '/operations/anomalies' },
       { path: 'operations/emergency-stop', name: 'emergency-stop', component: ExceptionOperationsView, props: { mode: 'procedures' }, meta: { title: '急停处置规程' } },
       { path: 'operations/anomalies', name: 'anomalies', component: ExceptionView, props: { mode: 'anomalies' }, meta: { title: '当前异常' } },
       { path: 'operations/alarms', name: 'alarms', component: ExceptionView, props: { mode: 'alarms' }, meta: { title: '告警记录' } },
