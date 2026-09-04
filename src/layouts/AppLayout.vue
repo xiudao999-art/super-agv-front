@@ -10,6 +10,13 @@ const mobileMenu = ref(false)
 const statusVisible = ref(false)
 const alertsVisible = ref(false)
 
+const alertItems = [
+  { title: '机台允许进样事件等待超过流程配置的30秒', code: 'ALM-20260817-0042', time: '2026-08-17 09:42:18', level: '严重', levelClass: 'danger', object: '贴标机台进样许可', impact: '运输任务保持在 W-B01；贴标机台进样位继续预约；后续同目标任务暂停派发', status: '待处理', statusClass: 'pending', owner: '陈工' },
+  { title: '系统记录为空，但库位传感器检测有物', code: 'ALM-20260817-0041', time: '2026-08-17 09:36:54', level: '警告', levelClass: 'warning', object: '立库 A 第4层07位', impact: '库位 A-04-07 已锁定，不参与新任务分配；同层其他库位不受影响', status: '处理中', statusClass: 'processing', owner: '王工' },
+  { title: '系统记录为空，但库位传感器检测有物', code: 'ALM-20260817-0041', time: '2026-08-17 09:36:54', level: '警告', levelClass: 'warning', object: '立库 A 第4层07位', impact: '库位 A-04-07 已锁定，不参与新任务分配；同层其他库位不受影响', status: '处理中', statusClass: 'processing', owner: '王工' },
+  { title: '视觉设备在60秒内出现3次短时断连', code: 'ALM-20260817-0040', time: '2026-08-17 09:31:12', level: '警告', levelClass: 'warning', object: '视觉 VISION-01', impact: '当前动作在重试前暂停；底盘和机械臂保持安全状态；其他任务等待', status: '已确认', statusClass: 'confirmed', owner: '李工' },
+]
+
 const activeMenu = computed(() => activeMenuForRoute[route.path] || route.path)
 const title = computed(() => route.meta.title || '运行总览')
 const sectionTitle = computed(() => navigation.find(group => group.items.some(item => item.path === activeMenu.value))?.label || '')
@@ -84,22 +91,32 @@ function logout() {
     </el-container>
   </el-container>
 
-  <el-dialog v-model="statusVisible" title="系统运行状态" width="520px" class="reference-dialog status-reference-dialog">
+  <el-dialog v-model="statusVisible" title="系统运行状态" width="600px" :show-close="false" align-center class="reference-dialog status-reference-dialog">
     <div class="status-explain-list">
-      <article><i class="dot success" /><div><strong>绿色 · 系统正常</strong><p>核心服务、数据库、任务引擎和机器人连接正常。</p></div></article>
-      <article><i class="dot warning" /><div><strong>黄色 · 受限运行</strong><p>部分非核心设备或接口异常，系统仍可继续部分业务。</p></div></article>
-      <article><i class="dot danger" /><div><strong>红色 · 系统异常</strong><p>核心能力异常，系统暂停接收和分配新任务。</p></div></article>
-      <article><i class="dot info" /><div><strong>灰色 · 维护模式</strong><p>系统处于人工维护、升级或硬件调试状态。</p></div></article>
+      <article class="success"><strong>绿色•系统正常</strong><p>核心服务、数据库、任务引擎和机器人连接正常。</p></article>
+      <article class="warning"><strong>黄色•受限运行</strong><p>部分非核心设备或上游接口异常，系统仍可继续部分业务。</p></article>
+      <article class="danger"><strong>红色•系统异常</strong><p>核心能力异常，系统暂停接收和分配新任务。</p></article>
+      <article class="info"><strong>灰色•维护模式</strong><p>系统处于人工维护、升级或硬件调试状态。</p></article>
     </div>
     <template #footer><el-button @click="statusVisible = false">关闭</el-button></template>
   </el-dialog>
 
-  <el-drawer v-model="alertsVisible" size="420px" class="reference-alert-drawer">
-    <template #header><div><h2>异常提醒</h2><p>3 条未完成 · 1 条严重</p></div></template>
-    <div class="alert-list">
-      <article class="alert-item danger"><strong>机台允许进样事件等待超过 30 秒</strong><p>ALM-20260827-0042 · 待处理</p></article>
-      <article class="alert-item warning"><strong>库位系统记录与传感器状态不一致</strong><p>ALM-20260827-0041 · 处理中</p></article>
-      <article class="alert-item info"><strong>视觉设备出现短时断连</strong><p>ALM-20260827-0040 · 已确认</p></article>
+  <el-drawer v-model="alertsVisible" size="444px" :show-close="false" class="reference-alert-drawer">
+    <template #header><div><h2>异常提醒</h2><p>3条未完成 · 1条严重</p></div></template>
+    <div class="alert-feed">
+      <article v-for="(alert, index) in alertItems" :key="`${alert.code}-${index}`" class="alert-card">
+        <div class="alert-card__head">
+          <div class="alert-card__title"><strong>{{ alert.title }}</strong><p>{{ alert.code }} · {{ alert.time }}</p></div>
+          <span class="alert-severity" :class="alert.levelClass"><img :src="`/assets/topbar/alert-${alert.levelClass}.svg`" alt="">{{ alert.level }}</span>
+        </div>
+        <dl class="alert-card__details">
+          <div><dt>异常对象：</dt><dd class="alert-object">{{ alert.object }}</dd></div>
+          <div><dt>影响：</dt><dd>{{ alert.impact }}</dd></div>
+          <div><dt>当前状态：</dt><dd class="alert-state" :class="alert.statusClass">{{ alert.status }}</dd></div>
+          <div><dt>负责人：</dt><dd>{{ alert.owner }}</dd></div>
+        </dl>
+        <button class="alert-detail-button" @click="alertsVisible = false; router.push('/operations/exception-recovery')">查看详情与处理</button>
+      </article>
     </div>
     <template #footer><el-button type="primary" @click="alertsVisible = false; router.push('/operations/exception-recovery')">进入异常与恢复</el-button></template>
   </el-drawer>
