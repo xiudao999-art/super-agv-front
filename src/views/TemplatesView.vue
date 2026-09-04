@@ -3,7 +3,8 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import PageHeader from '../components/PageHeader.vue'
-import { deployWorkflow, listResource } from '../api/agv'
+import PaginationBar from '../components/PaginationBar.vue'
+import { deployWorkflow, listResourcePage } from '../api/agv'
 
 const router = useRouter()
 const keywordInput = ref('')
@@ -13,15 +14,12 @@ const deployingId = ref(null)
 const templates = ref([])
 const page = ref(1)
 const pageSize = ref(10)
-const jumpPage = ref('')
-const rows = computed(() => templates.value.filter(row => !keyword.value.trim() || `${row.templateNumber} ${row.templateName} ${row.sequence} ${row.applicableObject} ${row.statusLabel}`.toLowerCase().includes(keyword.value.trim().toLowerCase())))
-const pageCount = computed(() => Math.max(1,Math.ceil(rows.value.length/pageSize.value)))
-const pageRows = computed(() => rows.value.slice((page.value-1)*pageSize.value,page.value*pageSize.value))
-watch(pageSize,async()=>{page.value=1;jumpPage.value='';await load()})
+const total = ref(0)
+const pageCount = computed(() => Math.max(1,Math.ceil(total.value/pageSize.value)))
 watch(pageCount,(count)=>{if(page.value>count)page.value=count})
 
 function edit(row) { router.push({ path:'/workflows/editor', query:row ? {id:row.id} : {} }) }
-async function load() { loading.value=true; try { templates.value=await listResource('workflows',{pageNum:page.value,pageSize:200,keyword:keyword.value||undefined}) } catch(error) { templates.value=[]; ElMessage.error(`模板列表加载失败：${error.message}`) } finally { loading.value=false } }
+async function load() { loading.value=true; try { const result=await listResourcePage('workflows',{pageNum:page.value,pageSize:pageSize.value,keyword:keyword.value||undefined});templates.value=result.records;total.value=result.total } catch(error) { templates.value=[];total.value=0;ElMessage.error(`模板列表加载失败：${error.message}`) } finally { loading.value=false } }
 async function deploy(row) {
   try {
     await ElMessageBox.confirm(`确认发布模板“${row.templateName}”吗？发布后将部署到 Flowable。`, row.status === 'ENABLED' ? '重新发布模板' : '发布模板', { type:'warning' })
@@ -33,9 +31,9 @@ async function deploy(row) {
   finally { deployingId.value=null }
 }
 async function changePage(value){if(value<1||value>pageCount.value||value===page.value)return;page.value=value;await load()}
-async function jump(){const value=Number(jumpPage.value);if(Number.isInteger(value)&&value>=1&&value<=pageCount.value)await changePage(value);else ElMessage.warning(`请输入 1-${pageCount.value} 之间的页码`)}
-async function search(){keyword.value=keywordInput.value.trim();page.value=1;jumpPage.value='';await load()}
-async function resetSearch(){keywordInput.value='';keyword.value='';page.value=1;jumpPage.value='';await load()}
+async function changePageSize(value){pageSize.value=value;page.value=1;await load()}
+async function search(){keyword.value=keywordInput.value.trim();page.value=1;await load()}
+async function resetSearch(){keywordInput.value='';keyword.value='';page.value=1;await load()}
 onMounted(load)
 </script>
 
@@ -45,8 +43,8 @@ onMounted(load)
     <div class="page-canvas"><section class="page-panel"><div class="tabs-row"><nav class="tabs"><router-link class="tab-btn" to="/workflows/processes">流程列表</router-link><i class="tab-divider"/><router-link class="tab-btn active" to="/workflows/templates">流程模板</router-link></nav></div><div class="content">
       <div class="list-head"><div><h2>模板列表</h2></div></div>
       <form class="filter-bar" @submit.prevent="search"><label class="filter"><span>模板名称</span><input v-model="keywordInput" placeholder="请输入模板名称" @keydown.esc="resetSearch"></label><div class="filter-actions"><button class="filter-reset" type="button" @click="resetSearch">重置</button><button class="filter-query" type="submit">查询</button></div></form>
-      <div class="table-wrap"><table aria-label="流程模板列表"><thead><tr><th>模板编号</th><th>模板名称</th><th>动作顺序</th><th>适用对象</th><th>版本 /状态</th><th class="col-actions">操作</th></tr></thead><tbody><tr v-if="loading"><td colspan="6" class="api-empty">正在加载模板数据…</td></tr><tr v-else-if="!pageRows.length"><td colspan="6" class="api-empty">暂无流程模板</td></tr><tr v-for="row in pageRows" v-else :key="row.id" class="clickable-row" tabindex="0" @click="edit(row)" @keydown.enter="edit(row)"><td>{{ row.templateNumber }}</td><td>{{ row.templateName }}</td><td><span class="truncate" style="max-width:520px">{{ row.sequence || '-' }}</span></td><td>{{ row.applicableObject || '-' }}</td><td><span :class="['status-tag',row.status==='ENABLED'?'valid':'draft']" :title="`更新时间：${row.updatedAt}`">{{ row.version ? `V${row.version} · ` : '' }}{{ row.statusLabel || (row.status==='ENABLED'?'已启用':'草稿') }}</span></td><td class="col-actions"><div class="row-actions"><TableActionButton kind="edit" label="编辑模板" @click.stop="edit(row)"/><TableActionButton kind="publish" :label="row.status==='ENABLED'?'重新发布模板':'发布模板'" :disabled="deployingId===row.id" @click.stop="deploy(row)"/></div></td></tr></tbody></table></div>
-      <div class="pager-row"><div class="total">共计 {{ rows.length }} 条数据</div><div class="pagination"><button class="page-btn" type="button" :disabled="page<=1||loading" @click="changePage(page-1)">‹</button><button v-for="n in pageCount" :key="n" :class="['page-btn',{active:page===n}]" type="button" :disabled="loading" @click="changePage(n)">{{ n }}</button><button class="page-btn" type="button" :disabled="page>=pageCount||loading" @click="changePage(page+1)">›</button><select v-model="pageSize" class="page-size" :disabled="loading"><option :value="10">10 条/页</option><option :value="20">20 条/页</option><option :value="50">50 条/页</option></select><span>跳至</span><input v-model="jumpPage" class="jump" inputmode="numeric" :disabled="loading" @keydown.enter="jump"><span>页</span></div></div>
+      <div class="table-wrap"><table aria-label="流程模板列表"><thead><tr><th>模板编号</th><th>模板名称</th><th>动作顺序</th><th>适用对象</th><th>版本 /状态</th><th class="col-actions">操作</th></tr></thead><tbody><tr v-if="loading"><td colspan="6" class="api-empty">正在加载模板数据…</td></tr><tr v-else-if="!templates.length"><td colspan="6" class="api-empty">暂无流程模板</td></tr><tr v-for="row in templates" v-else :key="row.id" class="clickable-row" tabindex="0" @click="edit(row)" @keydown.enter="edit(row)"><td>{{ row.templateNumber }}</td><td>{{ row.templateName }}</td><td><span class="truncate" style="max-width:520px">{{ row.sequence || '-' }}</span></td><td>{{ row.applicableObject || '-' }}</td><td><span :class="['status-tag',row.status==='ENABLED'?'valid':'draft']" :title="`更新时间：${row.updatedAt}`">{{ row.version ? `V${row.version} · ` : '' }}{{ row.statusLabel || (row.status==='ENABLED'?'已启用':'草稿') }}</span></td><td class="col-actions"><div class="row-actions"><TableActionButton kind="edit" label="编辑模板" @click.stop="edit(row)"/><TableActionButton kind="publish" :label="row.status==='ENABLED'?'重新发布模板':'发布模板'" :disabled="deployingId===row.id" @click.stop="deploy(row)"/></div></td></tr></tbody></table></div>
+      <PaginationBar :page="page" :page-size="pageSize" :total="total" :loading="loading" @update:page="changePage" @update:page-size="changePageSize" />
     </div></section></div>
   </div>
 </template>

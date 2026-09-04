@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import PageHeader from '../components/PageHeader.vue'
+import PaginationBar from '../components/PaginationBar.vue'
 import { deleteRobotInfo, getRobotInfo, listRobots, saveRobotInfo } from '../api/agv'
 
 const runningStatusLabels={0:'空闲',1:'运行中',2:'暂停',3:'充电中',4:'故障',5:'急停'}
@@ -9,6 +10,7 @@ const runningStatusValues={'空闲':0,'运行中':1,'暂停':2,'充电中':3,'�
 const moduleStatusLabels={0:'离线',1:'在线',2:'故障'}
 const keywordInput=ref(''),statusInput=ref('all'),applied=reactive({keyword:'',status:'all'})
 const robotRows=ref([]),total=ref(0),loading=ref(false),selected=ref(null),detailVisible=ref(false),createVisible=ref(false),saving=ref(false),editingId=ref(null)
+const page=ref(1),pageSize=ref(10)
 const form=reactive({robotCode:'',robotName:'',mapName:'',mapVersion:'',currentLocationCode:'',runningStatus:0,connectionStatus:1,batteryLevel:100,enabled:1,remark:''})
 
 function normalizeModule(module){return{...module,module:module.deviceName||module.module||'-',vendor:module.manufacturer||module.vendor||'-',model:module.hardwareModel||module.model||'-',code:module.deviceCode||module.code||'-',protocol:module.communicationProtocol||module.protocol||'-',purpose:module.remark||module.purpose||'-',status:moduleStatusLabels[module.status]||module.status||'未知'}}
@@ -17,9 +19,11 @@ const rows=computed(()=>robotRows.value.filter(robot=>(!applied.keyword||`${robo
 const statusClass=value=>({在线:'status-online',离线:'status-offline',运行中:'status-running',暂停:'status-waiting',等待资源:'status-waiting',空闲:'status-idle',充电中:'status-charging',故障:'status-error',急停:'status-error',异常:'status-error'}[value]||'status-running')
 const batteryClass=value=>value<=15?'is-critical':value<=30?'is-low':''
 
-async function loadRobots(){loading.value=true;try{const page=await listRobots();robotRows.value=(page?.records||[]).map(normalizeRobot);total.value=Number(page?.total??robotRows.value.length)}catch(error){ElMessage.error(`机器人列表加载失败：${error.message}`)}finally{loading.value=false}}
-function search(){applied.keyword=keywordInput.value.trim().toUpperCase();applied.status=statusInput.value}
-function reset(){keywordInput.value='';statusInput.value='all';applied.keyword='';applied.status='all'}
+async function loadRobots(){loading.value=true;try{const result=await listRobots({pageNum:page.value,pageSize:pageSize.value,keyword:applied.keyword||undefined,runningStatus:applied.status==='all'?undefined:runningStatusValues[applied.status]});robotRows.value=(result?.records||[]).map(normalizeRobot);total.value=Number(result?.total??robotRows.value.length)}catch(error){robotRows.value=[];total.value=0;ElMessage.error(`机器人列表加载失败：${error.message}`)}finally{loading.value=false}}
+async function search(){applied.keyword=keywordInput.value.trim().toUpperCase();applied.status=statusInput.value;page.value=1;await loadRobots()}
+async function reset(){keywordInput.value='';statusInput.value='all';applied.keyword='';applied.status='all';page.value=1;await loadRobots()}
+async function changePage(value){page.value=value;await loadRobots()}
+async function changePageSize(value){pageSize.value=value;page.value=1;await loadRobots()}
 async function showDetail(robot){selected.value=robot;detailVisible.value=true;if(robot.databaseId==null)return;try{selected.value=normalizeRobot({...robot,...await getRobotInfo(robot.databaseId)})}catch(error){ElMessage.error(`机器人详情加载失败：${error.message}`)}}
 function resetForm(){Object.assign(form,{robotCode:'',robotName:'',mapName:'',mapVersion:'',currentLocationCode:'',runningStatus:0,connectionStatus:1,batteryLevel:100,enabled:1,remark:''})}
 function openCreate(){editingId.value=null;resetForm();createVisible.value=true}
@@ -71,7 +75,7 @@ onMounted(loadRobots)
           </table>
         </div>
         <div v-else class="empty-state"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><strong>没有匹配的机器人</strong><span>请调整机器人编号或运行状态</span></div>
-        <div class="table-footer">当前显示 {{ rows.length }} 台 / 共 {{ total }} 台</div>
+        <PaginationBar :page="page" :page-size="pageSize" :total="total" :loading="loading" @update:page="changePage" @update:page-size="changePageSize" />
       </section>
     </main>
 

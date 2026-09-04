@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '../components/PageHeader.vue'
+import PaginationBar from '../components/PaginationBar.vue'
 import { changeExceptionHandlingRuleStatus, deleteExceptionHandlingRule, getExceptionHandlingRule, listExceptionHandlingRules, saveExceptionHandlingRule } from '../api/agv'
 import { emergencyProcedures, exceptionWorkorders } from '../data/exception-operations'
 
@@ -12,6 +13,10 @@ const selected = ref(null)
 const dialogVisible = ref(false)
 const toastText = ref('')
 const procedureRows = ref([...emergencyProcedures])
+const procedurePage = ref(1)
+const procedurePageSize = ref(10)
+const procedureTotal = ref(emergencyProcedures.length)
+const procedureLoading = ref(false)
 const procedureRequestPending = ref(false)
 const editorVisible = ref(false)
 const editorSaving = ref(false)
@@ -71,17 +76,26 @@ function normalizeProcedure(row, fallback = {}) {
 }
 
 async function loadProcedures() {
+  procedureLoading.value = true
   try {
-    const page = await listExceptionHandlingRules()
-    const records = Array.isArray(page) ? page : page?.records || []
+    const result = await listExceptionHandlingRules({ pageNum:procedurePage.value, pageSize:procedurePageSize.value })
+    const records = Array.isArray(result) ? result : result?.records || []
+    procedureTotal.value = Number(result?.total ?? records.length)
     const fallbackByCode = new Map(emergencyProcedures.map(item => [item.id, item]))
     procedureRows.value = records.map(row => normalizeProcedure(row, fallbackByCode.get(row.ruleCode)))
     procedureRows.value.forEach(item => { enabled[item.id] = item.status === 'ENABLED' })
   } catch (error) {
     console.warn('异常处置规程接口暂不可用，继续展示内置演示数据', error)
     toast('规程接口暂不可用，当前展示演示数据')
+    procedureRows.value = [...emergencyProcedures]
+    procedureTotal.value = procedureRows.value.length
+  } finally {
+    procedureLoading.value = false
   }
 }
+
+async function changeProcedurePage(value) { procedurePage.value = value; await loadProcedures() }
+async function changeProcedurePageSize(value) { procedurePageSize.value = value; procedurePage.value = 1; await loadProcedures() }
 
 async function openProcedure(item) {
   open(item)
@@ -224,7 +238,7 @@ onBeforeUnmount(() => { document.removeEventListener('keydown', onKeydown); docu
             <td class="ops-code">{{ row.id }}</td><td><strong class="table-primary">{{ row.title }}</strong><span class="table-secondary">{{ row.signal }}</span></td><td><span :class="['scope-chip',scopeClass(row.scope)]">{{ row.scope }}</span></td><td>{{ row.duty }}</td><td><button v-for="ticket in row.tickets" :key="ticket" class="ticket-chip procedure-ticket-link" type="button" :title="`前往异常与恢复查看 ${ticket}`" @click.stop="toTicket(ticket)"><span class="ticket-label">{{ ticket }}</span><span class="ticket-arrow" aria-hidden="true">→</span></button><span v-if="!row.tickets.length" class="table-secondary">—</span></td><td class="procedure-status-cell col-actions"><div class="procedure-actions"><TableActionButton kind="edit" label="编辑规程" @click.stop="editProcedureFromList(row)"/><TableActionButton kind="delete" label="删除规程" danger @click.stop="removeProcedure(row)"/><TableActionButton kind="toggle" :label="enabled[row.id]?'停用规则':'启用规则'" :active="enabled[row.id]" :danger="enabled[row.id]" @click.stop="toggleProcedure(row)"/></div></td>
           </tr></tbody>
         </table>
-      </div></div></section>
+      </div><PaginationBar v-if="proceduresMode" :page="procedurePage" :page-size="procedurePageSize" :total="procedureTotal" :loading="procedureLoading" @update:page="changeProcedurePage" @update:page-size="changeProcedurePageSize" /></div></section>
     </main>
 
     <div v-if="dialogVisible && selected" class="modal-overlay open" @click.self="close">

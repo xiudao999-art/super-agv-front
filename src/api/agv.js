@@ -24,6 +24,12 @@ const unwrap = (response) => {
   return body?.data ?? body
 }
 const asRows = (payload) => Array.isArray(payload) ? payload : payload?.records || []
+const asPage = (payload, records) => ({
+  records,
+  total: Number(payload?.total ?? records.length),
+  pageNum: Number(payload?.pageNum ?? payload?.current ?? 1),
+  pageSize: Number(payload?.pageSize ?? payload?.size ?? records.length),
+})
 const formatDateTime = (value) => value ? String(value).replace('T', ' ').slice(0, 19) : '-'
 
 const occupancyLabels = { 0: '空闲', 1: '占用', FREE: '空闲', OCCUPIED: '占用' }
@@ -107,7 +113,7 @@ export async function listResource(name, params = {}) {
   if (useMockApi || !resources[name]) return normalizeRows(name, clone(collection(name)))
 
   const requestParams = ['orders', 'processes', 'workflows'].includes(name)
-    ? { pageNum: 1, pageSize: 200, ...params }
+    ? { pageNum: 1, pageSize: 50, ...params }
     : params
 
   if (name === 'locations') {
@@ -181,6 +187,19 @@ export async function getActions() {
   return unwrap(await http.get('/api/actions'))
 }
 
+export async function listResourcePage(name, params = {}) {
+  if (useMockApi || !resources[name]) {
+    const allRows = normalizeRows(name, clone(collection(name)))
+    const pageNum = Number(params.pageNum || 1)
+    const pageSize = Number(params.pageSize || 10)
+    const start = (pageNum - 1) * pageSize
+    return asPage({ total: allRows.length, pageNum, pageSize }, allRows.slice(start, start + pageSize))
+  }
+
+  const payload = unwrap(await http.get(resources[name].list, { params }))
+  return asPage(payload, normalizeRows(name, asRows(payload)))
+}
+
 export async function listActionBusinessScenes() {
   return unwrap(await http.get('/api/action-business-scenes'))
 }
@@ -252,7 +271,7 @@ export async function listRobots(params = {}) {
     const records = clone(collection('robotPool') || [])
     return { records, total: records.length, current: 1, size: records.length }
   }
-  return unwrap(await http.get('/api/robot-info', { params: { pageNum: 1, pageSize: 200, ...params } }))
+  return unwrap(await http.get('/api/robot-info', { params: { pageNum: 1, pageSize: 10, ...params } }))
 }
 
 export async function getRobotInfo(id) {
@@ -272,7 +291,7 @@ export async function deleteRobotInfo(id) {
 
 export async function listExceptionHandlingRules(params = {}) {
   return unwrap(await http.get('/api/exception-handling-rules', {
-    params: { pageNum: 1, pageSize: 200, ...params },
+    params: { pageNum: 1, pageSize: 10, ...params },
   }))
 }
 

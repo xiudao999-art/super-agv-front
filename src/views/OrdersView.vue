@@ -2,13 +2,15 @@
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
-import { createResource, deleteResource, listResource } from '../api/agv'
+import { createResource, deleteResource, listResource, listResourcePage } from '../api/agv'
+import PaginationBar from '../components/PaginationBar.vue'
 
 const router = useRouter()
 const keyword = ref('')
 const status = ref('')
 const page = ref(1)
-const pageSize = ref(9)
+const pageSize = ref(10)
+const total = ref(0)
 const createVisible = ref(false)
 const detailVisible = ref(false)
 const selectedOrder = ref(null)
@@ -34,15 +36,7 @@ const statusMeta = {
   CANCELLED: { label: '已取消', className: 'cancelled' },
 }
 
-const filtered = computed(() => rows.value.filter((item) => {
-  const value = keyword.value.trim().toLowerCase()
-  return (!status.value || item.status === status.value)
-    && (!value || `${item.upstreamOrderNo} ${item.systemOrderNo}`.toLowerCase().includes(value))
-}))
-const pageCount = computed(() => Math.max(1, Math.ceil(filtered.value.length / pageSize.value)))
-const pageRows = computed(() => filtered.value.slice((page.value - 1) * pageSize.value, page.value * pageSize.value))
-const pageStart = computed(() => filtered.value.length ? (page.value - 1) * pageSize.value + 1 : 0)
-const pageEnd = computed(() => Math.min(page.value * pageSize.value, filtered.value.length))
+const pageCount = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)))
 const flowState = computed(() => workflowLoading.value
   ? '正在加载流程…'
   : workflowError.value
@@ -81,6 +75,7 @@ function reset() {
   keyword.value = ''
   status.value = ''
   page.value = 1
+  loadOrders()
 }
 
 function resetCreateForm() {
@@ -121,15 +116,22 @@ function changeTaskCount(event) {
 async function loadOrders() {
   loading.value = true
   try {
-    rows.value = await listResource('orders')
+    const result = await listResourcePage('orders', { pageNum:page.value, pageSize:pageSize.value, keyword:keyword.value.trim() || undefined, status:status.value || undefined })
+    rows.value = result.records
+    total.value = result.total
     if (page.value > pageCount.value) page.value = pageCount.value
   } catch (error) {
     rows.value = []
+    total.value = 0
     showToast(`订单加载失败：${error.message}`)
   } finally {
     loading.value = false
   }
 }
+
+async function searchOrders() { page.value = 1; await loadOrders() }
+async function changePage(value) { page.value = value; await loadOrders() }
+async function changePageSize(value) { pageSize.value = value; page.value = 1; await loadOrders() }
 
 async function loadWorkflows() {
   workflowLoading.value = true
@@ -251,9 +253,9 @@ onUnmounted(() => {
         </div>
 
         <div class="filters agv-filter-bar" data-agv-list-filters>
-          <label class="agv-filter-field"><span>状态选择</span><select v-model="status" aria-label="订单状态" @change="page = 1"><option value="">全部状态</option><option v-for="(meta, key) in statusMeta" :key="key" :value="key">{{ meta.label }}</option></select></label>
-          <label class="agv-filter-field"><span>查询订单</span><input v-model="keyword" type="search" placeholder="订单号/系统订单号" aria-label="查询订单" @keyup.enter="page = 1"></label>
-          <div class="agv-filter-actions"><button class="filter-btn" type="button" @click="reset"><img class="filter-action-icon" src="/assets/list-icons/refresh.svg" alt="">重置</button><button class="filter-btn primary" type="button" @click="page = 1"><img class="filter-action-icon" src="/assets/list-icons/search.svg" alt="">搜索</button></div>
+          <label class="agv-filter-field"><span>状态选择</span><select v-model="status" aria-label="订单状态"><option value="">全部状态</option><option v-for="(meta, key) in statusMeta" :key="key" :value="key">{{ meta.label }}</option></select></label>
+          <label class="agv-filter-field"><span>查询订单</span><input v-model="keyword" type="search" placeholder="订单号/系统订单号" aria-label="查询订单" @keyup.enter="searchOrders"></label>
+          <div class="agv-filter-actions"><button class="filter-btn" type="button" @click="reset"><img class="filter-action-icon" src="/assets/list-icons/refresh.svg" alt="">重置</button><button class="filter-btn primary" type="button" @click="searchOrders"><img class="filter-action-icon" src="/assets/list-icons/search.svg" alt="">搜索</button></div>
         </div>
 
         <div class="table-wrap">
@@ -262,7 +264,7 @@ onUnmounted(() => {
             <thead><tr><th>订单号</th><th>系统订单号</th><th>来源</th><th>状态</th><th>优先级</th><th>任务数</th><th>完成进度</th><th>下发时间</th><th class="col-actions">操作</th></tr></thead>
             <tbody>
               <tr v-if="loading"><td class="order-loading-cell" colspan="9"><span class="order-loading">正在加载订单…</span></td></tr>
-              <tr v-for="row in pageRows" v-else :key="row.id" @dblclick="openDetail(row, $event)">
+              <tr v-for="row in rows" v-else :key="row.id" @dblclick="openDetail(row, $event)">
                 <td :title="row.upstreamOrderNo">{{ row.upstreamOrderNo || '-' }}</td><td :title="row.systemOrderNo">{{ row.systemOrderNo || '-' }}</td><td>{{ row.source || '-' }}</td>
                 <td><span :class="['status-tag', `status-${statusInfo(row.status).className}`]">{{ statusInfo(row.status).label }}</span></td>
                 <td>{{ formatPriority(row.priority) }}</td><td>{{ row.taskCount ?? 0 }}</td><td>{{ progressText(row) }}</td><td>{{ row.issuedAt || '-' }}</td>
@@ -274,15 +276,12 @@ onUnmounted(() => {
                   </div>
                 </td>
               </tr>
-              <tr v-if="!loading && !pageRows.length" class="empty-row"><td colspan="9">没有符合条件的订单</td></tr>
+              <tr v-if="!loading && !rows.length" class="empty-row"><td colspan="9">没有符合条件的订单</td></tr>
             </tbody>
           </table>
         </div>
 
-        <div class="pagination">
-          <div class="page-summary">共 {{ filtered.length }} 条，当前显示 {{ pageStart }}–{{ pageEnd }} 条</div>
-          <div class="page-controls"><select v-model="pageSize" class="page-size" aria-label="每页条数" @change="page = 1"><option :value="9">9 条/页</option><option :value="10">10 条/页</option><option :value="15">15 条/页</option></select><button class="page-btn" :disabled="page <= 1" @click="page--">上一页</button><button v-for="item in pageCount" :key="item" :class="['page-btn', { active: page === item }]" @click="page = item">{{ item }}</button><button class="page-btn" :disabled="page >= pageCount" @click="page++">下一页</button></div>
-        </div>
+        <PaginationBar :page="page" :page-size="pageSize" :total="total" :loading="loading" @update:page="changePage" @update:page-size="changePageSize" />
       </div>
     </section>
 

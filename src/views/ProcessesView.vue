@@ -2,7 +2,8 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import PageHeader from '../components/PageHeader.vue'
-import { createResource, getFlow, listResource, updateFlow } from '../api/agv'
+import PaginationBar from '../components/PaginationBar.vue'
+import { createResource, getFlow, listResource, listResourcePage, updateFlow } from '../api/agv'
 
 const rows = ref([])
 const templates = ref([])
@@ -15,20 +16,20 @@ const editingId = ref(null)
 const hydratingForm = ref(false)
 const page = ref(1)
 const pageSize = ref(10)
-const jumpPage = ref('')
+const total = ref(0)
 const form = reactive({ templateName:'', sourceTemplateId:'', applicableScope:'', status:1, description:'' })
-const filtered = computed(() => rows.value.filter((row) => !keyword.value.trim() || `${row.number} ${row.name} ${row.template} ${row.statusLabel}`.toLowerCase().includes(keyword.value.trim().toLowerCase())))
-const pageCount = computed(() => Math.max(1, Math.ceil(filtered.value.length / pageSize.value)))
-const pageRows = computed(() => filtered.value.slice((page.value - 1) * pageSize.value, page.value * pageSize.value))
+const pageCount = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)))
 const statusLabel = (row) => row.statusLabel || ([1,'1',true,'ENABLED','ACTIVE'].includes(row.status) ? '启用' : [0,'0',false,'DISABLED','INACTIVE'].includes(row.status) ? '停用' : '未返回')
 
-watch(pageSize, async () => { page.value = 1; jumpPage.value = ''; await loadRows() })
 watch(pageCount, (count) => { if (page.value > count) page.value = count })
 watch(() => form.sourceTemplateId, (id) => { if (hydratingForm.value) return; const item = templates.value.find(t => String(t.id) === String(id)); if (item?.applicableObject) form.applicableScope = item.applicableObject }, { flush:'sync' })
 
 async function load() {
   loading.value = true
-  try { [rows.value,templates.value] = await Promise.all([listResource('processes'),listResource('workflows')]) }
+  try {
+    const [result, templateRows] = await Promise.all([listResourcePage('processes', { pageNum:page.value, pageSize:pageSize.value }), listResource('workflows')])
+    rows.value = result.records; total.value = result.total; templates.value = templateRows
+  }
   catch (error) { rows.value = []; ElMessage.error(`流程加载失败：${error.message}`) }
   finally { loading.value = false }
 }
@@ -40,7 +41,7 @@ function fillForm(row = null) {
 
 async function loadRows() {
   loading.value = true
-  try { rows.value = await listResource('processes', { pageNum:page.value, pageSize:200, keyword:keyword.value || undefined }) }
+  try { const result = await listResourcePage('processes', { pageNum:page.value, pageSize:pageSize.value, keyword:keyword.value || undefined }); rows.value = result.records; total.value = result.total }
   catch (error) { rows.value = []; ElMessage.error(`流程加载失败：${error.message}`) }
   finally { loading.value = false }
 }
@@ -82,10 +83,10 @@ async function save() {
   finally { saving.value = false }
 }
 
-async function changePage(value) { if (value < 1 || value > pageCount.value || value === page.value) return; page.value = value; await loadRows() }
-async function jump() { const value = Number(jumpPage.value); if (Number.isInteger(value) && value >= 1 && value <= pageCount.value) await changePage(value); else ElMessage.warning(`请输入 1-${pageCount.value} 之间的页码`) }
-async function search() { keyword.value = keywordInput.value.trim(); page.value = 1; jumpPage.value = ''; await loadRows() }
-async function resetSearch() { keywordInput.value = ''; keyword.value = ''; page.value = 1; jumpPage.value = ''; await loadRows() }
+async function changePage(value) { page.value = value; await loadRows() }
+async function changePageSize(value) { pageSize.value = value; page.value = 1; await loadRows() }
+async function search() { keyword.value = keywordInput.value.trim(); page.value = 1; await loadRows() }
+async function resetSearch() { keywordInput.value = ''; keyword.value = ''; page.value = 1; await loadRows() }
 
 onMounted(load)
 </script>
@@ -96,8 +97,8 @@ onMounted(load)
     <div class="page-canvas"><section class="page-panel"><div class="tabs-row"><nav class="tabs"><router-link class="tab-btn active" to="/workflows/processes">流程列表</router-link><i class="tab-divider"/><router-link class="tab-btn" to="/workflows/templates">流程模板</router-link></nav></div><div class="content">
       <div class="list-head"><div><h2>流程列表</h2></div></div>
       <form class="filter-bar" @submit.prevent="search"><label class="filter"><span>流程名称</span><input v-model="keywordInput" placeholder="请输入流程名称" @keydown.esc="resetSearch"></label><div class="filter-actions"><button class="filter-reset" type="button" @click="resetSearch">重置</button><button class="filter-query" type="submit">查询</button></div></form>
-      <div class="table-wrap"><table aria-label="流程列表"><thead><tr><th>流程编号</th><th>流程名称</th><th>流程模板名称</th><th>模板节点数</th><th>状态</th><th>更新时间</th><th class="col-actions">操作</th></tr></thead><tbody><tr v-if="loading"><td colspan="7" class="api-empty">正在加载流程数据…</td></tr><tr v-else-if="!pageRows.length"><td colspan="7" class="api-empty">暂无流程数据</td></tr><tr v-for="row in pageRows" v-else :key="row.id"><td>{{ row.number || `FLOW-${row.id}` }}</td><td>{{ row.name || `流程 ${row.id}` }}</td><td>{{ row.template || `- · 模板 ID ${row.templateId}` }}</td><td>{{ row.steps ?? 0 }}</td><td><span :class="['status-tag',statusLabel(row)==='启用'?'valid':'standby']">{{ statusLabel(row) }}</span></td><td>{{ row.updatedAt || '-' }}</td><td class="col-actions"><div class="row-actions"><TableActionButton kind="edit" label="编辑流程" @click="openForm(row)"/></div></td></tr></tbody></table></div>
-      <div class="pager-row"><div class="total">共计 {{ filtered.length }} 条数据</div><div class="pagination"><button class="page-btn" type="button" :disabled="page<=1||loading" @click="changePage(page-1)">‹</button><button v-for="n in pageCount" :key="n" :class="['page-btn',{active:page===n}]" type="button" :disabled="loading" @click="changePage(n)">{{ n }}</button><button class="page-btn" type="button" :disabled="page>=pageCount||loading" @click="changePage(page+1)">›</button><select v-model="pageSize" class="page-size" :disabled="loading"><option :value="10">10 条/页</option><option :value="20">20 条/页</option><option :value="50">50 条/页</option></select><span>跳至</span><input v-model="jumpPage" class="jump" inputmode="numeric" :disabled="loading" @keydown.enter="jump"><span>页</span></div></div>
+      <div class="table-wrap"><table aria-label="流程列表"><thead><tr><th>流程编号</th><th>流程名称</th><th>流程模板名称</th><th>模板节点数</th><th>状态</th><th>更新时间</th><th class="col-actions">操作</th></tr></thead><tbody><tr v-if="loading"><td colspan="7" class="api-empty">正在加载流程数据…</td></tr><tr v-else-if="!rows.length"><td colspan="7" class="api-empty">暂无流程数据</td></tr><tr v-for="row in rows" v-else :key="row.id"><td>{{ row.number || `FLOW-${row.id}` }}</td><td>{{ row.name || `流程 ${row.id}` }}</td><td>{{ row.template || `- · 模板 ID ${row.templateId}` }}</td><td>{{ row.steps ?? 0 }}</td><td><span :class="['status-tag',statusLabel(row)==='启用'?'valid':'standby']">{{ statusLabel(row) }}</span></td><td>{{ row.updatedAt || '-' }}</td><td class="col-actions"><div class="row-actions"><TableActionButton kind="edit" label="编辑流程" @click="openForm(row)"/></div></td></tr></tbody></table></div>
+      <PaginationBar :page="page" :page-size="pageSize" :total="total" :loading="loading" @update:page="changePage" @update:page-size="changePageSize" />
     </div></section></div>
 
     <div v-if="dialogVisible" class="modal-overlay open" @click.self="dialogVisible=false"><section class="modal-card" role="dialog" aria-modal="true"><h2>{{ editingId == null ? '新建流程' : `编辑流程 · ${rows.find(item => item.id === editingId)?.number || editingId}` }}</h2><form @submit.prevent="save"><div class="form-grid"><label class="form-field wide"><span>流程名称</span><input v-model="form.templateName" maxlength="120" required></label><label class="form-field wide"><span>来源流程模板</span><select v-model="form.sourceTemplateId" required><option value="">请选择来源模板</option><option v-for="item in templates" :key="item.id" :value="item.id">{{ item.templateName }} · {{ item.templateNumber }}</option></select><small class="field-hint">实际提交后端模板 ID</small></label><label class="form-field"><span>适用范围</span><input v-model="form.applicableScope" maxlength="120"></label><label class="form-field"><span>启用状态</span><select v-model="form.status"><option :value="1">启用</option><option :value="0">停用</option></select></label><label class="form-field wide"><span>流程说明</span><textarea v-model="form.description" maxlength="500" /></label></div><div class="modal-actions"><button class="modal-close" type="button" @click="dialogVisible=false">取消</button><button class="modal-primary" type="submit" :disabled="saving">{{ saving ? (editingId == null ? '创建中…' : '保存中…') : editingId == null ? '创建流程' : '保存' }}</button></div></form></section></div>
