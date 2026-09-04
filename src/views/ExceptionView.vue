@@ -1,15 +1,19 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import PageHeader from "../components/PageHeader.vue";
 import { appState } from "../stores/appStore";
+import { listRobotAlarms } from "../api/agv";
 const props = defineProps({ mode: { type: String, default: "anomalies" } });
 const router = useRouter(),
   keyword = ref(""),
   selected = ref(null),
   page = ref(1),
-  pageSize = ref(20);
+  pageSize = ref(10),
+  anomalyRows = ref([]),
+  anomalyTotal = ref(0),
+  anomalyLoading = ref(false);
 const tabs = [
   { label: "当前异常", path: "/operations/anomalies", mode: "anomalies" },
   { label: "告警记录", path: "/operations/alarms", mode: "alarms" },
@@ -19,106 +23,38 @@ const tabs = [
     mode: "recoveryTasks",
   },
 ];
-const anomalyDesignRows = [
-  {
-    id: "D-01",
-    objectName: "贴标机台进样许可",
-    title: "机台允许进样事件等待超过流程配置的 30秒",
-    eventCode: "TASK-PERMIT-TIMEOUT",
-    robot: "AGV-01（孔板机型）",
-    location: "ARM.PLACE @ 培养箱-窗口2",
-    disposal: "L3 现场人工",
-    disposalTone: "disposal-l3",
-    type: "任务执行",
-    time: "2026.08.31 14:00:00",
-    status: "待处理",
-  },
-  {
-    id: "DEVICE-B-DOCK",
-    objectName: "立库 A 第 4 层 / 07 位",
-    title: "系统记录为空，但库位传感器检测有物",
-    eventCode: "LOCATION-STATE-MISMATCH",
-    robot: "AGV-02（摆臂机型）",
-    location: "ARM.PICK @ 智能货架-B12",
-    disposal: "L2 远程人工",
-    disposalTone: "disposal-l2",
-    type: "库位一致性",
-    time: "2026.08.31 14:00:00",
-    status: "处理中",
-  },
-  {
-    id: "DEVICE-BPLACE-1",
-    displayId: "DEVICE-BPLACE",
-    objectName: "视觉 VISION-01",
-    title: "视觉设备在 60 秒内出现 3 次短时断连",
-    eventCode: "DEVICE-LINK-UNSTABLE",
-    robot: "AGV-01（孔板机型）",
-    location: "DOCK.TRANSFER @ 窗口暂存架-W1",
-    disposal: "L1 自动降级",
-    disposalTone: "disposal-l1",
-    type: "设备通信",
-    time: "2026.08.31 14:00:00",
-    status: "处理中",
-  },
-  {
-    id: "DEVICE-BPLACE-2",
-    displayId: "DEVICE-BPLACE",
-    objectName: "视觉 VISION-01",
-    title: "视觉设备在 60 秒内出现 3 次短时断连",
-    eventCode: "DEVICE-LINK-UNSTABLE",
-    robot: "AGV-03（孔板机型）",
-    location: "WAIT.PERMIT @ 静置综合台-窗口1",
-    disposal: "L1 自动降级",
-    disposalTone: "disposal-l1",
-    type: "设备通信",
-    time: "2026.08.31 14:00:00",
-    status: "处理中",
-  },
-  {
-    id: "DEVICE-BPLACE-3",
-    displayId: "DEVICE-BPLACE",
-    objectName: "视觉 VISION-01",
-    title: "视觉设备在 60 秒内出现 3 次短时断连",
-    eventCode: "DEVICE-LINK-UNSTABLE",
-    robot: "AGV-02（摆臂机型）",
-    location: "RFID.WRITE @ 智能货架-A07",
-    disposal: "L1 自动降级",
-    disposalTone: "disposal-l1",
-    type: "设备通信",
-    time: "2026.08.31 14:00:00",
-    status: "处理中",
-  },
-  {
-    id: "DEVICE-BPLACE-4",
-    displayId: "DEVICE-BPLACE",
-    objectName: "视觉 VISION-01",
-    title: "视觉设备在 60 秒内出现 3 次短时断连",
-    eventCode: "DEVICE-LINK-UNSTABLE",
-    robot: "AGV-02（摆臂机型）",
-    location: "RFID.WRITE @ 智能货架-A07",
-    disposal: "L1 自动降级",
-    disposalTone: "disposal-l1",
-    type: "设备通信",
-    time: "2026.08.31 14:00:00",
-    status: "处理中",
-  },
-  {
-    id: "DEVICE-BPLACE-5",
-    displayId: "DEVICE-BPLACE",
-    objectName: "视觉 VISION-01",
-    title: "视觉设备在 60 秒内出现 3 次短时断连",
-    eventCode: "DEVICE-LINK-UNSTABLE",
-    robot: "AGV-02（摆臂机型）",
-    location: "RFID.WRITE @ 智能货架-A07",
-    disposal: "L1 自动降级",
-    disposalTone: "disposal-l1",
-    type: "设备通信",
-    time: "2026.08.31 14:00:00",
-    status: "处理中",
-  },
-];
+const handlingLevelMap = { 1: ["L1 自动恢复", "disposal-l1"], 2: ["L2 远程人工", "disposal-l2"], 3: ["L3 现场人工", "disposal-l3"] };
+const handlingStatusMap = { 0: "待处理", 1: "处理中", 2: "已恢复", 3: "处置失败", 4: "已关闭" };
+function normalizeAlarm(row) {
+  const level = handlingLevelMap[row.handlingLevel] || ["-", ""];
+  return {
+    ...row,
+    id: row.alarmNo,
+    title: row.alarmDescription || "-",
+    robot: row.robotNode || "-",
+    disposal: level[0],
+    disposalTone: level[1],
+    time: row.occurredAt ? String(row.occurredAt).replace("T", " ").replaceAll("-", ".") : "-",
+    status: handlingStatusMap[row.handlingStatus] || "-",
+  };
+}
+async function loadAnomalies() {
+  if (props.mode !== "anomalies") return;
+  anomalyLoading.value = true;
+  try {
+    const result = await listRobotAlarms({ pageNum: page.value, pageSize: pageSize.value });
+    anomalyRows.value = (result?.records || []).map(normalizeAlarm);
+    anomalyTotal.value = Number(result?.total || 0);
+  } catch (error) {
+    anomalyRows.value = [];
+    anomalyTotal.value = 0;
+    ElMessage.error(error.message || "当前异常加载失败");
+  } finally {
+    anomalyLoading.value = false;
+  }
+}
 const sourceRows = computed(() =>
-  props.mode === "anomalies" ? anomalyDesignRows : appState[props.mode] || [],
+  props.mode === "anomalies" ? anomalyRows.value : appState[props.mode] || [],
 );
 const rows = computed(() => {
   const q = keyword.value.trim().toLowerCase();
@@ -140,6 +76,11 @@ function tone(value) {
 function selectRow(row) {
   selected.value = row;
 }
+watch(() => props.mode, (mode) => { if (mode === "anomalies") loadAnomalies(); }, { immediate: true });
+watch([page, pageSize], ([nextPage, nextSize], [previousPage, previousSize]) => {
+  if (nextSize !== previousSize && nextPage !== 1) { page.value = 1; return; }
+  if (props.mode === "anomalies") loadAnomalies();
+});
 </script>
 <template>
   <section class="page-view exception-design-page">
@@ -170,33 +111,24 @@ function selectRow(row) {
             <thead>
               <tr>
                 <th>异常编号</th>
-                <th>异常对象</th>
-                <th>异常内容</th>
-                <th>异常内容</th>
+                <th>异常描述</th>
                 <th>处置级别</th>
-                <th>异常类型</th>
+                <th>机器人/节点</th>
                 <th>发生时间</th>
-                <th>状态</th>
+                <th>处置状态</th>
               </tr>
             </thead>
             <tbody>
+              <tr v-if="anomalyLoading"><td colspan="6" class="table-state-cell">正在加载当前异常...</td></tr>
               <tr v-for="row in rows" :key="row.id">
-                <td>{{ row.displayId || row.id }}</td>
-                <td>{{ row.objectName }}</td>
-                <td>
-                  <strong>{{ row.title }}</strong
-                  ><small>{{ row.eventCode }}</small>
-                </td>
-                <td>
-                  <strong>{{ row.robot }}</strong
-                  ><small>{{ row.location }}</small>
-                </td>
+                <td>{{ row.id }}</td>
+                <td><strong>{{ row.title }}</strong></td>
                 <td>
                   <span :class="['status-tag', row.disposalTone]">{{
                     row.disposal
                   }}</span>
                 </td>
-                <td>{{ row.type }}</td>
+                <td>{{ row.robot }}</td>
                 <td>{{ row.time }}</td>
                 <td>
                   <span :class="['status-tag', tone(row.status)]">{{
@@ -204,21 +136,13 @@ function selectRow(row) {
                   }}</span>
                 </td>
               </tr>
+              <tr v-if="!anomalyLoading && !rows.length"><td colspan="6" class="table-state-cell">暂无当前异常</td></tr>
             </tbody>
           </table>
         </div>
         <div class="pagination">
-          <span>共计 {{ rows.length }} 条数据</span>
-          <div>
-            <button>‹</button><button class="active">1</button><button>2</button
-            ><button>3</button><button>4</button><button>5</button
-            ><button>•••</button><button>98</button><button>›</button
-            ><select v-model="pageSize">
-              <option :value="10">10 条/页</option>
-              <option :value="20">20 条/页</option>
-              <option :value="50">50 条/页</option></select
-            ><span>跳至</span><input v-model="page" /><span>页</span>
-          </div>
+          <span>共计 {{ anomalyTotal }} 条数据</span>
+          <el-pagination v-model:current-page="page" v-model:page-size="pageSize" :page-sizes="[10, 20, 50]" layout="prev, pager, next, sizes, jumper" :total="anomalyTotal" />
         </div></template
       >
       <template v-else-if="mode === 'alarms'"
@@ -516,6 +440,11 @@ function selectRow(row) {
 }
 .table-wrap tbody tr.selected {
   background: rgba(21, 119, 210, 0.08);
+}
+.table-wrap .table-state-cell {
+  height: 120px;
+  color: rgba(8, 24, 41, 0.48);
+  text-align: center;
 }
 .anomaly-table .status-tag.disposal-l3 {
   color: #f24e3f !important;

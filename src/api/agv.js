@@ -295,6 +295,12 @@ export async function listExceptionHandlingRules(params = {}) {
   }))
 }
 
+export async function listRobotAlarms(params = {}) {
+  return unwrap(await http.get('/api/robotAlarm', {
+    params: { pageNum: 1, pageSize: 10, ...params },
+  }))
+}
+
 export async function getExceptionHandlingRule(id) {
   return unwrap(await http.get(`/api/exception-handling-rules/${encodeURIComponent(id)}`))
 }
